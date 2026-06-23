@@ -2,414 +2,341 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>伊利小編購 | 官方行動商城</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>伊利小編購後台 | 智慧雲端旗艦管理系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'cream-bg': '#FFFFFF', 
-            'warm-taupe': '#8C857B',
+            'bg-main': '#FFFFFF',
+            'primary-taupe': '#8C857B',
             'taupe-dark': '#6E675F',
-            'carbon-black': '#3A3530',
-            'misty-rose': '#D4B2A7',
+            'text-dark': '#3A3530',
             'border-soft': '#EAE6DF',
             'sibyl-gold': '#bca085'
-          },
-          fontFamily: { sans: ['Noto Sans TC', 'sans-serif'] }
+          }
         }
       }
     }
   </script>
   <style>
-    body { background-color: #FFFFFF; color: #3A3530; -webkit-tap-highlight-color: transparent; font-size: 17px; overflow-x: hidden; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.25s; }
-    .dot.active { background: #FFFFFF; width: 18px; border-radius: 4px; }
-    
-    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-    @keyframes blink-ui { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
-    .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 14s linear infinite; }
-    .promo-flash { animation: blink-ui 2s infinite ease-in-out; }
-    
-    @media (min-width: 768px) { #categoryTabs { justify-content: center; flex-wrap: wrap; } }
+    body { background-color: #FFFFFF; color: #3A3530; }
+    @media print {
+      body { background: white; color: black; padding: 0; }
+      .admin-panel-ui, .tab-nav-ui, button, select, input { display: none !important; }
+      .print-invoice-area { display: block !important; width: 100%; }
+      .invoice-box { border: 2px solid black; padding: 20px; border-radius: 12px; margin-bottom: 25px; page-break-after: always; font-size: 14px; line-height: 1.6; }
+    }
+    .print-invoice-area { display: none; }
   </style>
 </head>
-<body class="font-sans antialiased pb-32 bg-white text-lg">
+<body class="bg-white text-text-dark font-sans p-4 sm:p-6">
+<div class="max-w-7xl mx-auto relative admin-panel-ui bg-white">
 
-<div class="w-full flex justify-end gap-2 px-4 pt-4 pb-2 z-50 bg-white">
-  <a href="https://lin.ee/vWmWpyT" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">LINE 客服</a>
-  <a href="https://line.me/ti/g2/LOmembwBbeqIpXoFcYG6yX8pCGrIvkPbnNpIig?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">加入 LINE 社群</a>
-</div>
-
-<div class="flex flex-col items-center text-center px-4 py-3 bg-white">
-  <div class="w-[140px] h-[140px] rounded-full border border-border-soft shadow-md overflow-hidden bg-white mb-3 cursor-pointer" onclick="backToHome()">
-    <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Store Logo">
-  </div>
-  <h1 class="text-2xl font-bold tracking-[3px] text-carbon-black uppercase cursor-pointer" onclick="backToHome()">伊利小編購</h1>
-</div>
-
-<div class="mx-4 my-2 bg-gradient-to-r from-red-50 via-amber-50 to-red-50 border border-red-200 rounded-xl p-3.5 overflow-hidden hidden promo-flash" id="marketingPromoBox">
-  <div class="w-full overflow-hidden"><span class="text-base font-bold text-red-600 animate-marquee" id="promoTextSpan"></span></div>
-</div>
-
-<div class="mx-4 my-2 bg-white border border-border-soft rounded-xl p-4 text-sm text-center leading-relaxed shadow-sm text-stone-600 font-medium" id="announcement">載入中...</div>
-
-<div class="px-4 py-2 space-y-2 bg-white">
-  <div class="bg-white border border-border-soft rounded-xl p-2 flex items-center shadow-sm gap-2 max-w-full overflow-hidden">
-    <input type="text" id="searchInput" class="bg-transparent pl-2 py-2 text-sm outline-none flex-1 text-carbon-black font-medium min-w-0" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼快查訂單進度與收藏...">
-    <button onclick="searchProducts()" class="bg-warm-taupe text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">搜尋<br>商品</button>
-    <button onclick="checkOrderHistory()" class="bg-misty-rose text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">狀態<br>查詢</button>
-  </div>
-
-  <div id="queryResultArea" class="bg-white border border-border-soft rounded-xl p-4 shadow-md hidden">
-    <div class="flex justify-between items-center mb-2 border-b pb-2">
-      <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單狀態與收藏清單</h4>
-      <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-2xl cursor-pointer px-1">×</span>
-    </div>
-    <div id="memberFavoritesContainer" class="mb-4 p-3 bg-rose-50/60 border border-rose-100 rounded-lg text-sm text-rose-900 font-bold hidden"></div>
-    <div id="multiOrdersContainer" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-stone-100"></div>
-  </div>
-</div>
-
-<div class="overflow-x-auto no-scrollbar flex gap-2 px-4 py-2 bg-white text-base font-bold" id="categoryTabs">
-  <button class="bg-warm-taupe text-white px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1">全部商品</button>
-</div>
-
-<div class="grid grid-cols-2 gap-3 px-4 py-3 bg-white" id="catalog"></div>
-
-<div class="fixed right-4 bottom-6 flex flex-col gap-2.5 items-end z-[2500]">
-  <button id="backToTopBtn" onclick="scrollToTop()" class="w-11 h-11 bg-white text-warm-taupe border border-border-soft rounded-full font-bold text-xl shadow-md hidden items-center justify-center transition-all hover:bg-stone-100">↑</button>
-  <button id="viewCartBtn" onclick="toggleCart(true)" class="bg-[#D4B2A7] text-white text-base font-bold px-6 py-4 rounded-full shadow-2xl hidden transition-transform active:scale-95">購物車 (0)</button>
-</div>
-
-<div id="itemModal" class="fixed inset-0 bg-black/60 backdrop-blur-[2px] hidden z-[3000] items-end sm:items-center justify-center p-0">
-  <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative max-h-[92vh] flex flex-col">
-    <span onclick="closeModal()" class="fixed sm:absolute right-4 top-4 w-9 h-9 rounded-full bg-white/95 border border-stone-300 text-stone-600 flex items-center justify-center font-bold text-lg cursor-pointer z-[3200] shadow-md">✕</span>
-
-    <div class="w-full aspect-[4/5] bg-stone-900 relative overflow-hidden group shrink-0" id="swiperArea">
-      <div id="itemImgBlurBg" class="absolute inset-0 w-full h-full scale-110 blur-xl opacity-40 bg-cover bg-center"></div>
-      <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
-      <img id="itemImg" src="" class="w-full h-full object-contain relative z-10 transition-all duration-300">
-      <button onclick="changeImg(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❯</button>
-      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30" id="dotsContainer"></div>
-    </div>
-
-    <div class="p-5 space-y-4 bg-white overflow-y-auto flex-1 no-scrollbar">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h2 id="itemTitle" class="text-base font-bold text-carbon-black leading-relaxed"></h2>
-          <p id="itemDesc" class="text-xs text-stone-500 mt-1 whitespace-pre-line leading-relaxed"></p>
-        </div>
-        <div class="flex flex-col gap-2 ml-2">
-          <button id="favProductBtn" onclick="toggleFavorite()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🤍</button>
-          <button id="shareProductBtn" onclick="shareProduct()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🔗</button>
-        </div>
+  <div class="flex flex-col sm:flex-row justify-between items-center border-b border-border-soft pb-4 mb-6">
+    <div class="flex items-center gap-3 cursor-pointer select-none group" onclick="backToDashboardHome()">
+      <div class="w-12 h-12 rounded-full overflow-hidden border border-border-soft shadow-sm group-hover:scale-105 transition-transform">
+        <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Logo">
       </div>
-
-      <div class="flex items-baseline gap-2 border-b pb-2.5">
-        <span id="itemPrice" class="text-xl font-bold text-red-600"></span>
+      <div class="text-left">
+        <h1 class="text-xl font-bold tracking-wider text-text-dark">伊利小編購 智慧管理後台</h1>
+        <p class="text-xs text-primary-taupe mt-0.5">2026 團購平鋪型雙端控制中樞</p>
       </div>
+    </div>
+    <a id="viewStoreLink" href="https://sibyldesign.github.io/yili-select/Index.html" target="_blank" class="mt-3 sm:mt-0 bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往行動商城</a>
+  </div>
 
-      <div class="grid grid-cols-2 gap-2">
-        <div><label class="text-xs font-bold text-stone-400 block mb-1">規格1</label><select id="colorSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-medium"></select></div>
-        <div><label class="text-xs font-bold text-stone-400 block mb-1">規格2</label><select id="sizeSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-medium"></select></div>
-      </div>
+  <div class="flex gap-1 border-b border-border-soft overflow-x-auto mb-6 tab-nav-ui">
+    <button onclick="switchTab('uploadTab')" id="btn-uploadTab" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-primary-taupe text-text-dark bg-white rounded-t-lg">商品快速上架</button>
+    <button onclick="switchTab('listTab')" id="btn-listTab" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-text-dark">商品清單</button>
+    <button onclick="switchTab('orderTab')" id="btn-orderTab" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-text-dark">訂單看板</button>
+  </div>
 
-      <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg border">
-        <span class="text-sm text-stone-500 font-bold">預訂數量</span>
-        <div class="flex items-center gap-3">
-          <button onclick="modifyModalQty(-1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">-</button>
-          <span id="qtyInput" class="text-sm font-bold w-6 text-center">1</span>
-          <button onclick="modifyModalQty(1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">+</button>
-        </div>
-      </div>
-      <button onclick="addToCart()" class="w-full bg-warm-taupe text-white text-sm font-bold py-3.5 rounded-xl shadow-md">加入購物車</button>
+  <div id="adminAlertModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] hidden z-[5000] items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-xl p-5 shadow-xl text-center space-y-3 border border-border-soft">
+      <div id="adminAlertText" class="text-xs font-medium text-stone-700 leading-relaxed"></div>
+      <button onclick="closeAdminAlert()" class="bg-primary-taupe text-white text-xs px-5 py-2 rounded-lg font-medium w-full shadow hover:bg-taupe-dark transition-all">確 認</button>
     </div>
   </div>
-</div>
 
-<div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 rounded-t-3xl z-[2800] max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col translate-y-full transition-transform duration-300">
-  <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b flex justify-between items-center z-50 shrink-0">
-    <h3 class="text-base font-bold text-carbon-black tracking-wide">🛒 購物車明細</h3>
-    <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-2xl cursor-pointer p-1">✕</span>
-  </div>
-  
-  <div class="p-5 overflow-y-auto space-y-4 flex-1">
-    <div id="cartList" class="divide-y divide-stone-100 max-h-44 overflow-y-auto"></div>
+  <div id="uploadTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4">
+    <h2 id="formActionTitle" class="text-sm font-bold border-b border-border-soft pb-2 text-stone-700">✍ 快速上架</h2>
 
-    <div class="space-y-3 pt-2">
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label><select id="shipSelectDropdown" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900"></select></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label><select id="pickupTimeSelect" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900"></select></div>
-    </div>
-
-    <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 flex gap-2 items-center">
-      <input type="text" id="couponCodeInput" class="text-sm p-2.5 border rounded-lg bg-white flex-1 font-mono uppercase" placeholder="輸入折扣碼">
-      <button onclick="applyDiscountCode()" class="bg-carbon-black text-white text-sm px-4 py-2.5 rounded-lg font-medium hover:bg-stone-900 transition-all">應用折抵</button>
-    </div>
-    <div id="discountMsgBlock" class="text-xs text-green-600 font-bold hidden"></div>
-
-    <div class="bg-stone-50 p-4 border text-sm leading-relaxed text-stone-700 rounded-xl space-y-1">
-      <div class="font-bold text-base text-stone-900 mb-1">💰 收款資訊說明</div>
-      <div id="paymentConfigText" class="font-medium text-stone-800"></div>
-    </div>
-
-    <div class="flex justify-between items-baseline border-t pt-2.5">
-      <div id="txtDiscountLabel" class="text-sm text-red-500 font-bold"></div>
-      <div class="text-base font-bold text-warm-taupe ml-auto">應付總額：NT$ <span id="grandTotal" class="text-xl">0</span></div>
-    </div>
-
-    <div class="border-t border-dashed pt-3 space-y-3">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <div>
-        <label class="text-sm font-bold text-stone-900 block mb-1">手機號碼 (必填)</label>
-        <div class="flex gap-1.5 w-full">
-          <input type="tel" id="custPhone" placeholder="請輸入手機號碼" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 flex-1 min-w-0">
-          <button onclick="fetchCustomerHistoryData()" id="btnFetchHistory" class="bg-carbon-black text-white text-xs font-bold px-3 py-2 rounded-lg shrink-0">帶入資料</button>
-        </div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號</label>
+        <input type="text" id="pSku" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
       </div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">訂購人姓名 (必填)</label><input type="text" id="custName" placeholder="請輸入訂購人姓名" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">LINE 暱稱 (必填)</label><input type="text" id="lineName" placeholder="請輸入 LINE 暱稱" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">電子郵件</label><input type="email" id="custEmail" placeholder="example@gmail.com" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">收貨地址</label><input type="text" id="custAddress" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white" placeholder="若需要宅配請填寫完整寄送地址"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">備註欄</label><input type="text" id="orderRemark" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white" placeholder="如交給管理員"></div>
+      <div class="sm:col-span-2">
+        <label class="text-xs font-semibold text-stone-600 block mb-1">商品品名</label>
+        <input type="text" id="pName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">到貨日期</label>
+        <input type="date" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+      </div>
     </div>
 
-    <button onclick="submitFinalOrder()" class="w-full bg-warm-taupe text-white text-base font-bold py-3.5 rounded-xl shadow-md hover:bg-taupe-dark">確認無誤！送出訂單</button>
-    <div class="text-center pt-1"><a href="https://lin.ee/vWmWpyT" target="_blank" class="text-sm font-bold text-blue-600 underline tracking-wide">如有訂單問題請LINE客服</a></div>
-  </div>
-</div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">商品狀態</label>
+        <select id="pStatus" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50">
+          <option value="上架">上架</option>
+          <option value="下架">下架</option>
+        </select>
+      </div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">主分類</label><select id="pMajorSelect" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50"></select></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">副分類</label><select id="pSubSelect" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50"></select></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+    </div>
 
-<div class="mx-4 my-4 space-y-2">
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box1')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>🛒</span> <span class="tracking-wide">購物須知規範</span></div>
-      <svg id="icon_box1" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="例如：小箱,大箱"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="例如：A級特選,B級次選"></div>
     </div>
-    <div id="box1" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
-  </div>
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box2')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>📦</span> <span class="tracking-wide">退換貨須知處理</span></div>
-      <svg id="icon_box2" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </div>
-    <div id="box2" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
-  </div>
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box3')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>🔒</span> <span class="tracking-wide">隱私權保護政策</span></div>
-      <svg id="icon_box3" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </div>
-    <div id="box3" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
-  </div>
-</div>
 
-<div class="mx-4 my-6">
-  <div class="bg-white border border-border-soft rounded-2xl p-6 text-center shadow-sm max-w-xl mx-auto">
-    <p class="text-stone-800 font-bold text-sm mb-2.5 tracking-wide">📍 伊利小編購 店面資訊</p>
-    <p class="text-stone-600 text-xs mb-2.5">營業時間：平日 16:00 - 20:00</p>
-    <p class="text-xs"><a href="https://maps.google.com" target="_blank" class="text-stone-800 font-semibold underline">地點：八德國小斜對面貨櫃市集 (點擊導航)</a></p>
+    <div class="bg-stone-50 p-4 border border-border-soft rounded-xl">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區</span>
+        <button onclick="fireBatchSetMatrix()" class="bg-stone-700 text-white text-[10px] px-2.5 py-1 rounded hover:bg-stone-900 transition-all">⚡ 批量統一填入價格</button>
+      </div>
+      <table class="w-full text-left text-xs bg-white border border-border-soft">
+        <thead>
+          <tr class="bg-stone-100 text-stone-600"><th class="p-2">組合規格</th><th class="p-2 w-28">原價</th><th class="p-2 w-28">特價</th><th class="p-2 w-24">庫存</th></tr>
+        </thead>
+        <tbody id="matrixTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">YouTube/IG 導流網址</label><input type="text" id="pVideo" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品名稱</label><input type="text" id="pAddonName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品加價金額</label><input type="number" id="pAddonPrice" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+    </div>
+
+    <div class="border-2 border-dashed border-stone-300 rounded-xl p-5 text-center bg-stone-50 cursor-pointer hover:bg-stone-100 transition-all" onclick="document.getElementById('bbFileInput').click()">
+      <span class="text-xs font-bold text-stone-600 block">┼ 點擊選取相片高速非同步上傳到 ImgBB 圖床</span>
+      <input type="file" id="bbFileInput" accept="image/*" multiple class="hidden" onchange="uploadToImgBB(this.files)">
+      <div id="uploadStatusText" class="text-[11px] text-stone-400 mt-1">API Key 認證綁定：0f2f883b9a46cfe7b26639f93bc293d3</div>
+    </div>
+
+    <div><label class="text-xs font-semibold text-stone-600 block mb-1">圖片網址紀錄欄</label><textarea id="pImgs" rows="3" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea></div>
+    <div><label class="text-xs font-semibold text-stone-600 block mb-1">商品敘述與短文細節</label><textarea id="pDesc" rows="2" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea></div>
+
+    <button onclick="publishProduct()" id="submitProductBtn" class="w-full bg-stone-700 text-white font-medium text-sm py-3 rounded-lg shadow-md hover:bg-stone-800">一鍵即時確認商品網頁上架</button>
+    <button onclick="resetProductForm()" id="cancelEditBtn" class="w-full bg-stone-400 text-white font-medium text-sm py-2 rounded-lg hidden">取消編輯返回全新上架</button>
   </div>
-  <div class="text-center text-xs text-[#C4A48A] mt-4 tracking-widest uppercase font-bold"><a href="https://heysibyl.com" target="_blank" class="hover:underline">Designed by Sibyl | 數位管家</a></div>
+
+  <div id="listTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
+    <div class="flex justify-between items-center"><h2 class="text-sm font-bold text-stone-700">📋 商品清單 (20筆一頁)</h2><input type="text" id="inventorySearchInput" oninput="searchInventory()" class="text-xs p-2 border rounded-lg max-w-xs bg-stone-50 outline-none" placeholder="快速篩選貨號或品名..."></div>
+    <div class="bg-stone-100 p-2.5 rounded-lg flex items-center flex-wrap gap-2 text-xs">
+      <button onclick="fireBatchCopy()" class="bg-stone-600 text-white px-3 py-1.5 rounded hover:bg-stone-700">複製勾選商品</button>
+      <button onclick="fireBatchArchive()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700">封存勾選商品</button>
+      <button onclick="fireBatchDeleteProducts()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">徹底刪除商品</button>
+    </div>
+    <div class="overflow-x-auto border rounded-lg">
+      <table class="w-full text-left text-xs bg-white">
+        <thead class="bg-stone-50 border-b">
+          <tr><th class="p-3 w-8"><input type="checkbox" id="selectAllProductsBox" onchange="toggleAllProducts(this)"></th><th class="p-3">主圖</th><th class="p-3">主貨號</th><th class="p-3">商品品名</th><th class="p-3">主/副分類</th><th class="p-3">單價</th><th class="p-3 text-amber-700 font-bold">到貨日期</th><th class="p-3">狀態</th><th class="p-3">編輯</th></tr>
+        </thead>
+        <tbody id="inventoryTableBody" class="divide-y divide-stone-100"></tbody>
+      </table>
+    </div>
+    <div class="flex justify-center items-center gap-4 text-xs font-bold pt-2">
+      <button id="prevInvBtn" onclick="changeInvPage(-1)" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">上一頁</button>
+      <span id="invPageText" class="text-stone-700">第 1 / 1 頁</span>
+      <button id="nextInvBtn" onclick="changeInvPage(1)" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">下一頁</button>
+    </div>
+  </div>
+
+  <div id="orderTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
+    <div class="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
+      <h2 class="text-sm font-bold text-stone-700">📋 訂單看板</h2>
+    </div>
+    <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
+      <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700">✅ 批量結案 (移至歷史訂單)</button>
+      <button onclick="fireBatchPrintPickingLists()" class="bg-blue-600 text-white px-3 py-1.5 rounded font-bold hover:bg-blue-700">🖨️ 批量生成揀貨單並列印</button>
+      <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
+      <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">❌ 批量徹底刪除訂單</button>
+    </div>
+    <div class="overflow-x-auto border rounded-lg">
+      <table class="w-full text-left text-xs bg-white border-collapse">
+        <thead>
+          <tr class="bg-stone-50 border-b">
+            <th class="p-3 w-8"><input type="checkbox" onchange="toggleAllOrders(this)"></th>
+            <th class="p-3">下單時間</th><th class="p-3">單號</th><th class="p-3">明細</th><th class="p-3">金額</th><th class="p-3">客戶資訊</th>
+            <th class="p-3 text-amber-800 font-bold">到貨日期</th>
+            <th class="p-3 text-blue-700 font-bold">老闆點擊備註</th>
+            <th class="p-3">狀態流轉</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody" class="divide-y divide-stone-100"></tbody>
+      </table>
+    </div>
+    <div class="flex justify-center items-center gap-4 text-xs font-bold pt-2">
+      <button onclick="changeOrderPage(-1)" id="prevOrderBtn" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">上一頁</button>
+      <span id="orderPageText" class="text-stone-700">第 1 / 1 頁</span>
+      <button onclick="changeOrderPage(1)" id="nextOrderBtn" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">下一頁</button>
+    </div>
+  </div>
+
 </div>
+<div id="printArea" class="print-invoice-area"></div>
 
 <script>
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
-let rawData = [], products = [], cart = [], selectedIdx = -1;
-let curImgs = [], imgIdx = 0, currentDiscountValue = 0, activatedCouponName = "";
-let touchStartX = 0, touchEndX = 0, activeSpecsPriceMap = {};
+const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
+let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
+let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
 
-function backToHome(){ window.location.reload(); }
-function showCustomAlert(msg) { document.getElementById('customAlertText').innerText = msg; document.getElementById('customAlertModal').className = "fixed inset-0 bg-black/40 backdrop-blur-[1px] flex z-[5000] items-center justify-center p-4"; }
-function closeCustomAlert() { document.getElementById('customAlertModal').className = "hidden"; }
-window.onscroll = function() { let topBtn = document.getElementById("backToTopBtn"); if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) { topBtn.classList.remove('hidden'); } else { topBtn.classList.add('hidden'); } };
-function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function toggleNotice(id) { let el = document.getElementById(id); el.classList.toggle('hidden'); document.getElementById('icon_'+id).style.transform = el.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)"; }
-function closeQueryPanel() { document.getElementById('queryResultArea').classList.add('hidden'); }
+// 🌟 加速大優化：點擊分頁再去即時撈取資料，不卡線、不拖慢速度
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-800";
+  });
+  document.getElementById('btn-' + id).className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-stone-700 text-stone-800 bg-white rounded-t-lg";
 
-window.onload = () => {
-  const swiper = document.getElementById('swiperArea');
-  swiper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
-  swiper.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, false);
+  if(id === 'listTab') { currentInvPage = 1; loadInventoryData(); }
+  if(id === 'orderTab') { currentOrderPage = 1; loadOrdersData(); }
+}
 
+function adminCustomAlert(msg) { document.getElementById('adminAlertText').innerText = msg; document.getElementById('adminAlertModal').className = "fixed inset-0 bg-black/40 backdrop-blur-[1px] flex z-[5000] items-center justify-center p-4"; }
+function closeAdminAlert() { document.getElementById('adminAlertModal').className = "hidden"; }
+function backToDashboardHome() { window.location.reload(); }
+
+window.onload = function() {
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
   .then(r => r.json()).then(res => {
-    if(!res || !res.success) return;
-    document.getElementById('announcement').innerText = res.config.announcement;
-    document.getElementById('paymentConfigText').innerText = res.config.payInfo || "現場付現";
-    document.getElementById('box1').innerText = res.shopNotice;
-    document.getElementById('box2').innerText = res.refundNotice;
-    document.getElementById('box3').innerText = res.privacyPolicy;
-
-    if(res.promoText && res.promoText !== "暫無特定行銷活動") {
-      let pBox = document.getElementById('marketingPromoBox');
-      let span = document.getElementById('promoTextSpan');
-      span.innerText = "💥 當期優惠：" + res.promoText + " 💥";
-      pBox.classList.remove('hidden');
-    }
-
-    const pTime = document.getElementById('pickupTimeSelect'); pTime.innerHTML = "";
-    res.config.timeOptions.forEach(t => { pTime.innerHTML += `<option value="${t}">${t}</option>`; });
-
-    const pShip = document.getElementById('shipSelectDropdown'); pShip.innerHTML = "";
-    if(res.shipModes) res.shipModes.split(',').forEach(m => { pShip.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`; });
-
-    rawData = res.products.map(p => {
-      let pricesArray = p.price ? p.price.toString().split(',').map(num => Number(num.replace(/[^0-9]/g, ""))) : [0];
-      let minPrice = Math.min(...pricesArray);
-      let fallbackUrl = "https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg";
-      return {
-        sku: p.sku, name: p.name, status: p.status, category: p.major, sub: p.sub, tag: p.tag, desc: p.desc, arrivalDate: p.arrivalDate || "追加中",
-        allImagesList: p.allImgs && p.allImgs.length > 0 && p.allImgs[0] !== "" ? p.allImgs : [fallbackUrl],
-        price: minPrice,
-        rawSpecsData: p.specsData ? JSON.parse(p.specsData) : [],
-        colors: p.color ? p.color.split(',') : ["通用規格"],
-        sizes: p.size ? p.size.split(',') : ["標準尺寸"]
-      };
-    });
-    products = rawData; setupCategoryTabs(res.majorCategories); renderCatalog(products);
+    if(!res || !res.success) return adminCustomAlert("中轉連線失敗，請檢查二端 GAS 權限部署！");
+    const maj = document.getElementById('pMajorSelect'); const sub = document.getElementById('pSubSelect');
+    maj.innerHTML = ""; sub.innerHTML = "";
+    res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
+    if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
+    globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
   });
 };
 
-function setupCategoryTabs(cats) {
-  const box = document.getElementById('categoryTabs');
-  box.innerHTML = `<button onclick="filterCat('all')" class="bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1">全部商品</button>`;
-  cats.forEach(c => { if(c) box.innerHTML += `<button onclick="filterCat('${c.trim()}')" class="bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm">${c.trim()}</button>`; });
-}
-function filterCat(c) { products = (c==='all') ? rawData : rawData.filter(x => x.category === c); renderCatalog(products); }
-
-function renderCatalog(list) {
-  const box = document.getElementById('catalog'); box.innerHTML = "";
-  let active = list.filter(p => p.status !== '下架');
-  if(active.length === 0) { box.innerHTML = "<p class='col-span-2 text-center py-10 text-xs text-stone-400'>目前無上架商品項目</p>"; return; }
-  active.forEach((p, i) => {
-    let minSpecPrice = p.price;
-    if(p.rawSpecsData && p.rawSpecsData.length > 0) {
-      let vPrices = p.rawSpecsData.map(v => Number(v.price)).filter(v => v > 0);
-      if(vPrices.length > 0) minSpecPrice = Math.min(...vPrices);
-    }
-    box.innerHTML += `<div onclick="openProduct(${rawData.indexOf(p)})" class="bg-white rounded-xl border border-border-soft overflow-hidden shadow-sm flex flex-col cursor-pointer transition-all active:scale-95"><div class="w-full aspect-square bg-stone-50 relative"><img src="${p.allImagesList[0]}" class="w-full h-full object-cover"></div><div class="p-3 flex flex-col flex-1 justify-between bg-white"><h2 class="text-sm font-bold text-carbon-black line-clamp-2 h-9 leading-tight">${p.name}</h2><div class="flex items-baseline gap-1.5 mt-2"><span class="text-sm font-bold text-warm-taupe">${minSpecPrice} 起</span></div></div></div>`;
-  });
+function fireBatchSetMatrix() {
+  let p = prompt("請輸入欲統一批次填入的特價單價金額："); if(!p) return;
+  document.querySelectorAll('#matrixTableBody .m-price').forEach(input => { input.value = p; });
 }
 
-function openProduct(idx) {
-  selectedIdx = idx; const p = rawData[idx];
-  document.getElementById('qtyInput').innerText = "1"; imgIdx = 0; curImgs = [...p.allImagesList]; activeSpecsPriceMap = {};
-  if(p.rawSpecsData) { p.rawSpecsData.forEach(sp => { activeSpecsPriceMap[sp.spec] = sp.price; }); }
-  buildDotsProgressBar(); showMediaImage();
-  document.getElementById('itemTitle').innerText = p.name;
-  document.getElementById('itemDesc').innerText = p.desc || "";
-  document.getElementById('itemImgBlurBg').style.backgroundImage = `url('${curImgs[0]}')`;
-
-  const cSel = document.getElementById('colorSelect'); cSel.innerHTML = "";
-  p.colors.forEach(c => { cSel.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
-  const sSel = document.getElementById('sizeSelect'); sSel.innerHTML = "";
-  p.sizes.forEach(s => { sSel.innerHTML += `<option value="${s.trim()}">${s.trim()}</option>`; });
-
-  let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
-  document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
-  syncMatrixPrice();
-  document.getElementById('itemModal').className = "fixed inset-0 bg-black/60 backdrop-blur-[2px] flex z-3000 items-end sm:items-center justify-center p-0";
+async function uploadToImgBB(files) {
+  if(files.length === 0) return;
+  const text = document.getElementById('uploadStatusText'); const area = document.getElementById('pImgs');
+  text.innerText = "⏳ 圖片上傳 ImgBB 網域中..."; let urls = [];
+  for (let f of files) {
+    let form = new FormData(); form.append("image", f);
+    try {
+      let r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: form });
+      let j = await r.json(); if(j.success) urls.push(j.data.url);
+    } catch(e){}
+  }
+  if(urls.length > 0) { area.value = (area.value ? area.value + "\n" : "") + urls.join("\n"); text.innerText = "🎉 圖片全部轉換成功！"; }
 }
 
-function buildDotsProgressBar() { const container = document.getElementById('dotsContainer'); container.innerHTML = ""; if (curImgs.length <= 1) return; curImgs.forEach((_, i) => { container.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="imgIdx=${i};showMediaImage();event.stopPropagation();"></div>`; }); }
-function showMediaImage() { document.getElementById('itemImg').src = curImgs[imgIdx]; let dots = document.querySelectorAll('#dotsContainer .dot'); dots.forEach((d, i) => { if(i === imgIdx) d.classList.add('active'); else d.classList.remove('active'); }); }
-function changeImg(dir, e) { if(e) e.stopPropagation(); if (curImgs.length <= 1) return; imgIdx = (imgIdx + dir + curImgs.length) % curImgs.length; showMediaImage(); }
-function handleSwipeGesture() { if (curImgs.length <= 1) return; if (touchStartX - touchEndX > 40) changeImg(1); if (touchEndX - touchStartX > 40) changeImg(-1); }
-function closeModal() { document.getElementById('itemModal').className = "hidden"; }
-function modifyModalQty(amt) { let q = parseInt(document.getElementById('qtyInput').innerText) + amt; if(q < 1) q = 1; document.getElementById('qtyInput').innerText = q; }
-
-function toggleFavorite() {
-  const p = rawData[selectedIdx]; let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]'); let fIdx = favs.indexOf(p.sku);
-  if(fIdx !== -1) { favs.splice(fIdx, 1); showCustomAlert("已移出您的收藏庫"); }
-  else { favs.push(p.sku); showCustomAlert("成功加入您的雲端收藏庫！"); }
-  localStorage.setItem('yl_favs', JSON.stringify(favs));
-  document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
-  let ph = document.getElementById('custPhone').value.trim();
-  if(ph) fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "handleSyncFavorites", phone: ph, favorites: favs }) });
-}
-function shareProduct() { let p = rawData[selectedIdx]; navigator.clipboard.writeText(window.location.href.split('?')[0] + "?sku=" + p.sku); showCustomAlert("🔗 分享連結已複製！"); }
-
-function addToCart() {
-  const p = rawData[selectedIdx]; const c = document.getElementById('colorSelect').value; const s = document.getElementById('sizeSelect').value;
-  let finalUnitPrice = activeSpecsPriceMap[`款式:${c} / ${s}`] || p.price;
-  cart.push({ sku: p.sku, prodName: p.name, color: c, size: s, price: Number(finalUnitPrice), qty: parseInt(document.getElementById('qtyInput').innerText) });
-  closeModal(); updateCartUI();
-}
-function removeCart(idx) { cart.splice(idx,1); updateCartUI(); }
-function toggleCart(show) { document.getElementById('cartDrawer').style.transform = show ? "translateY(0)" : "translateY(100%)"; }
-
-function applyDiscountCode() {
-  let code = document.getElementById('couponCodeInput').value.trim(); if(!code) return showCustomAlert("請輸入折扣碼！");
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "checkCouponCode", code: code }) }).then(r => r.json()).then(res => { if(res.success && res.match) { currentDiscountValue = Number(res.discount); activatedCouponName = code; document.getElementById('discountMsgBlock').innerText = `🎉 已折抵 NT$ ${currentDiscountValue} 元`; document.getElementById('discountMsgBlock').classList.remove('hidden'); document.getElementById('txtDiscountLabel').innerText = `已扣除：-$${currentDiscountValue}`; updateCartUI(); } else { showCustomAlert("折扣碼無效！"); } });
+function regenerateMatrixFromInputs() {
+  const tbody = document.getElementById('matrixTableBody'); tbody.innerHTML = "";
+  let colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(s => s !== "");
+  let sizes = document.getElementById('pSizes').value.split(',').map(s => s.trim()).filter(s => s !== "");
+  if(colors.length === 0) colors = ["規格1"]; if(sizes.length === 0) sizes = ["規格2"];
+  colors.forEach(c => { sizes.forEach(s => { tbody.innerHTML += `<tr class="border-b" data-key="款式:${c} / ${s}"><td class="p-2">${c}/${s}</td><td><input type="text" class="m-old w-full p-1 border rounded text-xs" placeholder="原價"></td><td><input type="text" class="m-price w-full p-1 border rounded text-xs" placeholder="特價"></td><td><input type="number" class="m-stock w-full p-1 border rounded text-xs" placeholder="不設限"></td></tr>`; }); });
 }
 
-function searchProducts() {
-  let kw = document.getElementById('searchInput').value.trim(); if(!kw) return showCustomAlert("請輸入欲搜尋的關鍵字！");
-  products = rawData.filter(p => p.sku.toLowerCase().includes(kw.toLowerCase()) || p.name.toLowerCase().includes(kw.toLowerCase()));
-  renderCatalog(products);
+function publishProduct() {
+  const sku = document.getElementById('pSku').value.trim(); const name = document.getElementById('pName').value.trim();
+  if(!sku || !name) return adminCustomAlert("貨號與品名不可為空！");
+  let specs = [], prices = [];
+  document.querySelectorAll('#matrixTableBody tr').forEach(row => { let pr = row.querySelector('.m-price').value; if(pr) { specs.push({ spec: row.dataset.key, price: pr }); prices.push(pr); } });
+  let method = isEditMode ? "editProduct" : "addNewProduct";
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: method, product: { sku: sku, name: name, status: document.getElementById('pStatus').value, major: document.getElementById('pMajorSelect').value, sub: document.getElementById('pSubSelect').value, tag: document.getElementById('pTag').value, desc: document.getElementById('pDesc').value, specsData: JSON.stringify(specs), price: prices.join(','), arrivalDate: document.getElementById('pArrivalDate').value, color: document.getElementById('pColors').value, size: document.getElementById('pSizes').value } }) }).then(() => { resetProductForm(); switchTab('listTab'); });
 }
 
-function fetchCustomerHistoryData() {
-  if(globalFetchLock) return;
-  let phone = document.getElementById('custPhone').value.trim(); if(!phone) return showCustomAlert("請先填寫手機號碼再點擊帶入資料！");
-  let btn = document.getElementById('btnFetchHistory'); btn.innerText = "請稍候..."; btn.disabled = true; globalFetchLock = true;
-  
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getCustomerHistory", phone: phone }) })
-  .then(r => r.json()).then(res => {
-    btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false;
-    if (res && res.success && res.data) {
-      document.getElementById('custName').value = res.data.custName || "";
-      document.getElementById('lineName').value = res.data.lineName || "";
-      document.getElementById('custEmail').value = res.data.email || "";
-      document.getElementById('custAddress').value = res.data.address || "";
-      document.getElementById('orderRemark').value = res.data.remark || "";
-      showCustomAlert("🎉 歷史資料已成功自動填入！");
-    } else { showCustomAlert("查無過往訂購紀錄。"); }
-  }).catch(() => { btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false; });
+function loadInventoryData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) }).then(r => r.json()).then(res => { globalProducts = res.products; filteredProducts = [...globalProducts]; renderInventoryTable(); }); }
+function searchInventory() { let kw = document.getElementById('inventorySearchInput').value.toLowerCase().trim(); filteredProducts = globalProducts.filter(p => p.sku.toLowerCase().includes(kw) || p.name.toLowerCase().includes(kw)); currentInvPage = 1; renderInventoryTable(); }
+
+function renderInventoryTable() {
+  const tbody = document.getElementById('inventoryTableBody'); tbody.innerHTML = "";
+  let total = Math.ceil(filteredProducts.length / pageSize) || 1; document.getElementById('invPageText').innerText = `第 ${currentInvPage} / ${total} 頁`;
+  let start = (currentInvPage - 1) * pageSize; let end = Math.min(start + pageSize, filteredProducts.length);
+  for(let i=start; i<end; i++) {
+    let p = filteredProducts[i]; let displayPrice = p.price;
+    if(p.color && p.color.includes(',')) { displayPrice = p.color.split(',')[0]; } 
+    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${displayPrice}</td><td class="p-3 font-medium text-amber-800">${p.arrivalDate || "追加中"}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}')" class="bg-stone-500 text-white px-2 py-1 rounded">編輯</button></td></tr>`;
+  }
+}
+function changeInvPage(amt) { currentInvPage += amt; renderInventoryTable(); }
+function toggleAllProducts(m) { document.querySelectorAll('.inv-chk').forEach(c => c.checked = m.checked); }
+
+function fireBatchCopy() {
+  let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCopyProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData());
+}
+function fireBatchArchive() { let chks = document.querySelectorAll('.inv-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchArchiveProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData()); }
+function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-chk:checked'); Promise.all(Array.from(chks).map(c => fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "deleteProduct", sku: c.value }) }))).then(() => loadInventoryData()); }
+
+function loadOrdersData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) }).then(r => r.json()).then(res => { rawOrders = res.orders || []; currentFilteredOrders = [...rawOrders]; renderOrderTable(); }); }
+
+function renderOrderTable() {
+  const tbody = document.getElementById('orderTableBody'); tbody.innerHTML = "";
+  let total = Math.ceil(currentFilteredOrders.length / pageSize) || 1; document.getElementById('orderPageText').innerText = `第 ${currentOrderPage} / ${total} 頁`;
+  let start = (currentOrderPage - 1) * pageSize; let end = Math.min(start + pageSize, currentFilteredOrders.length);
+
+  for(let i=start; i<end; i++) {
+    let o = currentFilteredOrders[i];
+    tbody.innerHTML += `
+    <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
+      <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}"></td>
+      <td class="p-3 font-mono text-stone-400">${o.time}</td>
+      <td class="p-3 font-bold">${o.orderId}</td>
+      <td class="p-3"><b>${o.prodName}</b><br><span class="text-stone-400">${o.specs}</span></td>
+      <td class="p-3 font-bold">$${o.total}</td>
+      <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
+      <td class="p-3 font-bold text-amber-800">${o.arrivalDate || "追加中"}</td>
+      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border rounded text-xs w-28 focus:border-blue-500 outline-none"></td>
+      <td class="p-3">
+        <span class="block font-bold text-blue-600 mb-1">${o.status}</span>
+        <select onchange="updateRowStatus(${o.rowIdx}, this.value)" class="block p-1 border text-[11px] rounded bg-white">
+          <option value="">狀態變更...</option>
+          <option value="新訂單">新訂單</option>
+          <option value="已確認訂單">已確認訂單</option>
+          <option value="等待到貨中">等待到貨中</option>
+          <option value="延後取貨">延後取貨</option>
+          <option value="已取貨">已取貨</option>
+          <option value="待宅配出貨">待宅配出貨</option>
+          <option value="取消不成立">取消不成立</option>
+        </select>
+      </td>
+    </tr>`;
+  }
+}
+function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
+function updateRowStatus(rowIdx, val) { if(!val) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: val }) }).then(() => loadOrdersData()); }
+function updateBossRemark(rowIdx, text) { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: text }) }); }
+function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
+
+function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+
+function fireBatchPrintPickingLists() {
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選訂單");
+  let w = window.open('', '_blank');
+  let html = `<html><body>`;
+  chks.forEach(b => { let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); html += `<div>單號: ${o.orderId} | 客戶: ${o.custName} | 明細: ${o.prodName} (${o.specs}) | 到貨日期: ${o.arrivalDate}</div><hr>`; });
+  html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
+  w.document.write(html); w.document.close();
 }
 
-function checkOrderHistory() {
-  let phone = document.getElementById('searchInput').value.trim(); if(!phone) return showCustomAlert("請先輸入您的手機號碼！");
-  const container = document.getElementById('multiOrdersContainer'); const favContainer = document.getElementById('memberFavoritesContainer');
-  container.innerHTML = "<span class='text-xs text-stone-400 animate-pulse'>正在為您同步資料庫進度...</span>"; favContainer.classList.add('hidden'); document.getElementById('queryResultArea').classList.remove('hidden');
-
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) }).then(r => r.json()).then(res => {
-    if(res.success && res.favList && res.favList.length > 0) {
-      let cardsHtml = `<div class="font-bold text-stone-800 mb-2 border-b pb-1 text-xs">⭐ 您的專屬雲端收藏清單</div><div class="grid grid-cols-1 gap-2">`;
-      res.favList.forEach(sku => {
-        let matchProd = rawData.find(x => x.sku === sku);
-        if(matchProd) {
-          cardsHtml += `<div class="flex items-center gap-2 bg-white border p-1.5 rounded-lg shadow-sm cursor-pointer" onclick="openProduct(${rawData.indexOf(matchProd)})"><img src="${matchProd.allImagesList[0]}" class="w-10 h-10 object-cover rounded"><div class="flex-1 min-w-0"><div class="text-xs font-bold text-stone-800 truncate">${matchProd.name}</div><div class="text-[11px] text-warm-taupe font-mono">${sku}</div></div></div>`;
-        } else { cardsHtml += `<div class="bg-stone-50 border p-2 rounded-lg text-xs font-mono text-stone-500">🔍 貨號：${sku}</div>`; }
-      });
-      cardsHtml += `</div>`; favContainer.innerHTML = cardsHtml; favContainer.classList.remove('hidden');
-    } else { favContainer.innerHTML = "⭐ <b>您的專屬雲端收藏清單：</b><br><span class='text-stone-400 font-medium'>暫無雲端收藏商品</span>"; favContainer.classList.remove('hidden'); }
-    if(!res.success || !res.allOrders || res.allOrders.length === 0) { container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無any預訂進度，請核對號碼。</p>"; return; }
-    container.innerHTML = "";
-    res.allOrders.forEach(o => { container.innerHTML += `<div class="py-2.5 text-xs text-stone-700 bg-white"><div class="flex justify-between"><b>單號: ${o.orderId}</b> <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${o.status}</span></div><div class="text-stone-400 mt-1">${o.items.join('<br>')}</div><div class="text-stone-500 mt-1">🚚 配送自取: ${o.shipping}</div><div class="text-[11px] text-warm-taupe">到貨日期：<span class="font-bold text-amber-700">${o.arrivalDate || "追加中"}</span></div></div>`; });
-  });
-}
-
-function submitFinalOrder() {
-  let ph = document.getElementById('custPhone').value.trim(), name = document.getElementById('custName').value.trim(), line = document.getElementById('lineName').value.trim();
-  if(!ph || !name || !line) return showCustomAlert("姓名、電話、LINE 暱稱為必填項目項目！");
-  if(cart.length === 0) return showCustomAlert("購物車目前無任何品項。");
-  showCustomAlert("訂單成立中");
-
-  let payload = { cartData: cart, userInfo: { phone: ph, name: name, lineName: line, email: document.getElementById('custEmail').value.trim(), shipping: document.getElementById('shipSelectDropdown').value, address: document.getElementById('pickupTimeSelect').value, grandTotal: document.getElementById('grandTotal').innerText, shipName: document.getElementById('custAddress').value.trim() || "現場自取", remark: document.getElementById('orderRemark').value.trim() || "無", couponUsed: activatedCouponName } };
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "processOrder", cartData: cart, userInfo: payload.userInfo }) }).then(r => r.json()).then(res => {
-    if(res.success) {
-      closeCustomAlert();
-      setTimeout(() => {
-        showCustomAlert("下單完成！明細已發送至您的Mail信箱。也可輸入電話查詢狀態！\n訂單編號：" + res.orderId);
-        cart = []; currentDiscountValue = 0; activatedCouponName = ""; document.getElementById('couponCodeInput').value = ""; document.getElementById('discountMsgBlock').classList.add('hidden'); document.getElementById('txtDiscountLabel').innerText = ""; updateCartUI(); toggleCart(false);
-      }, 300);
-    }
-  });
+function fireBatchExportToExcel() {
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目項目！");
+  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,取貨時間,到貨日期,老闆備註,訂單狀態\n";
+  chks.forEach(box => { let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${o.phone},${o.pickupTime},${o.arrivalDate},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; });
+  let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 </script>
 </body>
