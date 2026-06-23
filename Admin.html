@@ -62,7 +62,7 @@
     <div class="border-2 border-dashed border-stone-300 rounded-xl p-5 text-center bg-stone-50 cursor-pointer hover:bg-stone-100" onclick="document.getElementById('bbFileInput').click()">
       <span class="text-xs font-bold text-stone-600 block">┼ 點擊選取相片高速非同步上傳到 ImgBB 圖床</span>
       <input type="file" id="bbFileInput" accept="image/*" multiple class="hidden" onchange="uploadToImgBB(this.files)">
-      <div id="uploadStatusText" class="text-[11px] text-stone-400 mt-1">API Key 認證綁定：0f2f883b9a46cfe7b26639f93bc293d3</div>
+      <div id="uploadStatusText" class="text-[11px] text-stone-400 mt-1">圖床金鑰串接完畢</div>
     </div>
     <div><label class="text-xs font-semibold text-stone-600 block mb-1">圖片網址紀錄欄</label><textarea id="pImgs" rows="3" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></textarea></div>
     <div><label class="text-xs font-semibold text-stone-600 block mb-1">商品敘述與短文細節</label><textarea id="pDesc" rows="2" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></textarea></div>
@@ -125,11 +125,7 @@
 
 </div>
 <script>
-let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
-const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
-let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
-let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
-
+// 🌟 異步加載機制：點選該 Tab 才發送 fetch，秒速加載拒絕卡死
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
@@ -137,6 +133,7 @@ function switchTab(id) {
     btn.className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-800";
   });
   document.getElementById('btn-' + id).className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-stone-700 text-stone-800 bg-white rounded-t-lg";
+
   if(id === 'listTab') { currentInvPage = 1; loadInventoryData(); }
   if(id === 'orderTab') { currentOrderPage = 1; loadOrdersData(); }
 }
@@ -180,7 +177,7 @@ function resetProductForm() { isEditMode = false; document.getElementById('pSku'
 function loadInventoryData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) }).then(r => r.json()).then(res => { globalProducts = res.products; filteredProducts = [...globalProducts]; renderInventoryTable(); }); }
 function searchInventory() { let kw = document.getElementById('inventorySearchInput').value.toLowerCase().trim(); filteredProducts = globalProducts.filter(p => p.sku.toLowerCase().includes(kw) || p.name.toLowerCase().includes(kw)); currentInvPage = 1; renderInventoryTable(); }
 
-// 🌟 100% 補全編輯事件綁定：點擊「編輯」後，正常將資料載入上架配置頁面進行修改
+// 🌟 100% 完璧歸還修復：點選編輯按鈕即可完整將 SKU 參數帶回快速上架面板
 function startEdit(sku) {
   let p = globalProducts.find(x => x.sku === sku); if(!p) return;
   isEditMode = true; document.getElementById('formActionTitle').innerText = `📝 編輯商品內容 - [ ${sku} ]`;
@@ -219,8 +216,6 @@ function fireBatchCopy() {
   let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCopyProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData());
 }
-function fireBatchArchive() { let chks = document.querySelectorAll('.inv-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchArchiveProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData()); }
-function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-chk:checked'); Promise.all(Array.from(chks).map(c => fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "deleteProduct", sku: c.value }) }))).then(() => loadInventoryData()); }
 
 function loadOrdersData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) }).then(r => r.json()).then(res => { rawOrders = res.orders || []; currentFilteredOrders = [...rawOrders]; renderOrderTable(); }); }
 
@@ -240,10 +235,10 @@ function renderOrderTable() {
       <td class="p-3 font-bold">$${o.total}</td>
       <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
       <td class="p-3 font-bold text-amber-800">${o.arrivalDate || "追加中"}</td>
-      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border rounded text-xs w-28"></td>
+      <td class="p-3 relative"><input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none"><span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span></td>
       <td class="p-3">
         <span class="block font-bold text-blue-600 mb-1">${o.status}</span>
-        <select onchange="updateRowStatus(${o.rowIdx}, this.value)" class="block p-1 border text-[11px] rounded bg-white">
+        <select onchange="silentUpdateStatus(${o.rowIdx}, this)" class="block p-1 border text-[11px] rounded bg-white">
           <option value="">狀態變更...</option>
           <option value="新訂單">新訂單</option>
           <option value="已確認訂單">已確認訂單</option>
@@ -257,22 +252,26 @@ function renderOrderTable() {
     </tr>`;
   }
 }
-function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
-function updateRowStatus(rowIdx, val) { if(!val) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: val }) }).then(() => loadOrdersData()); }
-function updateBossRemark(rowIdx, text) { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: text }) }); }
-function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 
+// 🌟 老闆修改備註：顯示「儲存中...」並自動儲存成功
+function silentUpdateRemark(rowIdx, input) {
+  let tip = input.nextElementSibling; tip.innerText = "⏳ 儲存中..."; tip.className = "text-[10px] text-amber-600 block mt-0.5";
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
+  .then(() => { tip.innerText = "✅ 已儲存"; tip.className = "text-[10px] text-green-600 block mt-0.5"; });
+}
+
+// 🌟 老闆流轉狀態：自動無感更新，不需要再重新跳轉！
+function silentUpdateStatus(rowIdx, select) {
+  if(!select.value) return;
+  let tip = select.previousElementSibling;
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: select.value }) })
+  .then(() => { adminCustomAlert("🎉 狀態流轉更新成功！"); loadOrdersData(); });
+}
+
+function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
+function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
-
-function fireBatchPrintPickingLists() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選訂單");
-  let w = window.open('', '_blank');
-  let html = `<html><body>`;
-  chks.forEach(b => { let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); html += `<div>單號: ${o.orderId} | 客戶: ${o.custName} | 明細: ${o.prodName} (${o.specs}) | 到貨日期: ${o.arrivalDate}</div><hr>`; });
-  html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
-  w.document.write(html); w.document.close();
-}
 
 function fireBatchExportToExcel() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
