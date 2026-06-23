@@ -18,7 +18,7 @@
         <p class="text-xs text-stone-400 mt-0.5">2026 團購平鋪型雙端控制中樞</p>
       </div>
     </div>
-    <a id="viewStoreLink" href="#" target="_blank" class="bg-stone-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm">🌐 前前往台行動商城</a>
+    <a id="viewStoreLink" href="https://sibyldesign.github.io/yili-select/Index.html" target="_blank" class="bg-stone-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm">🌐 前往行動商城</a>
   </div>
 
   <div class="flex gap-1 border-b overflow-x-auto mb-6">
@@ -48,8 +48,8 @@
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：小箱,大箱"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：A級特選,B級次選"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="小箱,大箱"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="A級特選,B級次選"></div>
     </div>
     <div class="bg-stone-50 p-4 border rounded-xl">
       <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區</span><button onclick="fireBatchSetMatrix()" class="bg-stone-700 text-white text-[10px] px-2.5 py-1 rounded shadow-sm">⚡ 批量統一填入價格</button></div>
@@ -123,13 +123,19 @@
 
 </div>
 <script>
-let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
-let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
-
+// 🌟 修正分頁切換無反應 Bug：將 switchTab 的 DOM 對齊完全打通！
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
-  if(id === 'listTab') loadInventoryData(); if(id === 'orderTab') loadOrdersData();
+  
+  // 更新 Tab 按鈕的高亮樣式
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-800";
+  });
+  document.getElementById('btn-' + id).className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-stone-700 text-stone-800 bg-white rounded-t-lg";
+
+  if(id === 'listTab') loadInventoryData();
+  if(id === 'orderTab') loadOrdersData();
 }
 
 function regenerateMatrixFromInputs() {
@@ -188,7 +194,7 @@ function renderOrderTable() {
       <td class="p-3 font-bold">$${o.total}</td>
       <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
       <td class="p-3 font-bold text-amber-800">${o.arrivalDate || "追加中"}</td>
-      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border rounded text-xs w-24"></td>
+      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border rounded text-xs w-28"></td>
       <td class="p-3">
         <span class="block font-bold text-blue-600 mb-1">${o.status}</span>
         <select onchange="updateRowStatus(${o.rowIdx}, this.value)" class="block p-1 border text-[11px] rounded bg-white">
@@ -211,7 +217,7 @@ function updateBossRemark(rowIdx, text) { fetch(MASTER_GAS_URL, { method: "POST"
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 
 function fireBatchExportToExcel() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目項目！");
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選訂單");
   let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,取貨時間,到貨日期,老闆備註,訂單狀態\n";
   chks.forEach(box => { let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${o.phone},${o.pickupTime},${o.arrivalDate},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; });
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
