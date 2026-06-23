@@ -31,17 +31,19 @@
     .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.25s; }
     .dot.active { background: #FFFFFF; width: 18px; border-radius: 4px; }
     
+    /* 當期優惠跑馬燈加入閃爍效果 */
+    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    @keyframes pulse-light { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 14s linear infinite; }
+    .promo-flash { animation: pulse-light 2s infinite ease-in-out; }
+    
     /* 電腦版分類置中，手機版橫向滑動 */
     @media (min-width: 768px) {
       #categoryTabs { justify-content: center; flex-wrap: wrap; }
     }
-    
-    /* 霓虹漸層行銷跑馬燈特效 */
-    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-    .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 12s linear infinite; }
   </style>
 </head>
-<body class="font-sans antialiased pb-32 bg-white">
+<body class="font-sans antialiased pb-32 bg-white text-lg">
 
 <div class="w-full flex justify-end gap-2 px-4 pt-4 pb-2 z-50 bg-white">
   <a href="https://lin.ee/925zrjur" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">LINE 客服</a>
@@ -55,7 +57,7 @@
   <h1 class="text-2xl font-bold tracking-[3px] text-carbon-black uppercase cursor-pointer" onclick="backToHome()">伊利小編購</h1>
 </div>
 
-<div class="mx-4 my-2 bg-gradient-to-r from-red-50 to-amber-50 border border-red-200 rounded-xl p-3 overflow-hidden hidden" id="marketingPromoBox">
+<div class="mx-4 my-2 bg-gradient-to-r from-red-50 via-amber-50 to-red-50 border border-red-200 rounded-xl p-3.5 overflow-hidden hidden promo-flash" id="marketingPromoBox">
   <div class="w-full overflow-hidden">
     <span class="text-base font-bold text-red-600 animate-marquee" id="promoTextSpan"></span>
   </div>
@@ -148,7 +150,7 @@
 <div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 rounded-t-3xl z-[2800] p-5 translate-y-full transition-transform duration-300 max-h-[92vh] overflow-y-auto shadow-2xl space-y-4">
   <div class="flex justify-between items-center border-b pb-2">
     <h3 class="text-base font-bold text-carbon-black tracking-wide">🛒 購物車明細</h3>
-    <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-lg cursor-pointer px-1">✕</span>
+    <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-xl cursor-pointer px-1">✕</span>
   </div>
   <div id="cartList" class="divide-y divide-stone-100 max-h-34 overflow-y-auto"></div>
 
@@ -239,9 +241,67 @@
 
 <script>
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
-function backToHome(){ window.location.reload(); }
+let rawData = [], products = [], cart = [], selectedIdx = -1;
+let curImgs = [], imgIdx = 0, currentDiscountValue = 0, activatedCouponName = "";
+let touchStartX = 0, touchEndX = 0, activeSpecsPriceMap = {};
 
-// 完美修好前台天價：在加載商品目錄時，直接從 JSON 多規格特價欄位中挑選最低金額渲染
+function backToHome(){ window.location.reload(); }
+function showCustomAlert(msg) { document.getElementById('customAlertText').innerText = msg; document.getElementById('customAlertModal').className = "fixed inset-0 bg-black/40 backdrop-blur-[1px] flex z-[5000] items-center justify-center p-4"; }
+function closeCustomAlert() { document.getElementById('customAlertModal').className = "hidden"; }
+window.onscroll = function() { let topBtn = document.getElementById("backToTopBtn"); if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) { topBtn.classList.remove('hidden'); } else { topBtn.classList.add('hidden'); } };
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function toggleNotice(id) { let el = document.getElementById(id); el.classList.toggle('hidden'); document.getElementById('icon_'+id).style.transform = el.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)"; }
+function closeQueryPanel() { document.getElementById('queryResultArea').classList.add('hidden'); }
+
+window.onload = () => {
+  const swiper = document.getElementById('swiperArea');
+  swiper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+  swiper.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, false);
+
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
+  .then(r => r.json()).then(res => {
+    if(!res || !res.success) return;
+    document.getElementById('announcement').innerText = res.config.announcement;
+    document.getElementById('paymentConfigText').innerText = res.config.payInfo || "現場付現";
+    document.getElementById('box1').innerText = res.shopNotice;
+
+    if(res.promoText && res.promoText !== "暫無特定行銷活動") {
+      let pBox = document.getElementById('marketingPromoBox');
+      let span = document.getElementById('promoTextSpan');
+      span.innerText = "💥 當期優惠：" + res.promoText + " 💥";
+      pBox.classList.remove('hidden');
+    }
+
+    const pTime = document.getElementById('pickupTimeSelect'); pTime.innerHTML = "";
+    res.config.timeOptions.forEach(t => { pTime.innerHTML += `<option value="${t}">${t}</option>`; });
+
+    const pShip = document.getElementById('shipSelectDropdown'); pShip.innerHTML = "";
+    if(res.shipModes) res.shipModes.split(',').forEach(m => { pShip.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`; });
+
+    rawData = res.products.map(p => {
+      let pricesArray = p.price ? p.price.toString().split(',').map(num => Number(num.replace(/[^0-9]/g, ""))) : [0];
+      let minPrice = Math.min(...pricesArray);
+      let fallbackUrl = "https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg";
+      return {
+        sku: p.sku, name: p.name, status: p.status, category: p.major, sub: p.sub, tag: p.tag, desc: p.desc, arrivalDate: p.arrivalDate || "追加中",
+        allImagesList: p.allImgs && p.allImgs.length > 0 && p.allImgs[0] !== "" ? p.allImgs : [fallbackUrl],
+        price: minPrice,
+        rawSpecsData: p.specsData ? JSON.parse(p.specsData) : [],
+        colors: p.color ? p.color.split(',') : ["通用規格"],
+        sizes: p.size ? p.size.split(',') : ["標準尺寸"]
+      };
+    });
+    products = rawData; setupCategoryTabs(res.majorCategories); renderCatalog(products);
+  });
+};
+
+function setupCategoryTabs(cats) {
+  const box = document.getElementById('categoryTabs');
+  box.innerHTML = `<button onclick="filterCat('all')" class="bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1">全部商品</button>`;
+  cats.forEach(c => { if(c) box.innerHTML += `<button onclick="filterCat('${c.trim()}')" class="bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm">${c.trim()}</button>`; });
+}
+function filterCat(c) { products = (c==='all') ? rawData : rawData.filter(x => x.category === c); renderCatalog(products); }
+
 function renderCatalog(list) {
   const box = document.getElementById('catalog'); box.innerHTML = "";
   let active = list.filter(p => p.status !== '下架');
@@ -256,6 +316,85 @@ function renderCatalog(list) {
   });
 }
 
+function openProduct(idx) {
+  selectedIdx = idx; const p = rawData[idx];
+  document.getElementById('qtyInput').innerText = "1";
+  imgIdx = 0; curImgs = [...p.allImagesList]; activeSpecsPriceMap = {};
+  if(p.rawSpecsData) { p.rawSpecsData.forEach(sp => { activeSpecsPriceMap[sp.spec] = sp.price; }); }
+  buildDotsProgressBar(); showMediaImage();
+  document.getElementById('itemTitle').innerText = p.name;
+  document.getElementById('itemDesc').innerText = p.desc || "";
+
+  const cSel = document.getElementById('colorSelect'); cSel.innerHTML = "";
+  p.colors.forEach(c => { cSel.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
+  const sSel = document.getElementById('sizeSelect'); sSel.innerHTML = "";
+  p.sizes.forEach(s => { sSel.innerHTML += `<option value="${s.trim()}">${s.trim()}</option>`; });
+
+  let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
+  document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
+  syncMatrixPrice();
+  document.getElementById('itemModal').className = "fixed inset-0 bg-black/60 backdrop-blur-[2px] flex z-3000 items-end sm:items-center justify-center p-0";
+}
+
+function syncMatrixPrice() {
+  const p = rawData[selectedIdx];
+  const c = document.getElementById('colorSelect').value;
+  const s = document.getElementById('sizeSelect').value;
+  let targetKey = `款式:${c} / ${s}`;
+  let matchedPrice = activeSpecsPriceMap[targetKey];
+  if (matchedPrice) {
+    document.getElementById('itemPrice').innerHTML = `<span class="text-red-500 font-bold text-xl">${matchedPrice} 起</span>`;
+  } else {
+    let fallbackMin = p.price;
+    if(p.rawSpecsData && p.rawSpecsData.length > 0) {
+      let prices = p.rawSpecsData.map(item => Number(item.price)).filter(v => v > 0);
+      if(prices.length > 0) fallbackMin = Math.min(...prices);
+    }
+    document.getElementById('itemPrice').innerHTML = `<span class="text-red-500 font-bold text-xl">${fallbackMin} 起</span>`;
+  }
+}
+
+function buildDotsProgressBar() { const container = document.getElementById('dotsContainer'); container.innerHTML = ""; if (curImgs.length <= 1) return; curImgs.forEach((_, i) => { container.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="imgIdx=${i};showMediaImage();event.stopPropagation();"></div>`; }); }
+function showMediaImage() { document.getElementById('itemImg').src = curImgs[imgIdx]; let dots = document.querySelectorAll('#dotsContainer .dot'); dots.forEach((d, i) => { if(i === imgIdx) d.classList.add('active'); else d.classList.remove('active'); }); }
+function changeImg(dir, e) { if(e) e.stopPropagation(); if (curImgs.length <= 1) return; imgIdx = (imgIdx + dir + curImgs.length) % curImgs.length; showMediaImage(); }
+function handleSwipeGesture() { if (curImgs.length <= 1) return; if (touchStartX - touchEndX > 40) changeImg(1); if (touchEndX - touchStartX > 40) changeImg(-1); }
+function closeModal() { document.getElementById('itemModal').className = "hidden"; }
+function modifyModalQty(amt) { let q = parseInt(document.getElementById('qtyInput').innerText) + amt; if(q < 1) q = 1; document.getElementById('qtyInput').innerText = q; }
+
+function toggleFavorite() {
+  const p = rawData[selectedIdx]; let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
+  let fIdx = favs.indexOf(p.sku);
+  if(fIdx !== -1) { favs.splice(fIdx, 1); showCustomAlert("已移出您的收藏庫"); }
+  else { favs.push(p.sku); showCustomAlert("成功加入您的雲端收藏庫！"); }
+  localStorage.setItem('yl_favs', JSON.stringify(favs));
+  document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
+  let ph = document.getElementById('custPhone').value.trim();
+  if(ph) fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "handleSyncFavorites", phone: ph, favorites: favs }) });
+}
+function shareProduct() { let p = rawData[selectedIdx]; navigator.clipboard.writeText(window.location.href.split('?')[0] + "?sku=" + p.sku); showCustomAlert(`🔗 分享連結已複製！`); }
+
+function addToCart() {
+  const p = rawData[selectedIdx]; const c = document.getElementById('colorSelect').value; const s = document.getElementById('sizeSelect').value;
+  let finalUnitPrice = activeSpecsPriceMap[`款式:${c} / ${s}`] || p.price;
+  cart.push({ sku: p.sku, prodName: p.name, color: c, size: s, price: Number(finalUnitPrice), qty: parseInt(document.getElementById('qtyInput').innerText) });
+  closeModal(); updateCartUI();
+}
+function removeCart(idx) { cart.splice(idx,1); updateCartUI(); }
+function toggleCart(show) { document.getElementById('cartDrawer').style.transform = show ? "translateY(0)" : "translateY(100%)"; }
+
+function updateCartUI() {
+  const box = document.getElementById('cartList'); box.innerHTML = ""; let subtotal = 0;
+  cart.forEach((item, idx) => { subtotal += item.price * item.qty; box.innerHTML += `<div class="flex justify-between items-center py-2 text-xs border-b bg-white"><div><b>${item.prodName}</b><br><span class="text-stone-400">${item.color}/${item.size} x${item.qty}</span></div><div class="font-bold">NT$${item.price*item.qty}<span onclick="removeCart(${idx})" class="text-stone-300 ml-2 cursor-pointer">✕</span></div></div>`; });
+  let finalTotal = subtotal - currentDiscountValue; if(finalTotal < 0) finalTotal = 0;
+  document.getElementById('grandTotal').innerText = finalTotal;
+  const btn = document.getElementById('viewCartBtn'); btn.className = cart.length > 0 ? "bg-warm-taupe text-white text-xs font-bold px-5 py-3.5 rounded-full shadow-lg fixed right-4 bottom-6 z-50 flex" : "hidden"; btn.innerText = `購物車 (${cart.length})`;
+}
+
+function applyDiscountCode() {
+  let code = document.getElementById('couponCodeInput').value.trim(); if(!code) return showCustomAlert("請輸入折扣碼！");
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "checkCouponCode", code: code }) }).then(r => r.json()).then(res => { if(res.success && res.match) { currentDiscountValue = Number(res.discount); activatedCouponName = code; document.getElementById('discountMsgBlock').innerText = `🎉 已折抵 NT$ ${currentDiscountValue} 元`; document.getElementById('discountMsgBlock').classList.remove('hidden'); document.getElementById('txtDiscountLabel').innerText = `已扣除：-$${currentDiscountValue}`; updateCartUI(); } else { showCustomAlert("折扣碼無效！"); } });
+}
+
 function checkOrderHistory() {
   let phone = document.getElementById('searchInput').value.trim(); if(!phone) return showCustomAlert("請先輸入您的手機號碼！");
   const container = document.getElementById('multiOrdersContainer'); const favContainer = document.getElementById('memberFavoritesContainer');
@@ -263,7 +402,6 @@ function checkOrderHistory() {
 
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) }).then(r => r.json()).then(res => {
     if(res.success && res.favList && res.favList.length > 0) {
-      // 快速查詢狀態後，能夠正確渲染出「收藏清單」
       favContainer.innerHTML = `⭐ <b>您的雲端收藏清單：</b><br><span class="font-bold text-rose-600 tracking-wide">${res.favsHtml}</span>`; favContainer.classList.remove('hidden');
     } else { favContainer.innerHTML = "⭐ <b>您的雲端收藏清單：</b><br><span class='text-stone-400'>暫無雲端收藏商品</span>"; favContainer.classList.remove('hidden'); }
     if(!res.success || !res.allOrders || res.allOrders.length === 0) { container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無任何預訂進度，請核對號碼。</p>"; return; }
@@ -282,14 +420,13 @@ function submitFinalOrder() {
   let ph = document.getElementById('custPhone').value.trim(), name = document.getElementById('custName').value.trim(), line = document.getElementById('lineName').value.trim();
   if(!ph || !name || !line) return showCustomAlert("姓名、電話、LINE 暱稱為必填項目！");
   if(cart.length === 0) return showCustomAlert("購物車目前無任何品項。");
-  showCustomAlert("訂單成立中"); // 簡化提示文字
+  showCustomAlert("訂單成立中");
 
   let payload = { cartData: cart, userInfo: { phone: ph, name: name, lineName: line, email: document.getElementById('custEmail').value.trim(), shipping: document.getElementById('shipSelectDropdown').value, address: document.getElementById('pickupTimeSelect').value, grandTotal: document.getElementById('grandTotal').innerText, shipName: document.getElementById('custAddress').value.trim() || "現場自取", remark: document.getElementById('orderRemark').value.trim() || "無", couponUsed: activatedCouponName } };
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "processOrder", cartData: cart, userInfo: payload.userInfo }) }).then(r => r.json()).then(res => {
     if(res.success) {
       closeCustomAlert();
       setTimeout(() => {
-        // 下單成功後的精確字句回填
         showCustomAlert("下單完成！明細已發送至您的Mail信箱。也可輸入電話查詢狀態！\n訂單編號：" + res.orderId);
         cart = []; currentDiscountValue = 0; activatedCouponName = ""; document.getElementById('couponCodeInput').value = ""; document.getElementById('discountMsgBlock').classList.add('hidden'); document.getElementById('txtDiscountLabel').innerText = ""; updateCartUI(); toggleCart(false);
       }, 300);
