@@ -48,8 +48,8 @@
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="小箱,大箱"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="A級特選,B級次選"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：小箱,大箱"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：A級特選,B級次選"></div>
     </div>
     <div class="bg-stone-50 p-4 border rounded-xl">
       <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區</span><button onclick="fireBatchSetMatrix()" class="bg-stone-700 text-white text-[10px] px-2.5 py-1 rounded shadow-sm">⚡ 批量統一填入價格</button></div>
@@ -58,13 +58,15 @@
         <tbody id="matrixTableBody"></tbody>
       </table>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">YouTube/IG 導流網址</label><input type="text" id="pVideo" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品名稱</label><input type="text" id="pAddonName" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品加價金額</label><input type="number" id="pAddonPrice" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
+    
+    <div class="border-2 border-dashed border-stone-300 rounded-xl p-5 text-center bg-stone-50 cursor-pointer hover:bg-stone-100" onclick="document.getElementById('bbFileInput').click()">
+      <span class="text-xs font-bold text-stone-600 block">┼ 點擊選取相片高速非同步上傳到 ImgBB 圖床</span>
+      <input type="file" id="bbFileInput" accept="image/*" multiple class="hidden" onchange="uploadToImgBB(this.files)">
+      <div id="uploadStatusText" class="text-[11px] text-stone-400 mt-1">API Key 認證綁定中...</div>
     </div>
     <div><label class="text-xs font-semibold text-stone-600 block mb-1">圖片網址紀錄欄</label><textarea id="pImgs" rows="3" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></textarea></div>
     <div><label class="text-xs font-semibold text-stone-600 block mb-1">商品敘述與短文細節</label><textarea id="pDesc" rows="2" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></textarea></div>
+
     <button onclick="publishProduct()" id="submitProductBtn" class="w-full bg-stone-700 text-white font-medium text-sm py-3 rounded-lg shadow-md hover:bg-stone-800">一鍵即時確認商品網頁上架</button>
   </div>
 
@@ -123,12 +125,14 @@
 
 </div>
 <script>
-// 🌟 修正分頁切換無反應 Bug：將 switchTab 的 DOM 對齊完全打通！
+let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
+let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
+
+// 🌟 徹底打通點擊分頁：正確重新加載並刷新 UI 視窗數據
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   
-  // 更新 Tab 按鈕的高亮樣式
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-stone-800";
   });
@@ -136,6 +140,35 @@ function switchTab(id) {
 
   if(id === 'listTab') loadInventoryData();
   if(id === 'orderTab') loadOrdersData();
+}
+
+// 🌟 ⚡ 批量統一填入價格：完整監監聽對齊，按下立即填入配置特價
+function fireBatchSetMatrix() {
+  let p = prompt("請輸入欲批次套用的規格單價金額：");
+  if(!p) return;
+  document.querySelectorAll('#matrixTableBody tr').forEach(row => {
+    row.querySelector('.m-price').value = p;
+  });
+}
+
+// 🌟 ImgBB 圖床非同步上傳功能
+async function uploadToImgBB(files) {
+  if(files.length === 0) return;
+  const text = document.getElementById('uploadStatusText');
+  const area = document.getElementById('pImgs');
+  text.innerText = "⏳ 圖片非同步處理上傳中...";
+  let urls = [];
+  for (let f of files) {
+    let form = new FormData(); form.append("image", f);
+    try {
+      let r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: form });
+      let j = await r.json(); if(j.success) urls.push(j.data.url);
+    } catch(e){}
+  }
+  if(urls.length > 0) {
+    area.value = (area.value ? area.value + "\n" : "") + urls.join("\n");
+    text.innerText = "🎉 圖片全部上傳轉換成功！";
+  }
 }
 
 function regenerateMatrixFromInputs() {
