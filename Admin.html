@@ -508,6 +508,17 @@
       });
       window.print();
     }
+    function loadAllOrders() {
+  google.script.run.withSuccessHandler(function(res){
+    // ... 渲染訂單表格 ...
+  }).getAllOrders();
+}
+function publishProduct() {
+  // ... 封裝好 pObj 商品物件 ...
+  google.script.run.withSuccessHandler(function(res){
+    alert(res.message);
+  }).addNewProduct(pObj);
+}
   </script>
 </body>
 </html>
