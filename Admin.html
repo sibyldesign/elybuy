@@ -27,6 +27,13 @@
     <button onclick="switchTab('orderTab')" id="btn-orderTab" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400">訂單看板</button>
   </div>
 
+  <div id="adminAlertModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] hidden z-[5000] items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-xl p-5 shadow-xl text-center space-y-3 border">
+      <div id="adminAlertText" class="text-xs font-medium text-stone-700 leading-relaxed"></div>
+      <button onclick="closeAdminAlert()" class="bg-stone-700 text-white text-xs px-5 py-2 rounded-lg font-medium w-full shadow">確 認</button>
+    </div>
+  </div>
+
   <div id="uploadTab" class="tab-content bg-white border rounded-xl p-5 shadow-sm space-y-4">
     <h2 class="text-sm font-bold border-b pb-2 text-stone-700">✍ 快速上架</h2>
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -41,8 +48,8 @@
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none"></div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="顏色，例如：小箱,大箱"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="尺寸，例如：A級特選,B級次選"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：小箱,大箱"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 outline-none" placeholder="例如：A級特選,B級次選"></div>
     </div>
     <div class="bg-stone-50 p-4 border rounded-xl">
       <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區</span><button onclick="fireBatchSetMatrix()" class="bg-stone-700 text-white text-[10px] px-2.5 py-1 rounded shadow-sm">⚡ 批量統一填入價格</button></div>
@@ -151,7 +158,7 @@ function renderInventoryTable() {
   for(let i=start; i<end; i++) {
     let p = filteredProducts[i];
     let displayPrice = p.price;
-    if(p.color && p.color.includes(',')) { displayPrice = p.color.split(',')[0]; } // 物理對齊圖一：若是多規格單價顯示首個規格名稱（如小箱）
+    if(p.color && p.color.includes(',')) { displayPrice = p.color.split(',')[0]; } 
     tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${displayPrice}</td><td class="p-3 font-medium text-amber-800">${p.arrivalDate || "追加中"}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}')" class="bg-stone-500 text-white px-2 py-1 rounded">編輯</button></td></tr>`;
   }
 }
@@ -181,7 +188,7 @@ function renderOrderTable() {
       <td class="p-3 font-bold">$${o.total}</td>
       <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
       <td class="p-3 font-bold text-amber-800">${o.arrivalDate || "追加中"}</td>
-      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none"></td>
+      <td class="p-3"><input type="text" value="${o.bossRemark || ""}" onchange="updateBossRemark(${o.rowIdx}, this.value)" class="p-1 border rounded text-xs w-24"></td>
       <td class="p-3">
         <span class="block font-bold text-blue-600 mb-1">${o.status}</span>
         <select onchange="updateRowStatus(${o.rowIdx}, this.value)" class="block p-1 border text-[11px] rounded bg-white">
@@ -203,19 +210,11 @@ function updateRowStatus(rowIdx, val) { if(!val) return; fetch(MASTER_GAS_URL, {
 function updateBossRemark(rowIdx, text) { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: text }) }); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 
-// 多選多筆訂單生成微軟標準不亂碼 EXCEL 報表分流模組
 function fireBatchExportToExcel() {
-  let chks = document.querySelectorAll('.order-chk:checked');
-  if(chks.length === 0) return alert("請先勾選您想要導出 EXCEL 的訂單項目！");
-  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,選購規格,金額,客戶姓名,聯絡電話,到貨日期,老闆備註,訂單狀態\n";
-  chks.forEach(box => {
-    let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw'));
-    csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${o.phone},${o.arrivalDate},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`;
-  });
-  let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  let link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-  link.setAttribute("download", `伊利小編購_出貨核對表_${new Date().toISOString().slice(0,10)}.csv`);
-  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目項目！");
+  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,取貨時間,到貨日期,老闆備註,訂單狀態\n";
+  chks.forEach(box => { let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${o.phone},${o.pickupTime},${o.arrivalDate},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; });
+  let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 </script>
 </body>
