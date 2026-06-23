@@ -599,6 +599,16 @@
       if(idx !== -1) favoriteSkus.splice(idx, 1); else favoriteSkus.push(p.sku);
       localStorage.setItem('yl_favs', JSON.stringify(favoriteSkus)); updateFavoriteButtonUI(p.sku);
     };
+    function searchProducts() {
+  let kw = document.getElementById('searchInput').value.trim();
+  google.script.run.withSuccessHandler(renderProductGrid).searchProducts(kw);
+}
+function submitFinalOrder() {
+  // ... 封裝好 cart 與 userInfo 資料 ...
+  google.script.run.withSuccessHandler(function(res){
+    alert("預約成功！單號：" + res.orderId);
+  }).processOrder(cart, userInfo);
+}
   </script>
 </body>
 </html>
