@@ -46,14 +46,13 @@
     <h1 class="text-xl font-bold tracking-[3px] text-carbon-black uppercase">伊利小編購</h1>
   </div>
 
-  <div class="mx-4 my-1.5 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 hidden" id="marketingPromoBox"></div>
   <div class="mx-4 my-2 bg-white border border-border-soft rounded-xl p-3.5 text-xs text-center leading-relaxed shadow-sm text-stone-600" id="announcement">
     雲端核心數據晶片通車連線中...
   </div>
 
   <div class="px-4 py-2 space-y-2 bg-white">
     <div class="bg-white border border-border-soft rounded-xl p-1.5 flex items-center shadow-sm">
-      <input type="text" id="searchInput" class="bg-transparent pl-3 pr-2 py-2 text-xs outline-none flex-1 text-carbon-black" placeholder="輸入品名貨號搜尋，或輸入電話號碼快查進度與收藏...">
+      <input type="text" id="searchInput" class="bg-transparent pl-3 pr-2 py-2 text-xs outline-none flex-1 text-carbon-black" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼快查進度與收藏...">
       <button onclick="searchProducts()" class="bg-warm-taupe text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-taupe-dark">搜尋商品</button>
       <button onclick="checkOrderHistory()" class="bg-misty-rose text-white text-xs font-medium px-3 py-2 rounded-lg ml-1.5">狀態查詢</button>
     </div>
@@ -63,7 +62,7 @@
         <h4 class="text-xs font-bold text-warm-taupe tracking-wide">📋 客戶實時狀態與收藏追蹤牆</h4>
         <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-lg cursor-pointer px-1">×</span>
       </div>
-      <div id="memberFavoritesContainer" class="mb-3 p-2 bg-stone-50 rounded-lg text-xs hidden"></div>
+      <div id="memberFavoritesContainer" class="mb-3 p-2.5 bg-rose-50/40 border border-rose-100 rounded-lg text-xs text-rose-900 font-medium hidden"></div>
       <div id="multiOrdersContainer" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-stone-100"></div>
     </div>
   </div>
@@ -75,13 +74,13 @@
   <div class="grid grid-cols-2 gap-3 px-4 py-3 bg-white" id="catalog"></div>
 
   <div class="fixed right-4 bottom-6 flex flex-col gap-2.5 items-end z-[2500]">
-    <button id="backToTopBtn" onclick="scrollToTop()" class="w-11 h-11 bg-white text-warm-taupe border border-border-soft rounded-full font-bold text-xl shadow-md hidden items-center justify-center">↑</button>
+    <button id="backToTopBtn" onclick="scrollToTop()" class="w-11 h-11 bg-white/95 text-warm-taupe border border-border-soft rounded-full font-bold text-xl shadow-md flex items-center justify-center transition-all hover:bg-stone-100 hidden">↑</button>
     <button id="viewCartBtn" onclick="toggleCart(true)" class="bg-warm-taupe text-white text-xs font-bold px-5 py-3.5 rounded-full shadow-lg hidden">購物車 (0)</button>
   </div>
 
   <div id="itemModal" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] hidden z-[3000] items-end sm:items-center justify-center p-0">
     <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative max-h-[95vh] overflow-y-auto flex flex-col">
-      <span onclick="closeModal()" class="absolute right-3 top-3 w-8 h-8 rounded-full bg-white/70 border border-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm cursor-pointer z-50">✕</span>
+      <span onclick="closeModal()" class="absolute right-3 top-3 w-8 h-8 rounded-full bg-white/80 border border-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm cursor-pointer z-50">✕</span>
       
       <div class="w-full aspect-square bg-stone-100 relative overflow-hidden group" id="swiperArea">
         <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
@@ -134,11 +133,11 @@
     
     <div class="grid grid-cols-2 gap-2 border-t pt-2">
       <div>
-        <label class="text-xs font-bold text-stone-900 block mb-1">配送或自取方式 (加大加深)</label>
+        <label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label>
         <select id="shipSelectDropdown" class="w-full text-xs p-2.5 border border-stone-400 rounded-lg bg-white font-bold text-stone-900"></select>
       </div>
       <div>
-        <label class="text-xs font-bold text-stone-900 block mb-1">『預計取貨時間』</label>
+        <label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label>
         <select id="pickupTimeSelect" class="w-full text-xs p-2.5 border border-stone-400 rounded-lg bg-white font-bold text-stone-900"></select>
       </div>
     </div>
@@ -146,7 +145,7 @@
     <div class="space-y-2">
       <div>
         <label class="text-[10px] font-bold text-stone-500 block mb-0.5">收貨地址 (選填)</label>
-        <input type="text" id="custAddress" class="w-full text-xs p-2.5 border rounded-lg bg-white" placeholder="若需要宅配請填寫完整收件地址">
+        <input type="text" id="custAddress" class="w-full text-xs p-2.5 border rounded-lg bg-white" placeholder="若需要宅配請填寫完整寄送地址">
       </div>
       <div>
         <label class="text-[10px] font-bold text-stone-500 block mb-0.5">備註欄 (選填)</label>
@@ -177,7 +176,7 @@
       </div>
       <div class="grid grid-cols-2 gap-2">
         <input type="text" id="lineName" placeholder="LINE 暱稱 (必填)" class="text-xs p-2.5 border rounded-lg bg-white font-medium text-stone-800">
-        <input type="email" id="custEmail" placeholder="電子郵件 (必填！將發送訂單明細副本)" class="text-xs p-2.5 border border-stone-400 rounded-lg bg-white font-bold text-stone-900">
+        <input type="email" id="custEmail" placeholder="電子郵件 (必填項目！將同步發送副本通知)" class="text-xs p-2.5 border border-stone-400 rounded-lg bg-white font-bold text-stone-900">
       </div>
     </div>
     <button onclick="submitFinalOrder()" class="w-full bg-warm-taupe text-white text-xs font-medium py-3 rounded-xl shadow-md hover:bg-taupe-dark">確認無誤！送出預訂單</button>
@@ -207,26 +206,36 @@
     </div>
   </div>
 
+  <div class="mx-4 my-6 bg-white border border-border-soft rounded-xl p-4 text-center space-y-1.5 shadow-sm">
+    <div class="text-xs font-bold text-carbon-black">📍 伊利小編購 店面資訊</div>
+    <div class="text-xs text-carbon-black">營業時間：平日 16:00 - 20:00</div>
+    <a href="https://share.google/WVzvnfsiIDpCLF28i" target="_blank" class="inline-block text-xs text-carbon-black underline font-medium">地點：八德國小斜對面貨櫃市集 (點擊導航)</a>
+  </div>
+
+  <div class="w-full text-center py-6 border-t border-border-soft/60 mt-6"><a href="https://www.heysibyl.com/" target="_blank" class="text-sibyl-gold text-[10px] tracking-widest font-light hover:opacity-80 transition-opacity">Designed by Sibyl | 數位管家</a></div>
+
   <script>
     let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
-    
     let rawData = [], products = [], cart = [], selectedIdx = -1;
     let curImgs = [], imgIdx = 0, currentDiscountValue = 0, activatedCouponName = "";
     let touchStartX = 0, touchEndX = 0;
 
-    function toggleNotice(id) {
-      let el = document.getElementById(id); let icon = document.getElementById('icon_' + id);
-      el.classList.toggle('hidden');
-      if(el.classList.contains('hidden')) { icon.style.transform = "rotate(0deg)"; } else { icon.style.transform = "rotate(180deg)"; }
-    }
+    // 回到頂部按鈕控制事件
+    window.onscroll = function() {
+      let topBtn = document.getElementById("backToTopBtn");
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) { topBtn.classList.remove('hidden'); } 
+      else { topBtn.classList.add('hidden'); }
+    };
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function closeQueryPanel() { document.getElementById('queryResultArea').classList.add('hidden'); }
+    function toggleNotice(id) { let el = document.getElementById(id); el.classList.toggle('hidden'); document.getElementById('icon_'+id).style.transform = el.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)"; }
 
     window.onload = () => {
-      // 🎯 手機版觸控滑動手勢綁定
+      // 手機版滑動手勢
       const swiper = document.getElementById('swiperArea');
       swiper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
       swiper.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, false);
 
-      // 強制讀取優先加載
       fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
         .then(r => r.json()).then(res => {
           if(!res || !res.success) return;
@@ -236,19 +245,13 @@
           document.getElementById('box2').innerText = res.refundNotice;
           document.getElementById('box3').innerText = res.privacyPolicy;
           
-          // 渲染行銷門檻
-          if(res.promoText) {
-            let pBox = document.getElementById('marketingPromoBox');
-            pBox.innerText = "📢 當期行銷公告：" + res.promoText; pBox.classList.remove('hidden');
-          }
-
           const pTime = document.getElementById('pickupTimeSelect'); pTime.innerHTML = "";
           res.config.timeOptions.forEach(t => { pTime.innerHTML += `<option value="${t}">${t}</option>`; });
           
           const pShip = document.getElementById('shipSelectDropdown'); pShip.innerHTML = "";
           if(res.shipModes) res.shipModes.split(',').forEach(m => { pShip.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`; });
 
-          // 核心修正價格與多圖抓取
+          // 🌟 欄位精準修正：抓取價格 K 欄位的第一個元素，不與款式字串混淆
           rawData = res.products.map(p => {
             let cleanPrice = p.price ? p.price.toString().split(',')[0].replace(/[^0-9]/g, "") : "0";
             let fallbackUrl = "https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg";
@@ -267,22 +270,22 @@
     function setupCategoryTabs(cats) {
       const box = document.getElementById('categoryTabs');
       box.innerHTML = `<button onclick="filterCat('all')" class="bg-warm-taupe text-white text-xs px-4 py-1.5 rounded-full whitespace-nowrap shadow-sm">全部商品</button>`;
-      cats.forEach(c => { if(c) box.innerHTML += `<button onclick="filterCat('${c.trim()}')" class="bg-white border border-border-soft text-carbon-black text-xs px-4 py-1.5 rounded-full whitespace-nowrap">${c.trim()}</button>`; });
+      cats.forEach(c => { if(c) box.innerHTML += `<button onclick="filterCat('${c.trim()}')" class="bg-white border text-carbon-black text-xs px-4 py-1.5 rounded-full whitespace-nowrap">${c.trim()}</button>`; });
     }
     function filterCat(c) { products = (c==='all') ? rawData : rawData.filter(x => x.category === c); renderCatalog(products); }
 
     function renderCatalog(list) {
       const box = document.getElementById('catalog'); box.innerHTML = "";
       let active = list.filter(p => p.status !== '下架');
-      if(active.length === 0) { box.innerHTML = "<p class='col-span-2 text-center py-10 text-xs text-stone-400'>目前暫無上架商品項目</p>"; return; }
+      if(active.length === 0) { box.innerHTML = "<p class='col-span-2 text-center py-10 text-xs text-stone-400'>目前無上架商品項目</p>"; return; }
       active.forEach((p, i) => {
-        // 🎯 圖片加速跑出功能：前 6 張強制高優先級拉取渲染
-        let speedPriority = (i < 6) ? 'fetchpriority="high" loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
+        // 🌟 補回原功能：開啟畫面強制優先讀取加載前 6 張圖片加速跑出功能
+        let speedAttr = (i < 6) ? 'fetchpriority="high" loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
         box.innerHTML += `
-          <div onclick="openProduct(${rawData.indexOf(p)})" class="bg-white rounded-xl border border-border-soft overflow-hidden shadow-sm flex flex-col cursor-pointer bg-white transition-transform active:scale-95">
+          <div onclick="openProduct(${rawData.indexOf(p)})" class="bg-white rounded-xl border border-border-soft overflow-hidden shadow-sm flex flex-col cursor-pointer transition-all active:scale-95">
             <div class="w-full aspect-square bg-stone-50 relative">
               ${p.tag ? `<span class="absolute top-2 left-2 bg-misty-rose text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-sm">${p.tag}</span>` : ''}
-              <img src="${p.allImagesList[0]}" ${speedPriority} class="w-full h-full object-cover">
+              <img src="${p.allImagesList[0]}" ${speedAttr} class="w-full h-full object-cover">
             </div>
             <div class="p-3 flex flex-col flex-1 justify-between bg-white">
               <h2 class="text-xs font-medium text-carbon-black line-clamp-2 h-8">${p.name}</h2>
@@ -297,7 +300,7 @@
       document.getElementById('qtyInput').innerText = "1";
       imgIdx = 0; curImgs = [...p.allImagesList];
       
-      // 🎯 非同步預緩存輪播圖
+      // 🌟 圖片加速：背景非同步載入輪播圖
       if (curImgs.length > 1) { for (let m = 1; m < curImgs.length; m++) { (new Image()).src = curImgs[m]; } }
 
       buildDotsProgressBar(); showMediaImage();
@@ -310,13 +313,13 @@
       const sSel = document.getElementById('sizeSelect'); sSel.innerHTML = "";
       p.sizes.forEach(s => { sSel.innerHTML += `<option value="${s.trim()}">${s.trim()}</option>`; });
 
-      // 初始化收藏狀態按鈕視覺
       let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
       document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
 
       document.getElementById('itemModal').className = "fixed inset-0 bg-black/50 backdrop-blur-[2px] flex z-3000 items-end sm:items-center justify-center p-0";
     }
 
+    // 🌟 補回原功能：下方白點進度及左右箭頭切換
     function buildDotsProgressBar() {
       const container = document.getElementById('dotsContainer'); container.innerHTML = ""; if (curImgs.length <= 1) return;
       curImgs.forEach((_, i) => { container.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="imgIdx=${i};showMediaImage();event.stopPropagation();"></div>`; });
@@ -332,18 +335,18 @@
     function toggleFavorite() {
       const p = rawData[selectedIdx]; let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
       let fIdx = favs.indexOf(p.sku);
-      if(fIdx !== -1) { favs.splice(fIdx, 1); alert("已移出您的收藏清單"); } else { favs.push(p.sku); alert("商品成功加入您的收藏庫！"); }
+      if(fIdx !== -1) { favs.splice(fIdx, 1); alert("已移出您的收藏庫"); } 
+      else { favs.push(p.sku); alert("成功加入您的雲端收藏庫！"); }
       localStorage.setItem('yl_favs', JSON.stringify(favs));
       document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
       
-      // 同步到試算表「會員收藏紀錄」分頁
       let ph = document.getElementById('custPhone').value.trim();
       if(ph) fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "handleSyncFavorites", phone: ph, favorites: favs }) });
     }
 
     function shareProduct() {
       let p = rawData[selectedIdx]; navigator.clipboard.writeText(window.location.href.split('?')[0] + "?sku=" + p.sku);
-      alert(`🔗 商品 [${p.sku}] 分享連結已成功複製至剪貼簿！`);
+      alert(`🔗 商品 [${p.sku}] 專屬分享網址已成功複製！`);
     }
 
     function closeModal() { document.getElementById('itemModal').className = "hidden"; }
@@ -370,15 +373,14 @@
       document.getElementById('grandTotal').innerText = finalTotal;
       
       const btn = document.getElementById('viewCartBtn');
-      btn.className = cart.length > 0 ? "bg-warm-taupe text-white text-xs font-bold px-5 py-3.5 rounded-full shadow-lg fixed right-4 bottom-6 z-50 flex" : "hidden";
+      btn.className = cart.length > 0 ? "bg-warm-taupe text-white text-xs font-bold px-5 py-3.5 rounded-full shadow-lg fixed right-4 bottom-24 z-50 flex" : "hidden";
       btn.innerText = `購物車 (${cart.length})`;
     }
     function removeCart(idx) { cart.splice(idx,1); updateCartUI(); }
 
-    // 🌟 啟動：比對試算表『折扣碼管理』分頁資料折抵功能
     function applyDiscountCode() {
       let code = document.getElementById('couponCodeInput').value.trim();
-      if(!code) return alert("請輸入折扣碼代稱！");
+      if(!code) return alert("請輸入折扣碼！");
       fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "checkCouponCode", code: code }) })
         .then(r => r.json()).then(res => {
           if(res.success && res.match) {
@@ -387,33 +389,29 @@
             document.getElementById('discountMsgBlock').classList.remove('hidden');
             document.getElementById('txtDiscountLabel').innerText = `已扣除：-$${currentDiscountValue}`;
             updateCartUI();
-          } else {
-            alert("該折扣碼不存在或已被領取完畢！");
-          }
+          } else { alert("該折扣碼無效或已過期！"); }
         });
     }
 
-    // 🌟 核心整合：輸入電話除查詢狀態看板，還能同時查看「雲端收藏清單」
+    // 🌟 補回原功能：狀態追蹤 + 同時加載會員雲端收藏清單
     function checkOrderHistory() {
       let phone = document.getElementById('searchInput').value.trim();
-      if(!phone) return alert("請先在上面搜尋欄輸入您的手機號碼！");
+      if(!phone) return alert("請先輸入您的手機號碼！");
       
       const container = document.getElementById('multiOrdersContainer');
       const favContainer = document.getElementById('memberFavoritesContainer');
-      container.innerHTML = "<span class='text-xs text-stone-400 animate-pulse'>實時連線雲端資料庫中...</span>";
+      container.innerHTML = "<span class='text-xs text-stone-400 animate-pulse'>正在為您極速對接對帳狀態看板...</span>";
       favContainer.classList.add('hidden');
       document.getElementById('queryResultArea').classList.remove('hidden');
 
       fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) })
         .then(r => r.json()).then(res => {
-          // 渲染雲端收藏
-          if(res.success && res.favList && res.favsHtml) {
-            favContainer.innerHTML = `<b>⭐ 您綁定的雲端收藏清單項目：</b><br>${res.favsHtml}`;
+          if(res.success && res.favList && res.favList.length > 0) {
+            favContainer.innerHTML = `⭐ <b>您綁定的雲端收藏清單項目：</b><br><span class="font-mono">${res.favsHtml}</span>`;
             favContainer.classList.remove('hidden');
           }
-          // 渲染訂單狀態
           if(!res.success || !res.allOrders || res.allOrders.length === 0) {
-            container.innerHTML = "<p class='text-xs text-stone-400 py-2'>該手機目前在雲端查無任何預訂進度紀錄。</p>"; return;
+            container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無任何預訂進度，請核對號碼。</p>"; return;
           }
           container.innerHTML = "";
           res.allOrders.forEach(o => {
@@ -421,8 +419,8 @@
               <div class="py-2.5 text-xs text-stone-700 leading-relaxed bg-white">
                 <div class="flex justify-between"><b>單號: ${o.orderId}</b> <span class="px-2 py-0.5 bg-stone-100 rounded text-stone-600 font-bold">${o.status}</span></div>
                 <div class="text-stone-400 text-[11px]">${o.items.join('<br>')}</div>
-                <div class="text-stone-500">取貨時間/收貨地址: ${o.pickupTime || '市集時間'} / ${o.shipping} (${o.address})</div>
-                <div class="text-[11px] text-warm-taupe">財務對帳看板狀態: <span class="font-bold">${o.payStatus}</span></div>
+                <div class="text-stone-500">⏱️ 取貨時間: ${o.pickupTime || '市集時間'}</div>
+                <div class="text-[11px] text-warm-taupe">財務對帳狀態: <span class="font-bold">${o.payStatus}</span></div>
               </div>`;
           });
         });
@@ -430,27 +428,26 @@
 
     function submitFinalOrder() {
       let ph = document.getElementById('custPhone').value.trim(), name = document.getElementById('custName').value.trim(), line = document.getElementById('lineName').value.trim(), mail = document.getElementById('custEmail').value.trim();
-      if(!ph || !name || !line || !mail) return alert("姓名、電話、LINE、以及電子郵件皆為必填核對資料項目！");
-      if(cart.length === 0) return alert("預訂購物車空空如也！");
+      if(!ph || !name || !line || !mail) return alert("姓名、電話、LINE、以及電子郵件皆為必填核對項目！");
+      if(cart.length === 0) return alert("購物車目前無任何品項項目。");
       
       let payload = {
         cartData: cart,
         userInfo: {
           phone: ph, name: name, lineName: line, email: mail,
           shipping: document.getElementById('shipSelectDropdown').value,
-          address: document.getElementById('pickupTimeSelect').value, // 預計取貨時間對齊 N 欄
+          address: document.getElementById('pickupTimeSelect').value,
           grandTotal: document.getElementById('grandTotal').innerText,
           shipName: document.getElementById('custAddress').value.trim() || "現場自取",
           remark: document.getElementById('orderRemark').value.trim() || "無",
-          couponUsed: activatedCouponName // 傳送已用折扣碼至後台
+          couponUsed: activatedCouponName
         }
       };
 
-      alert("⏳ 合併預訂封裝中，正在極速傳輸至雲端中轉站...");
       fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "processOrder", cartData: cart, userInfo: payload.userInfo }) })
         .then(r => r.json()).then(res => {
           if(res.success) {
-            alert("🎉 預約排單成功！副本通知信已發送至您的 Mail 箱。\n預定單號為：" + res.orderId);
+            alert("🎉 預約成功！通知副本已發送至您的 Mail 箱。\n預定單號為：" + res.orderId);
             cart = []; currentDiscountValue = 0; activatedCouponName = "";
             document.getElementById('couponCodeInput').value = "";
             document.getElementById('discountMsgBlock').classList.add('hidden');
@@ -459,7 +456,6 @@
           }
         });
     }
-    function backToHome() { document.getElementById('searchInput').value = ""; products = rawData; renderCatalog(products); }
   </script>
 </body>
 </html>
