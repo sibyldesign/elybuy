@@ -31,199 +31,204 @@
     .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.25s; }
     .dot.active { background: #FFFFFF; width: 18px; border-radius: 4px; }
     
+    /* 霓虹漸層跑馬燈與行銷閃爍特效 */
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     @keyframes blink-ui { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
     .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 14s linear infinite; }
     .promo-flash { animation: blink-ui 2s infinite ease-in-out; }
     
-    @media (min-width: 768px) { #categoryTabs { justify-content: center; flex-wrap: wrap; } }
+    /* 電腦版分類列置中，手機版維持橫向滑動 */
+    @media (min-width: 768px) {
+      #categoryTabs { justify-content: center; flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body class="font-sans antialiased pb-32 bg-white">
 
-<div class="w-full flex justify-end gap-2 px-4 pt-4 pb-2 z-50 bg-white">
-  <a href="https://lin.ee/vWmWpyT" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">LINE 客服</a>
-  <a href="https://line.me/ti/g2/LOmembwBbeqIpXoFcYG6yX8pCGrIvkPbnNpIig?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">加入 LINE 社群</a>
-</div>
-
-<div class="flex flex-col items-center text-center px-4 py-3 bg-white">
-  <div class="w-[140px] h-[140px] rounded-full border border-border-soft shadow-md overflow-hidden bg-white mb-3 cursor-pointer" onclick="backToHome()">
-    <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Store Logo">
-  </div>
-  <h1 class="text-2xl font-bold tracking-[3px] text-carbon-black uppercase cursor-pointer" onclick="backToHome()">伊利小編購</h1>
-</div>
-
-<div class="mx-4 my-2 bg-gradient-to-r from-red-50 via-amber-50 to-red-50 border border-red-200 rounded-xl p-3.5 overflow-hidden hidden promo-flash" id="marketingPromoBox">
-  <div class="w-full overflow-hidden"><span class="text-base font-bold text-red-600 animate-marquee" id="promoTextSpan"></span></div>
-</div>
-
-<div class="mx-4 my-2 bg-white border border-border-soft rounded-xl p-4 text-sm text-center leading-relaxed shadow-sm text-stone-600 font-medium" id="announcement">載入中...</div>
-
-<div class="px-4 py-2 space-y-2 bg-white">
-  <div class="bg-white border border-border-soft rounded-xl p-2 flex items-center shadow-sm gap-2 max-w-full overflow-hidden">
-    <input type="text" id="searchInput" class="bg-transparent pl-2 py-2 text-sm outline-none flex-1 text-carbon-black font-medium min-w-0" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼快查訂單進度與收藏...">
-    <button onclick="searchProducts()" class="bg-warm-taupe text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">搜尋<br>商品</button>
-    <button onclick="checkOrderHistory()" class="bg-misty-rose text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">狀態<br>查詢</button>
+  <div class="w-full flex justify-end gap-2 px-4 pt-4 pb-2 z-50 bg-white">
+    <a href="https://lin.ee/vWmWpyT" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">LINE 客服</a>
+    <a href="https://line.me/ti/g2/LOmembwBbeqIpXoFcYG6yX8pCGrIvkPbnNpIig?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" class="bg-white border border-border-soft text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">加入 LINE 社群</a>
   </div>
 
-  <div id="queryResultArea" class="bg-white border border-border-soft rounded-xl p-4 shadow-md hidden">
-    <div class="flex justify-between items-center mb-2 border-b pb-2">
-      <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單狀態與收藏清單</h4>
-      <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-2xl cursor-pointer px-1">×</span>
+  <div class="flex flex-col items-center text-center px-4 py-3 bg-white">
+    <div class="w-[140px] h-[140px] rounded-full border border-border-soft shadow-md overflow-hidden bg-white mb-3 cursor-pointer" onclick="backToHome()">
+      <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Store Logo">
     </div>
-    <div id="memberFavoritesContainer" class="mb-4 p-3 bg-rose-50/60 border border-rose-100 rounded-lg text-sm text-rose-900 font-bold hidden"></div>
-    <div id="multiOrdersContainer" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-stone-100"></div>
+    <h1 class="text-2xl font-bold tracking-[3px] text-carbon-black uppercase cursor-pointer" onclick="backToHome()">伊利小編購</h1>
   </div>
-</div>
 
-<div class="overflow-x-auto no-scrollbar flex gap-2 px-4 py-2 bg-white text-base font-bold items-center" id="categoryTabs">
-  <button onclick="filterCat('all')" class="bg-warm-taupe text-white px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1">全部商品</button>
-</div>
-
-<div class="grid grid-cols-2 gap-3 px-4 py-3 bg-white" id="catalog"></div>
-
-<div class="fixed right-4 bottom-6 flex flex-col gap-2.5 items-end z-[2500]">
-  <button id="backToTopBtn" onclick="scrollToTop()" class="w-11 h-11 bg-white text-warm-taupe border border-border-soft rounded-full font-bold text-xl shadow-md hidden items-center justify-center transition-all hover:bg-stone-100">↑</button>
-  <button id="viewCartBtn" onclick="toggleCart(true)" class="bg-[#D4B2A7] text-white text-base font-bold px-6 py-4.5 rounded-full shadow-2xl hidden transition-transform active:scale-95">購物車 (0)</button>
-</div>
-
-<div id="customAlertModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] hidden z-[5000] items-center justify-center p-4">
-  <div class="bg-white w-full max-w-xs rounded-xl p-5 shadow-xl text-center space-y-3">
-    <div id="customAlertText" class="text-sm font-bold text-stone-700 leading-relaxed"></div>
-    <button onclick="closeCustomAlert()" class="bg-warm-taupe text-white text-sm px-5 py-2 rounded-lg font-medium w-full shadow">確 定</button>
-  </div>
-</div>
-
-<div id="itemModal" class="fixed inset-0 bg-black/60 backdrop-blur-[2px] hidden z-[3000] items-end sm:items-center justify-center p-0">
-  <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative max-h-[92vh] flex flex-col">
-    <span onclick="closeModal()" class="fixed sm:absolute right-4 top-4 w-9 h-9 rounded-full bg-white/95 border border-stone-300 text-stone-600 flex items-center justify-center font-bold text-lg cursor-pointer z-[3200] shadow-md">✕</span>
-
-    <div class="w-full aspect-[4/5] bg-stone-900 relative overflow-hidden group shrink-0" id="swiperArea">
-      <div id="itemImgBlurBg" class="absolute inset-0 w-full h-full scale-110 blur-xl opacity-40 bg-cover bg-center"></div>
-      <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
-      <img id="itemImg" src="" class="w-full h-full object-contain relative z-10 transition-all duration-300">
-      <button onclick="changeImg(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❯</button>
-      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30" id="dotsContainer"></div>
+  <div class="mx-4 my-2 bg-gradient-to-r from-red-50 via-amber-50 to-red-50 border border-red-200 rounded-xl p-3.5 overflow-hidden hidden promo-flash" id="marketingPromoBox">
+    <div class="w-full overflow-hidden">
+      <span class="text-base font-bold text-red-600 animate-marquee" id="promoTextSpan"></span>
     </div>
-
-    <div class="p-5 space-y-4 bg-white overflow-y-auto flex-1 no-scrollbar max-h-[40vh]">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h2 id="itemTitle" class="text-base font-bold text-carbon-black leading-relaxed"></h2>
-          <p id="itemDesc" class="text-xs text-stone-500 mt-1 whitespace-pre-line leading-relaxed"></p>
-        </div>
-        <div class="flex flex-col gap-2 ml-2">
-          <button id="favProductBtn" onclick="toggleFavorite()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🤍</button>
-          <button id="shareProductBtn" onclick="shareProduct()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🔗</button>
-        </div>
-      </div>
-
-      <div class="flex items-baseline gap-2 border-b pb-2.5">
-        <span id="itemPrice" class="text-xl font-bold text-red-600"></span>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2">
-        <div><label class="text-xs font-bold text-stone-400 block mb-1">規格1</label><select id="colorSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px]"></select></div>
-        <div><label class="text-xs font-bold text-stone-400 block mb-1">規格2</label><select id="sizeSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px]"></select></div>
-      </div>
-
-      <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg border h-11 min-h-[44px]">
-        <span class="text-sm text-stone-500 font-bold">預訂數量</span>
-        <div class="flex items-center gap-3">
-          <button onclick="modifyModalQty(-1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">-</button>
-          <span id="qtyInput" class="text-sm font-bold w-6 text-center">1</span>
-          <button onclick="modifyModalQty(1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">+</button>
-        </div>
-      </div>
-      <button onclick="addToCart()" class="w-full bg-warm-taupe text-white text-sm font-bold py-3.5 rounded-xl shadow-md h-11 min-h-[44px]">加入購物車</button>
-    </div>
-  </div>
-</div>
-
-<div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 rounded-t-3xl z-[2800] max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col translate-y-full transition-transform duration-300">
-  <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b flex justify-between items-center z-50 shrink-0">
-    <h3 class="text-base font-bold text-carbon-black tracking-wide">🛒 購物車明細</h3>
-    <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-2xl cursor-pointer p-1">✕</span>
   </div>
   
-  <div class="p-5 overflow-y-auto space-y-4 flex-1">
-    <div id="cartList" class="divide-y divide-stone-100 max-h-44 overflow-y-auto"></div>
+  <div class="mx-4 my-2 bg-white border border-border-soft rounded-xl p-4 text-sm text-center leading-relaxed shadow-sm text-stone-600 font-medium" id="announcement">
+    載入中...
+  </div>
 
-    <div class="space-y-3 pt-2">
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label><select id="shipSelectDropdown" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label><select id="pickupTimeSelect" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
+  <div class="px-4 py-2 space-y-2 bg-white">
+    <div class="bg-white border border-border-soft rounded-xl p-2 flex items-center shadow-sm gap-2 max-w-full overflow-hidden">
+      <input type="text" id="searchInput" class="bg-transparent pl-2 py-2 text-sm outline-none flex-1 text-carbon-black font-medium min-w-0" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼快查訂單進度與收藏...">
+      <button onclick="searchProducts()" class="bg-warm-taupe text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">搜尋<br>商品</button>
+      <button onclick="checkOrderHistory()" class="bg-misty-rose text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">狀態<br>查詢</button>
     </div>
 
-    <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 flex gap-2 items-center">
-      <input type="text" id="couponCodeInput" class="text-sm p-2.5 border rounded-lg bg-white flex-1 font-mono uppercase h-11 min-h-[44px]" placeholder="輸入折扣碼">
-      <button onclick="applyDiscountCode()" class="bg-carbon-black text-white text-sm px-4 py-2.5 rounded-lg font-medium hover:bg-stone-900 transition-all h-11 min-h-[44px]">應用折抵</button>
-    </div>
-    <div id="discountMsgBlock" class="text-xs text-green-600 font-bold hidden"></div>
-
-    <div class="bg-stone-50 p-4 border text-sm leading-relaxed text-stone-700 rounded-xl space-y-1">
-      <div class="font-bold text-base text-stone-900 mb-1">💰 收款資訊說明</div>
-      <div id="paymentConfigText" class="font-medium text-stone-800 text-sm"></div>
-    </div>
-
-    <div class="flex justify-between items-baseline border-t pt-2.5">
-      <div id="txtDiscountLabel" class="text-sm text-red-500 font-bold"></div>
-      <div class="text-base font-bold text-warm-taupe ml-auto">應付總額：NT$ <span id="grandTotal" class="text-xl">0</span></div>
-    </div>
-
-    <div class="border-t border-dashed pt-3 space-y-3">
-      <div>
-        <label class="text-sm font-bold text-stone-900 block mb-1">手機號碼 (必填)</label>
-        <div class="flex gap-1.5 w-full">
-          <input type="tel" id="custPhone" placeholder="請輸入手機號碼" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 flex-1 min-w-0 h-11 min-h-[44px]">
-          <button onclick="fetchCustomerHistoryData()" id="btnFetchHistory" class="bg-carbon-black text-white text-xs font-bold px-3 py-2 rounded-lg shrink-0 h-11 min-h-[44px]">帶入資料</button>
-        </div>
+    <div id="queryResultArea" class="bg-white border border-border-soft rounded-xl p-4 shadow-md hidden">
+      <div class="flex justify-between items-center mb-2 border-b pb-2">
+        <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單進度查詢看板</h4>
+        <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-2xl cursor-pointer px-1">×</span>
       </div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">訂購人姓名 (必填)</label><input type="text" id="custName" placeholder="請輸入訂購人姓名" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">LINE 暱稱 (必填)</label><input type="text" id="lineName" placeholder="請輸入 LINE 暱稱" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">電子郵件</label><input type="email" id="custEmail" placeholder="example@gmail.com" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">收貨地址</label><input type="text" id="custAddress" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="若需要宅配請填寫完整寄送地址"></div>
-      <div><label class="text-sm font-bold text-stone-900 block mb-1">備註欄</label><input type="text" id="orderRemark" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="如交給管理員"></div>
+      <div id="multiOrdersContainer" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-stone-100"></div>
     </div>
-
-    <button onclick="submitFinalOrder()" class="w-full bg-warm-taupe text-white text-base font-bold py-3.5 rounded-xl shadow-md hover:bg-taupe-dark h-12 min-h-[44px]">確認無誤！送出訂單</button>
-    <div class="text-center pt-1"><a href="https://lin.ee/vWmWpyT" target="_blank" class="text-sm font-bold text-blue-600 underline tracking-wide">如有訂單問題請LINE客服</a></div>
   </div>
-</div>
 
-<div class="mx-4 my-4 space-y-2">
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box1')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>🛒</span> <span class="tracking-wide">購物須知規範</span></div>
-      <svg id="icon_box1" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+  <div class="overflow-x-auto no-scrollbar flex gap-2 px-4 py-2 bg-white text-base font-bold items-center" id="categoryTabs">
+    <button id="tab-all" onclick="filterCat('all')" class="cat-tab-btn bg-warm-taupe text-white px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all">全部商品</button>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 px-4 py-3 bg-white" id="catalog"></div>
+
+  <div class="fixed right-4 bottom-6 flex flex-col gap-2.5 items-end z-[2500]">
+    <button id="backToTopBtn" onclick="scrollToTop()" class="w-11 h-11 bg-white text-warm-taupe border border-border-soft rounded-full font-bold text-xl shadow-md hidden items-center justify-center transition-all hover:bg-stone-100"> ↑ </button>
+    <button id="viewCartBtn" onclick="toggleCart(true)" class="bg-[#D4B2A7] text-white text-base font-bold px-6 py-4.5 rounded-full shadow-2xl hidden transition-transform active:scale-95"> 購物車 (0) </button>
+  </div>
+
+  <div id="itemModal" class="fixed inset-0 bg-black/60 backdrop-blur-[2px] hidden z-[3000] items-end sm:items-center justify-center p-0">
+    <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative max-h-[92vh] flex flex-col">
+      <span onclick="closeModal()" class="fixed sm:absolute right-4 top-4 w-9 h-9 rounded-full bg-white/95 border border-stone-300 text-stone-600 flex items-center justify-center font-bold text-lg cursor-pointer z-[3200] shadow-md">✕</span>
+
+      <div class="w-full aspect-[4/5] bg-stone-900 relative overflow-hidden group shrink-0" id="swiperArea">
+        <div id="itemImgBlurBg" class="absolute inset-0 w-full h-full scale-110 blur-xl opacity-40 bg-cover bg-center"></div>
+        <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
+        <img id="itemImg" src="" class="w-full h-full object-contain relative z-10 transition-all duration-300">
+        <button onclick="changeImg(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❯</button>
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30" id="dotsContainer"></div>
+      </div>
+
+      <div class="p-5 space-y-4 bg-white overflow-y-auto flex-1 no-scrollbar max-h-[42vh] border-t border-stone-100">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h2 id="itemTitle" class="text-base font-bold text-carbon-black leading-relaxed"></h2>
+            <p id="itemDesc" class="text-xs text-stone-500 mt-1 whitespace-pre-line leading-relaxed"></p>
+          </div>
+          <div class="flex flex-col gap-2 ml-2">
+            <button id="favProductBtn" onclick="toggleFavorite()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🤍</button>
+            <button id="shareProductBtn" onclick="shareProduct()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🔗</button>
+          </div>
+        </div>
+
+        <div class="flex items-baseline gap-2 border-b pb-2.5">
+          <span id="itemPrice" class="text-xl font-bold text-red-600"></span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-stone-400 block mb-1">規格1</label>
+            <select id="colorSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none"></select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-stone-400 block mb-1">規格2</label>
+            <select id="sizeSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none"></select>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg border h-11 min-h-[44px]">
+          <span class="text-sm text-stone-500 font-bold">預訂數量</span>
+          <div class="flex items-center gap-3">
+            <button onclick="modifyModalQty(-1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">-</button>
+            <span id="qtyInput" class="text-sm font-bold w-6 text-center">1</span>
+            <button onclick="modifyModalQty(1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">+</button>
+          </div>
+        </div>
+        <button onclick="addToCart()" class="w-full bg-warm-taupe text-white text-sm font-bold py-3 rounded-xl shadow-md h-11 min-h-[44px] hover:bg-taupe-dark">加入購物車</button>
+      </div>
     </div>
-    <div id="box1" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
   </div>
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box2')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>📦</span> <span class="tracking-wide">退換貨須知處理</span></div>
-      <svg id="icon_box2" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </div>
-    <div id="box2" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
-  </div>
-  <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
-    <div onclick="toggleNotice('box3')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
-      <div class="flex items-center gap-2"><span>🔒</span> <span class="tracking-wide">隱私權保護政策</span></div>
-      <svg id="icon_box3" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </div>
-    <div id="box3" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
-  </div>
-</div>
 
-<div class="mx-4 my-6">
-  <div class="bg-white border border-border-soft rounded-2xl p-6 text-center shadow-sm max-w-xl mx-auto">
-    <p class="text-stone-800 font-bold text-sm mb-2.5 tracking-wide">📍 伊利小編購 店面資訊</p>
-    <p class="text-stone-600 text-xs mb-2.5">營業時間：平日 16:00 - 20:00</p>
-    <p class="text-xs"><a href="https://maps.google.com" target="_blank" class="text-stone-800 font-semibold underline">地點：八德國小斜對面貨櫃市集 (點擊導航)</a></p>
-  </div>
-  <div class="text-center text-xs text-[#C4A48A] mt-4 tracking-widest uppercase font-bold"><a href="https://heysibyl.com" target="_blank" class="hover:underline">Designed by Sibyl | 數位管家</a></div>
-</div>
+  <div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 rounded-t-3xl z-[2800] max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col translate-y-full transition-transform duration-300">
+    <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b flex justify-between items-center z-50 shrink-0">
+      <h3 class="text-base font-bold text-carbon-black tracking-wide">🛒 購物車明細</h3>
+      <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-2xl cursor-pointer p-1">✕</span>
+    </div>
+    
+    <div class="p-5 overflow-y-auto space-y-4 flex-1 no-scrollbar">
+      <div id="cartList" class="divide-y divide-stone-100 max-h-44 overflow-y-auto"></div>
 
-<script>
+      <div class="space-y-3 pt-2">
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label><select id="shipSelectDropdown" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label><select id="pickupTimeSelect" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
+      </div>
+
+      <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 flex gap-2 items-center">
+        <input type="text" id="couponCodeInput" class="text-sm p-2.5 border rounded-lg bg-white flex-1 font-mono uppercase h-11 min-h-[44px]" placeholder="輸入折扣碼">
+        <button onclick="applyDiscountCode()" class="bg-carbon-black text-white text-sm px-4 py-2.5 rounded-lg font-medium hover:bg-stone-900 transition-all h-11 min-h-[44px]">應用折抵</button>
+      </div>
+      <div id="discountMsgBlock" class="text-xs text-green-600 font-bold hidden"></div>
+
+      <div class="bg-stone-50 p-4 border text-sm leading-relaxed text-stone-700 rounded-xl space-y-1">
+        <div class="font-bold text-base text-stone-900 mb-1">💰 收款資訊說明</div>
+        <div id="paymentConfigText" class="font-medium text-stone-800 text-sm"></div>
+      </div>
+
+      <div class="flex justify-between items-baseline border-t pt-2.5">
+        <div id="txtDiscountLabel" class="text-sm text-red-500 font-bold"></div>
+        <div class="text-base font-bold text-warm-taupe ml-auto">應付總額：NT$ <span id="grandTotal" class="text-xl">0</span></div>
+      </div>
+
+      <div class="border-t border-dashed pt-3 space-y-3">
+        <div>
+          <label class="text-sm font-bold text-stone-900 block mb-1">手機號碼 (必填)</label>
+          <div class="flex gap-1.5 w-full">
+            <input type="tel" id="custPhone" placeholder="請輸入手機號碼" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 flex-1 min-w-0 h-11 min-h-[44px]">
+            <button onclick="fetchCustomerHistoryData()" id="btnFetchHistory" class="bg-carbon-black text-white text-xs font-bold px-3 py-2 rounded-lg shrink-0 h-11 min-h-[44px]">帶入資料</button>
+          </div>
+        </div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">訂購人姓名 (必填)</label><input type="text" id="custName" placeholder="請輸入訂購人姓名" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">LINE 暱稱 (必填)</label><input type="text" id="lineName" placeholder="請輸入 LINE 暱稱" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">電子郵件</label><input type="email" id="custEmail" placeholder="example@gmail.com" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">收貨地址</label><input type="text" id="custAddress" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="若需要宅配請填寫完整寄送地址"></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">備註欄</label><input type="text" id="orderRemark" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="如交給管理員"></div>
+      </div>
+
+      <button onclick="submitFinalOrder()" class="w-full bg-warm-taupe text-white text-base font-bold py-3.5 rounded-xl shadow-md hover:bg-taupe-dark h-12 min-h-[44px]">確認無誤！送出訂單</button>
+      <div class="text-center pt-1"><a href="https://lin.ee/vWmWpyT" target="_blank" class="text-sm font-bold text-blue-600 underline tracking-wide">如有訂單問題請LINE客服</a></div>
+    </div>
+  </div>
+
+  <div class="mx-4 my-4 space-y-2">
+    <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+      <div onclick="toggleNotice('box1')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
+        <div class="flex items-center gap-2"><span>🛒</span> <span class="tracking-wide">購物須知規範</span></div>
+        <svg id="icon_box1" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </div>
+      <div id="box1" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
+    </div>
+    <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+      <div onclick="toggleNotice('box2')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
+        <div class="flex items-center gap-2"><span>📦</span> <span class="tracking-wide">退換貨須知處理</span></div>
+        <svg id="icon_box2" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </div>
+      <div id="box2" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
+    </div>
+    <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+      <div onclick="toggleNotice('box3')" class="p-3.5 text-sm font-bold text-stone-700 flex justify-between items-center cursor-pointer hover:bg-stone-50 transition-colors">
+        <div class="flex items-center gap-2"><span>🔒</span> <span class="tracking-wide">隱私權保護政策</span></div>
+        <svg id="icon_box3" class="w-4 h-4 text-stone-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </div>
+      <div id="box3" class="text-xs text-stone-500 p-4 leading-relaxed border-t bg-stone-50/40 hidden whitespace-pre-line"></div>
+    </div>
+  </div>
+
+  <div class="mx-4 my-6">
+    <div class="bg-white border border-border-soft rounded-2xl p-6 text-center shadow-sm max-w-xl mx-auto">
+      <p class="text-stone-800 font-bold text-sm mb-2.5 tracking-wide">📍 伊利小編購 店面資訊</p>
+      <p class="text-stone-600 text-xs mb-2.5">營業時間：平日 16:00 - 20:00</p>
+      <p class="text-xs"><a href="https://maps.google.com" target="_blank" class="text-stone-800 font-semibold underline">地點：八德國小斜對面貨櫃市集 (點擊導航)</a></p>
+    </div>
+    <div class="text-center text-xs text-[#C4A48A] mt-4 tracking-widest uppercase font-bold"><a href="https://heysibyl.com" target="_blank" class="hover:underline">Designed by Sibyl | 數位管家</a></div>
+  </div>
+  <script>
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
 let rawData = [], products = [], cart = [], selectedIdx = -1;
 let curImgs = [], imgIdx = 0, currentDiscountValue = 0, activatedCouponName = "";
@@ -233,7 +238,12 @@ let globalFetchLock = false;
 function backToHome(){ window.location.reload(); }
 function showCustomAlert(msg) { document.getElementById('customAlertText').innerText = msg; document.getElementById('customAlertModal').className = "fixed inset-0 bg-black/40 backdrop-blur-[1px] flex z-[5000] items-center justify-center p-4"; }
 function closeCustomAlert() { document.getElementById('customAlertModal').className = "hidden"; }
-window.onscroll = function() { let topBtn = document.getElementById("backToTopBtn"); if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) { topBtn.classList.remove('hidden'); } else { topBtn.classList.add('hidden'); } };
+
+window.onscroll = function() {
+  let topBtn = document.getElementById("backToTopBtn");
+  if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) { topBtn.classList.remove('hidden'); }
+  else { topBtn.classList.add('hidden'); }
+};
 function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function toggleNotice(id) { let el = document.getElementById(id); el.classList.toggle('hidden'); document.getElementById('icon_'+id).style.transform = el.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)"; }
 function closeQueryPanel() { document.getElementById('queryResultArea').classList.add('hidden'); }
@@ -284,15 +294,28 @@ window.onload = () => {
 
 function setupCategoryTabs(cats) {
   const box = document.getElementById('categoryTabs');
-  box.innerHTML = `<button onclick="filterCat('all')" class="bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1">全部商品</button>`;
-  cats.forEach(c => { if(c) box.innerHTML += `<button onclick="filterCat('${c.trim()}')" class="bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm">${c.trim()}</button>`; });
-  
-  // 分類列最後方新增粉紅色收藏按鈕
-  box.innerHTML += `<button onclick="filterFavoritesOnly()" class="bg-rose-100 border border-rose-300 text-rose-700 text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm">我的收藏</button>`;
+  box.innerHTML = `<button id="tab-all" onclick="filterCat('all')" class="cat-tab-btn bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all">全部商品</button>`;
+  cats.forEach(c => {
+    if(c) box.innerHTML += `<button id="tab-${c.trim()}" onclick="filterCat('${c.trim()}')" class="cat-tab-btn bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all">${c.trim()}</button>`;
+  });
+  box.innerHTML += `<button id="tab-fav" onclick="filterFavoritesOnly()" class="cat-tab-btn bg-white border border-rose-200 text-rose-500 text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all">💖 我的收藏</button>`;
 }
 
-function filterCat(c) { products = (c==='all') ? rawData : rawData.filter(x => x.category === c); renderCatalog(products); }
+function filterCat(c) {
+  document.querySelectorAll('.cat-tab-btn').forEach(b => { b.className = "cat-tab-btn bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all"; });
+  if(c === 'all') {
+    document.getElementById('tab-all').className = "cat-tab-btn bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all";
+    products = rawData;
+  } else {
+    document.getElementById('tab-' + c).className = "cat-tab-btn bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all";
+    products = rawData.filter(x => x.category === c);
+  }
+  renderCatalog(products);
+}
+
 function filterFavoritesOnly() {
+  document.querySelectorAll('.cat-tab-btn').forEach(b => { b.className = "cat-tab-btn bg-white border border-border-soft text-carbon-black text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all"; });
+  document.getElementById('tab-fav').className = "cat-tab-btn bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all";
   let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
   products = rawData.filter(p => favs.includes(p.sku));
   renderCatalog(products);
@@ -301,7 +324,7 @@ function filterFavoritesOnly() {
 function renderCatalog(list) {
   const box = document.getElementById('catalog'); box.innerHTML = "";
   let active = list.filter(p => p.status !== '下架');
-  if(active.length === 0) { box.innerHTML = "<p class='col-span-2 text-center py-10 text-xs text-stone-400'>目前無符合條件商品項目</p>"; return; }
+  if(active.length === 0) { box.innerHTML = "<p class='col-span-2 text-center py-10 text-xs text-stone-400'>目前無符合條件之商品項目</p>"; return; }
   active.forEach((p, i) => {
     let minSpecPrice = p.price;
     if(p.rawSpecsData && p.rawSpecsData.length > 0) {
@@ -332,7 +355,6 @@ function openProduct(idx) {
   document.getElementById('itemModal').className = "fixed inset-0 bg-black/60 backdrop-blur-[2px] flex z-3000 items-end sm:items-center justify-center p-0";
 }
 
-// 🌟 起字精準控制：當組合規格完全選定後，起字立刻切除！
 function syncMatrixPrice() {
   const p = rawData[selectedIdx]; const c = document.getElementById('colorSelect').value; const s = document.getElementById('sizeSelect').value;
   let targetKey = `款式:${c} / ${s}`; let matchedPrice = activeSpecsPriceMap[targetKey];
@@ -350,8 +372,8 @@ function syncMatrixPrice() {
 
 function buildDotsProgressBar() { const container = document.getElementById('dotsContainer'); container.innerHTML = ""; if (curImgs.length <= 1) return; curImgs.forEach((_, i) => { container.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="imgIdx=${i};showMediaImage();event.stopPropagation();"></div>`; }); }
 function showMediaImage() { document.getElementById('itemImg').src = curImgs[imgIdx]; let dots = document.querySelectorAll('#dotsContainer .dot'); dots.forEach((d, i) => { if(i === imgIdx) d.classList.add('active'); else d.classList.remove('active'); }); }
-function changeImg(dir, e) { if(e) e.stopPropagation(); if (curImgs.length <= 1) return; imgIdx = (imgIdx + dir + curImgs.length) % curImgs.length; showMediaImage(); }
-function handleSwipeGesture() { if (curImgs.length <= 1) return; if (touchStartX - touchEndX > 40) changeImg(1); if (touchEndX - touchStartX > 40) changeImg(-1); }
+function changeImg(dir, e) { if(e) e.stopPropagation(); imgIdx = (imgIdx + dir + curImgs.length) % curImgs.length; showMediaImage(); }
+function handleSwipeGesture() { if (touchStartX - touchEndX > 40) changeImg(1); if (touchEndX - touchStartX > 40) changeImg(-1); }
 function closeModal() { document.getElementById('itemModal').className = "hidden"; }
 function modifyModalQty(amt) { let q = parseInt(document.getElementById('qtyInput').innerText) + amt; if(q < 1) q = 1; document.getElementById('qtyInput').innerText = q; }
 
@@ -419,7 +441,6 @@ function fetchCustomerHistoryData() {
       document.getElementById('custEmail').value = res.data.email || "";
       document.getElementById('custAddress').value = res.data.address || "";
       document.getElementById('orderRemark').value = res.data.remark || "";
-      showCustomAlert("🎉 歷史資料已成功自動填入！");
     } else { showCustomAlert("查無過往訂購紀錄。"); }
   }).catch(() => { btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false; });
 }
@@ -446,7 +467,6 @@ function checkOrderHistory() {
   });
 }
 
-// 🌟 表單送出：前端防呆必填項驗證，若未填寫自動滾動至該目標
 function submitFinalOrder() {
   let ph = document.getElementById('custPhone'), name = document.getElementById('custName'), line = document.getElementById('lineName');
   if(!ph.value.trim()){ showCustomAlert("請填寫必填欄位：手機號碼！"); ph.scrollIntoView({ behavior: 'smooth' }); return; }
