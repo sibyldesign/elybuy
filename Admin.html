@@ -497,29 +497,39 @@ function renderOrderTable() {
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
     
+    // 🚀 到貨日期修正：去除 GMT 長英文，精準轉為 YYYY-MM-DD 格式
     let cleanArrivalDate = o.arrivalDate || "追加中";
     if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time"))) {
       let d = new Date(cleanArrivalDate);
       if(!isNaN(d.getTime())) {
-        let year = d.getFullYear();
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let day = String(d.getDate()).padStart(2, '0');
-        cleanArrivalDate = `${year}-${month}-${day}`;
+        cleanArrivalDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
     }
 
+    // 🚀 欄位加強：將到貨日期、預計取貨時間、配送方式、收貨地址、收件備註全部呈現在表格中供老闆出貨比對
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
         <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}"></td>
         <td class="p-3 font-mono text-stone-400">${o.time}</td>
-        <td class="p-3 font-bold">${o.orderId}</td>
+        <td class="p-3 font-bold text-blue-900">${o.orderId}</td>
         <td class="p-3"><b>${o.prodName}</b><br><span class="text-stone-400">${o.specs}</span></td>
-        <td class="p-3 font-bold">$${o.total}</td>
-        <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
+        <td class="p-3 font-bold text-red-600">$${o.total}</td>
+        <td class="p-3"><b>${o.custName}</b><br><span class="text-stone-500">Tel:${o.phone}</span><br><span class="text-stone-400">LINE:${o.lineName || ''}</span></td>
+        
+        <!-- 🚀 到貨日期顯示 -->
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
-        <td class="p-3 font-medium text-stone-600"><span>${o.pickupTime || '常規自取'}</span><br><span class="text-[10px] text-stone-400">${o.address || ''}</span></td>
+        
+        <!-- 🚀 預計取貨時間與配送方式組合欄位 -->
+        <td class="p-3 font-medium text-stone-700">
+          <span class="px-1.5 py-0.5 bg-stone-100 text-stone-800 rounded font-bold">${o.shipping || '自取'}</span><br>
+          <span class="block mt-1 text-stone-600">⏱️ 時間: ${o.pickupTime || '常規時間'}</span>
+          <span class="block text-[11px] text-stone-500 font-normal">📍 地址: ${o.address || '現場取貨'}</span>
+        </td>
+        
         <td class="p-3 relative">
-          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none">
+          <!-- 🚀 收貨備註直接呈現在老闆備註輸入框上方，供出貨參考 -->
+          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註: ${o.orderRemark || '無'}</div>
+          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="點擊輸入對帳備註">
           <span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span>
         </td>
         <td class="p-3">
