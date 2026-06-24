@@ -172,9 +172,27 @@
     <div class="p-5 overflow-y-auto space-y-4 flex-1 no-scrollbar">
       <div id="cartList" class="divide-y divide-stone-100 max-h-44 overflow-y-auto"></div>
 
-      <div class="space-y-3 pt-2">
-        <div><label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label><select id="shipSelectDropdown" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
-        <div><label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label><select id="pickupTimeSelect" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select></div>
+      <div class="grid grid-cols-1 gap-3 border-t pt-2">
+        <div>
+          <label class="text-sm font-bold text-stone-900 block mb-1">配送或自取方式</label>
+          <select id="shipSelectDropdown" onchange="handleShipModeChange()" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select>
+        </div>
+        
+        <div id="pickupTimeBlock">
+          <label class="text-sm font-bold text-stone-900 block mb-1">『預計取貨時間』</label>
+          <select id="pickupTimeSelect" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white font-bold text-stone-900 h-11 min-h-[44px]"></select>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div id="shippingAddressBlock">
+          <label class="text-sm font-bold text-stone-900 block mb-1">收貨地址 (必填)</label>
+          <input type="text" id="custAddress" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="請填寫完整寄送地址">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-stone-900 block mb-1">收貨備註欄</label>
+          <input type="text" id="orderRemark" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="如交給管理員">
+        </div>
       </div>
 
       <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 flex gap-2 items-center">
@@ -203,9 +221,7 @@
         </div>
         <div><label class="text-sm font-bold text-stone-900 block mb-1">訂購人姓名 (必填)</label><input type="text" id="custName" placeholder="請輸入訂購人姓名" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
         <div><label class="text-sm font-bold text-stone-900 block mb-1">LINE 暱稱 (必填)</label><input type="text" id="lineName" placeholder="請輸入 LINE 暱稱" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
-        <div><label class="text-sm font-bold text-stone-900 block mb-1">電子郵件 (選填)</label><input type="email" id="custEmail" placeholder="example@gmail.com" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
-        <div><label class="text-sm font-bold text-stone-900 block mb-1">收貨地址</label><input type="text" id="custAddress" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="若需要宅配請填寫完整寄送地址"></div>
-        <div><label class="text-sm font-bold text-stone-900 block mb-1">備註欄</label><input type="text" id="orderRemark" class="w-full text-sm p-3 border border-stone-400 rounded-lg bg-white h-11 min-h-[44px]" placeholder="如交給管理員"></div>
+        <div><label class="text-sm font-bold text-stone-900 block mb-1">電子郵件 (必填)</label><input type="email" id="custEmail" placeholder="example@gmail.com" class="text-sm p-3 border border-stone-400 rounded-lg bg-white font-medium text-stone-800 w-full h-11 min-h-[44px]"></div>
       </div>
 
       <button onclick="submitFinalOrder()" class="w-full bg-warm-taupe text-white text-base font-bold py-3.5 rounded-xl shadow-md hover:bg-taupe-dark h-12 min-h-[44px]">確認無誤！送出訂單</button>
@@ -266,6 +282,23 @@ function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function toggleNotice(id) { let el = document.getElementById(id); el.classList.toggle('hidden'); document.getElementById('icon_'+id).style.transform = el.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)"; }
 function closeQueryPanel() { document.getElementById('queryResultArea').classList.add('hidden'); }
 
+// 🚀 核心大改版：配送與自取前端連動互鎖機制
+function handleShipModeChange() {
+  let shipMode = document.getElementById('shipSelectDropdown').value;
+  let timeBlock = document.getElementById('pickupTimeBlock');
+  let addressBlock = document.getElementById('shippingAddressBlock');
+  
+  if (shipMode.includes("來店取貨") || shipMode.includes("自取")) {
+    timeBlock.classList.remove('hidden');
+    addressBlock.classList.add('hidden');
+    document.getElementById('custAddress').value = ""; // 清空，不開放給來店取貨
+  } else {
+    timeBlock.classList.add('hidden');
+    addressBlock.classList.remove('hidden');
+    document.getElementById('pickupTimeSelect').value = ""; // 清空，不開放給配送到府
+  }
+}
+
 window.onload = () => {
   const swiper = document.getElementById('swiperArea');
   swiper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
@@ -280,6 +313,7 @@ window.onload = () => {
     document.getElementById('box2').innerText = res.refundNotice;
     document.getElementById('box3').innerText = res.privacyPolicy;
 
+    // 🚀 試算表 100% 控制行銷跑馬燈文字
     if(res.promoText && res.promoText !== "暫無特定行銷活動") {
       let pBox = document.getElementById('marketingPromoBox');
       let span = document.getElementById('promoTextSpan');
@@ -292,6 +326,9 @@ window.onload = () => {
 
     const pShip = document.getElementById('shipSelectDropdown'); pShip.innerHTML = "";
     if(res.shipModes) res.shipModes.split(',').forEach(m => { pShip.innerHTML += `<option value="${m.trim()}">${m.trim()}</option>`; });
+
+    // 初始化配送互鎖狀態
+    handleShipModeChange();
 
     rawData = res.products.map(p => {
       let specs = [];
@@ -366,7 +403,14 @@ function openProduct(idx) {
   document.getElementById('itemTitle').innerText = p.name;
   
   document.getElementById('itemTagContainer').innerText = p.tag ? `🏷️ ${p.tag}` : "今日推薦";
-  document.getElementById('itemArrivalDateContainer').innerText = `📅 到貨日期：${p.arrivalDate || "追加中"}`;
+  
+  // 🚀 格式化到貨日期防止長英文物件英文字串錯位
+  let formattedShowDate = p.arrivalDate || "追加中";
+  if(formattedShowDate.includes("GMT") || formattedShowDate.includes("台北標準時間")) {
+    let d = new Date(formattedShowDate);
+    if(!isNaN(d.getTime())) formattedShowDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  document.getElementById('itemArrivalDateContainer').innerText = `📅 到貨日期：${formattedShowDate}`;
   document.getElementById('itemDesc').innerText = p.desc || "";
   document.getElementById('itemImgBlurBg').style.backgroundImage = `url('${curImgs[0]}')`;
 
@@ -410,12 +454,12 @@ function toggleFavorite() {
 
 function shareProduct() { 
   let p = rawData[selectedIdx]; 
+  // 🚀 修正：正確 GitHub 網址正式環境自動拼接
   let baseDomain = window.location.hostname.includes('github.io') 
     ? window.location.origin + window.location.pathname 
     : "https://sibyldesign.github.io/yili-select/Index.html";
     
   navigator.clipboard.writeText(baseDomain + "?sku=" + p.sku); 
-  // 🚀 已修正：改為您指定的提示文字
   showCustomAlert("🔗 分享連結已複製到您的剪貼簿！"); 
 }
 
@@ -437,7 +481,6 @@ function updateCartUI() {
       <div class="space-y-1 flex-1 pr-2">
         <div class="font-bold text-stone-900 text-base leading-tight">${item.prodName}</div>
         <div class="text-stone-400 text-xs font-medium">${item.color} / ${item.size} × ${item.qty}</div>
-        <div class="text-xs text-amber-600 font-bold">📦 到貨日期：${item.arrivalDate}</div>
         <div class="text-sm font-bold text-amber-800 pt-0.5">小計金額：NT$ ${item.price * item.qty}</div>
       </div>
       <span onclick="removeCart(${idx})" class="text-stone-300 text-lg font-bold px-1 cursor-pointer hover:text-red-500">✕</span>
@@ -467,7 +510,15 @@ function checkOrderHistory() {
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) }).then(r => r.json()).then(res => {
     if(!res.success || !res.allOrders || res.allOrders.length === 0) { container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無 any 預訂進度，請核對號碼。</p>"; return; }
     container.innerHTML = "";
-    res.allOrders.forEach(o => { container.innerHTML += `<div class="py-2.5 text-xs text-stone-700 bg-white"><div class="flex justify-between"><b>單號: ${o.orderId}</b> <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${o.status}</span></div><div class="text-stone-400 mt-1">${o.items.join('<br>')}</div><div class="text-stone-500 mt-1">🚚 配送自取: ${o.shipping}</div><div class="text-[11px] text-warm-taupe">到貨日期：<span class="font-bold text-amber-700">${o.arrivalDate || "追加中"}</span></div></div>`; });
+    res.allOrders.forEach(o => {
+      // 🚀 狀態快查日期格式清洗優化防止長英文
+      let cleanArrivalDate = o.arrivalDate || "追加中";
+      if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("台北標準時間"))) {
+        let d = new Date(cleanArrivalDate);
+        if(!isNaN(d.getTime())) cleanArrivalDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
+      container.innerHTML += `<div class="py-2.5 text-xs text-stone-700 bg-white"><div class="flex justify-between"><b>單號: ${o.orderId}</b> <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${o.status}</span></div><div class="text-stone-400 mt-1">${o.items.join('<br>')}</div><div class="text-stone-500 mt-1">🚚 配送自取: ${o.shipping}</div><div class="text-[11px] text-warm-taupe">到貨日期：<span class="font-bold text-amber-700">${cleanArrivalDate}</span></div></div>`;
+    });
   });
 }
 
@@ -490,29 +541,30 @@ function fetchCustomerHistoryData() {
 }
 
 function submitFinalOrder() {
-  let ph = document.getElementById('custPhone'), name = document.getElementById('custName'), line = document.getElementById('lineName');
-  let shipMode = document.getElementById('shipSelectDropdown').value; // 配送自取方式
-  let pickupTime = document.getElementById('pickupTimeSelect').value; // 預計取貨時間
-  let addressInput = document.getElementById('custAddress'); // 收貨地址
-  
-  if(!ph.value.trim()){ showCustomAlert("請填寫必填欄位：手機號碼！"); ph.scrollIntoView({ behavior: 'smooth' }); return; }
-  if(!name.value.trim()){ showCustomAlert("請填寫必填欄位：訂購人姓名！"); name.scrollIntoView({ behavior: 'smooth' }); return; }
-  if(!line.value.trim()){ showCustomAlert("請填寫必填欄位：LINE 暱稱！"); line.scrollIntoView({ behavior: 'smooth' }); return; }
+  let ph = document.getElementById('custPhone'), name = document.getElementById('custName'), line = document.getElementById('lineName'), mail = document.getElementById('custEmail');
+  let shipMode = document.getElementById('shipSelectDropdown').value;
+  let pickupTime = document.getElementById('pickupTimeSelect').value;
+  let custAddress = document.getElementById('custAddress').value.trim();
+  let orderRemark = document.getElementById('orderRemark').value.trim();
 
-  // 🚀 核心優化：配送方式強制防呆鎖定
+  // 🚀 防呆必填與滑動聚焦提示
+  if(!name.value.trim()){ showCustomAlert("請填寫必填欄位：訂購人姓名！"); name.focus(); name.scrollIntoView({ behavior: 'smooth' }); return; }
+  if(!ph.value.trim()){ showCustomAlert("請填寫必填欄位：手機號碼！"); ph.focus(); ph.scrollIntoView({ behavior: 'smooth' }); return; }
+  if(!line.value.trim()){ showCustomAlert("請填寫必填欄位：LINE 暱稱！"); line.focus(); line.scrollIntoView({ behavior: 'smooth' }); return; }
+  if(!mail.value.trim()){ showCustomAlert("請填寫必填欄位：電子郵件！"); mail.focus(); mail.scrollIntoView({ behavior: 'smooth' }); return; }
+  
+  // 🚀 配送或自取前端動態強制防呆鎖定互鎖
+  let finalTimeField = ""; 
+  let finalAddressField = "";
+
   if (shipMode.includes("來店取貨") || shipMode.includes("自取")) {
-    if (!pickupTime || pickupTime.trim() === "") {
-      showCustomAlert("⚠️ 提示：您選擇來店取貨，請務必選取『預計取貨時間』！");
-      document.getElementById('pickupTimeSelect').scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-  } else if (shipMode.includes("配送到府") || shipMode.includes("宅配")) {
-    if (!addressInput.value.trim()) {
-      showCustomAlert("⚠️ 提示：您選擇配送到府，請務必填寫完整的『收貨地址』！");
-      addressInput.focus();
-      addressInput.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
+    if (!pickupTime) { showCustomAlert("⚠️ 提示：您選擇來店取貨，請務必選取『預計取貨時間』！"); document.getElementById('pickupTimeSelect').scrollIntoView({ behavior: 'smooth' }); return; }
+    finalTimeField = pickupTime; 
+    finalAddressField = "現場取貨"; 
+  } else {
+    if (!custAddress) { showCustomAlert("⚠️ 提示：您選擇配送到府，請務必填寫完整的『收貨地址』！"); document.getElementById('custAddress').focus(); document.getElementById('custAddress').scrollIntoView({ behavior: 'smooth' }); return; }
+    finalTimeField = "選宅配"; 
+    finalAddressField = custAddress; 
   }
 
   if(cart.length === 0) return showCustomAlert("購物車目前無任何品項。");
@@ -524,12 +576,12 @@ function submitFinalOrder() {
       phone: ph.value.trim(), 
       name: name.value.trim(), 
       lineName: line.value.trim(), 
-      email: document.getElementById('custEmail').value.trim() || "", 
-      shipping: document.getElementById('shipSelectDropdown').value, 
-      address: document.getElementById('pickupTimeSelect').value, 
+      email: mail.value.trim(), 
+      shipping: shipMode, 
+      address: finalTimeField, 
       grandTotal: document.getElementById('grandTotal').innerText, 
-      shipName: document.getElementById('custAddress').value.trim() || "現場自取", 
-      remark: document.getElementById('orderRemark').value.trim() || "無", 
+      shipName: finalAddressField, 
+      remark: orderRemark || "無", 
       couponUsed: activatedCouponName 
     } 
   };
@@ -538,15 +590,15 @@ function submitFinalOrder() {
     if(res.success) {
       closeCustomAlert();
       setTimeout(() => {
-        // 🚀 已修正：修改提示文字加入 (可能去垃圾信件)
-        showCustomAlert("下單完成！明細已發送至您的Mail信箱(可能去垃圾信件)。也可輸入電話於此商城查詢狀態！\n訂單編號：" + res.orderId);
+        // 🚀 修改提示文字：加入可能去垃圾信件
+        showCustomAlert("下單完成！明細已發送至您的Mail信箱(可能去垃圾信件)。\n也可輸入電話查詢狀態！\n訂單編號：" + res.orderId);
         cart = []; currentDiscountValue = 0; activatedCouponName = ""; document.getElementById('couponCodeInput').value = ""; document.getElementById('discountMsgBlock').classList.add('hidden'); document.getElementById('txtDiscountLabel').innerText = ""; updateCartUI(); toggleCart(false);
       }, 300);
     } else {
-      // 🚀 已修正：修改失敗提示文字，改為提示再次下單或與LINE客服聯絡
+      // 🚀 修改失敗提示文字
       showCustomAlert("訂單送出失敗，請再次下單或與LINE客服聯絡");
     }
-  }).catch(() => { showCustomAlert("網路連線逾時，請再試一次。"); });
+  }).catch(() => { showCustomAlert("網路連線逾時，請再次下單或與LINE客服聯絡"); });
 }
 </script>
 </body>
