@@ -98,50 +98,54 @@
     <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative max-h-[92vh] flex flex-col">
       <span onclick="closeModal()" class="fixed sm:absolute right-4 top-4 w-9 h-9 rounded-full bg-white/95 border border-stone-300 text-stone-600 flex items-center justify-center font-bold text-lg cursor-pointer z-[3200] shadow-md">✕</span>
 
-      <div class="w-full aspect-[4/5] bg-stone-900 relative overflow-hidden group shrink-0" id="swiperArea">
-        <div id="itemImgBlurBg" class="absolute inset-0 w-full h-full scale-110 blur-xl opacity-40 bg-cover bg-center"></div>
-        <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
-        <img id="itemImg" src="" class="w-full h-full object-contain relative z-10 transition-all duration-300">
-        <button onclick="changeImg(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❯</button>
-        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30" id="dotsContainer"></div>
-      </div>
-
-      <div class="p-5 space-y-4 bg-white overflow-y-auto flex-1 no-scrollbar max-h-[42vh] border-t border-stone-100">
-        <div class="flex justify-between items-start">
-          <div class="flex-1">
-            <h2 id="itemTitle" class="text-base font-bold text-carbon-black leading-relaxed"></h2>
-            <p id="itemDesc" class="text-xs text-stone-500 mt-1 whitespace-pre-line leading-relaxed"></p>
-          </div>
-          <div class="flex flex-col gap-2 ml-2">
-            <button id="favProductBtn" onclick="toggleFavorite()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🤍</button>
-            <button id="shareProductBtn" onclick="shareProduct()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🔗</button>
-          </div>
+      <div id="modalScrollBody" class="w-full overflow-y-auto flex-1 no-scrollbar max-h-[85vh]">
+        
+        <div class="w-full aspect-[4/5] bg-stone-900 relative overflow-hidden group shrink-0" id="swiperArea">
+          <div id="itemImgBlurBg" class="absolute inset-0 w-full h-full scale-110 blur-xl opacity-40 bg-cover bg-center"></div>
+          <button onclick="changeImg(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❮</button>
+          <img id="itemImg" src="" class="w-full h-full object-contain relative z-10 transition-all duration-300">
+          <button onclick="changeImg(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white w-8 h-8 rounded-full font-bold text-sm z-30 hidden group-hover:block">❯</button>
+          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30" id="dotsContainer"></div>
         </div>
 
-        <div class="flex items-baseline gap-2 border-b pb-2.5">
-          <span id="itemPrice" class="text-xl font-bold text-red-600"></span>
+        <div class="p-5 space-y-4 bg-white border-t border-stone-100">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h2 id="itemTitle" class="text-base font-bold text-carbon-black leading-relaxed"></h2>
+              <p id="itemDesc" class="text-xs text-stone-500 mt-1 whitespace-pre-line leading-relaxed"></p>
+            </div>
+            <div class="flex flex-col gap-2 ml-2">
+              <button id="favProductBtn" onclick="toggleFavorite()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🤍</button>
+              <button id="shareProductBtn" onclick="shareProduct()" class="bg-stone-100 p-2 rounded-full text-xs hover:bg-stone-200 transition-all">🔗</button>
+            </div>
+          </div>
+
+          <div class="flex items-baseline gap-2 border-b pb-2.5">
+            <span id="itemPrice" class="text-xl font-bold text-red-600"></span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-stone-400 block mb-1">規格1</label>
+              <select id="colorSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none focus:border-warm-taupe"></select>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-stone-400 block mb-1">規格2</label>
+              <select id="sizeSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none focus:border-warm-taupe"></select>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg border h-11 min-h-[44px]">
+            <span class="text-sm text-stone-500 font-bold">預訂數量</span>
+            <div class="flex items-center gap-3">
+              <button onclick="modifyModalQty(-1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">-</button>
+              <span id="qtyInput" class="text-sm font-bold w-6 text-center">1</span>
+              <button onclick="modifyModalQty(1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">+</button>
+            </div>
+          </div>
+          <button onclick="addToCart()" class="w-full bg-warm-taupe text-white text-sm font-bold py-3.5 rounded-xl shadow-md h-11 min-h-[44px] hover:bg-taupe-dark transition-colors">加入購物車</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-stone-400 block mb-1">規格1</label>
-            <select id="colorSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none"></select>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-stone-400 block mb-1">規格2</label>
-            <select id="sizeSelect" onchange="syncMatrixPrice()" class="w-full text-sm p-2.5 border rounded-lg bg-stone-50 text-carbon-black font-bold h-11 min-h-[44px] outline-none"></select>
-          </div>
-        </div>
-
-        <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg border h-11 min-h-[44px]">
-          <span class="text-sm text-stone-500 font-bold">預訂數量</span>
-          <div class="flex items-center gap-3">
-            <button onclick="modifyModalQty(-1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">-</button>
-            <span id="qtyInput" class="text-sm font-bold w-6 text-center">1</span>
-            <button onclick="modifyModalQty(1)" class="w-8 h-8 bg-white rounded border flex items-center justify-center font-bold shadow-sm">+</button>
-          </div>
-        </div>
-        <button onclick="addToCart()" class="w-full bg-warm-taupe text-white text-sm font-bold py-3 rounded-xl shadow-md h-11 min-h-[44px] hover:bg-taupe-dark">加入購物車</button>
       </div>
     </div>
   </div>
@@ -149,7 +153,7 @@
   <div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 rounded-t-3xl z-[2800] max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col translate-y-full transition-transform duration-300">
     <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b flex justify-between items-center z-50 shrink-0">
       <h3 class="text-base font-bold text-carbon-black tracking-wide">🛒 購物車明細</h3>
-      <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-2xl cursor-pointer p-1">✕</span>
+      <span onclick="toggleCart(false)" class="text-stone-400 font-bold text-2xl cursor-pointer p-1 hover:text-carbon-black">✕</span>
     </div>
     
     <div class="p-5 overflow-y-auto space-y-4 flex-1 no-scrollbar">
@@ -228,6 +232,7 @@
     </div>
     <div class="text-center text-xs text-[#C4A48A] mt-4 tracking-widest uppercase font-bold"><a href="https://heysibyl.com" target="_blank" class="hover:underline">Designed by Sibyl | 數位管家</a></div>
   </div>
+
   <script>
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
 let rawData = [], products = [], cart = [], selectedIdx = -1;
@@ -292,6 +297,7 @@ window.onload = () => {
   });
 };
 
+// 🌟 微調優化：滑鼠點選誰，誰就轉變為淺棕色高亮
 function setupCategoryTabs(cats) {
   const box = document.getElementById('categoryTabs');
   box.innerHTML = `<button id="tab-all" onclick="filterCat('all')" class="cat-tab-btn bg-warm-taupe text-white text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm m-1 transition-all">全部商品</button>`;
@@ -331,7 +337,7 @@ function renderCatalog(list) {
       let vPrices = p.rawSpecsData.map(v => Number(v.price)).filter(v => v > 0);
       if(vPrices.length > 0) minSpecPrice = Math.min(...vPrices);
     }
-    box.innerHTML += `<div onclick="openProduct(${rawData.indexOf(p)})" class="bg-white rounded-xl border border-border-soft overflow-hidden shadow-sm flex flex-col cursor-pointer transition-all active:scale-95"><div class="w-full aspect-square bg-stone-50 relative"><img src="${p.allImagesList[0]}" class="w-full h-full object-cover"></div><div class="p-3 flex flex-col flex-1 justify-between bg-white"><h2 class="text-sm font-bold text-carbon-black line-clamp-2 h-9 leading-tight">${p.name}</h2><div class="flex items-baseline gap-1.5 mt-2"><span class="text-sm font-bold text-warm-taupe">${minSpecPrice} 起</span></div></div></div>`;
+    box.innerHTML += `<div onclick="openProduct(${rawData.indexOf(p)})" class="bg-white rounded-xl border border-border-soft overflow-hidden shadow-sm flex flex-col cursor-pointer transition-all active:scale-95"><div class="w-full aspect-square bg-stone-50 relative"><img src="${p.allImagesList[0]}" class="w-full h-full object-cover"></div><div class="p-3 flex flex-col flex-1 justify-between bg-white"><h2 class="text-sm font-bold text-carbon-black line-clamp-2 h-9 leading-tight">${p.name}</h2><div class="flex items-baseline gap-1.5 mt-2"><span class="text-sm font-bold text-warm-taupe">NT$ ${minSpecPrice} 起</span></div></div></div>`;
   });
 }
 
@@ -352,9 +358,10 @@ function openProduct(idx) {
   let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
   document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "🤍 收藏";
   syncMatrixPrice();
-  document.getElementById('itemModal').className = "fixed inset-0 bg-black/60 backdrop-blur-[2px] flex z-3000 items-end sm:items-center justify-center p-0";
+  document.getElementById('itemModal').className = "fixed inset-0 bg-black/60 backdrop-blur-[2px] flex z-[3000] items-end sm:items-center justify-center p-0";
 }
 
+// 🌟 規格選齊精準切除「起」字邏輯
 function syncMatrixPrice() {
   const p = rawData[selectedIdx]; const c = document.getElementById('colorSelect').value; const s = document.getElementById('sizeSelect').value;
   let targetKey = `款式:${c} / ${s}`; let matchedPrice = activeSpecsPriceMap[targetKey];
@@ -427,6 +434,7 @@ function searchProducts() {
   renderCatalog(products);
 }
 
+// 🌟 異步大加速：一鍵直接靜默填入資料，不需要按確定才能繼續
 function fetchCustomerHistoryData() {
   if(globalFetchLock) return;
   let phone = document.getElementById('custPhone').value.trim(); if(!phone) return showCustomAlert("請先填寫手機號碼再點擊帶入資料！");
@@ -451,17 +459,7 @@ function checkOrderHistory() {
   container.innerHTML = "<span class='text-xs text-stone-400 animate-pulse'>正在為您同步資料庫進度...</span>"; favContainer.classList.add('hidden'); document.getElementById('queryResultArea').classList.remove('hidden');
 
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) }).then(r => r.json()).then(res => {
-    if(res.success && res.favList && res.favList.length > 0) {
-      let cardsHtml = `<div class="font-bold text-stone-800 mb-2 border-b pb-1 text-xs">⭐ 您的專屬雲端收藏清單</div><div class="grid grid-cols-1 gap-2">`;
-      res.favList.forEach(sku => {
-        let matchProd = rawData.find(x => x.sku === sku);
-        if(matchProd) {
-          cardsHtml += `<div class="flex items-center gap-2 bg-white border p-1.5 rounded-lg shadow-sm cursor-pointer" onclick="openProduct(${rawData.indexOf(matchProd)})"><img src="${matchProd.allImagesList[0]}" class="w-10 h-10 object-cover rounded"><div class="flex-1 min-w-0"><div class="text-xs font-bold text-stone-800 truncate">${matchProd.name}</div><div class="text-[11px] text-warm-taupe font-mono">${sku}</div></div></div>`;
-        } else { cardsHtml += `<div class="bg-stone-50 border p-2 rounded-lg text-xs font-mono text-stone-500">🔍 貨號：${sku}</div>`; }
-      });
-      cardsHtml += `</div>`; favContainer.innerHTML = cardsHtml; favContainer.classList.remove('hidden');
-    } else { favContainer.innerHTML = "⭐ <b>您的專屬雲端收藏清單：</b><br><span class='text-stone-400 font-medium'>暫無雲端收藏商品</span>"; favContainer.classList.remove('hidden'); }
-    if(!res.success || !res.allOrders || res.allOrders.length === 0) { container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無any預訂進度，請核對號碼。</p>"; return; }
+    if(!res.success || !res.allOrders || res.allOrders.length === 0) { container.innerHTML = "<p class='text-xs text-stone-400 py-2'>目前查無任何預訂進度，請核對號碼。</p>"; return; }
     container.innerHTML = "";
     res.allOrders.forEach(o => { container.innerHTML += `<div class="py-2.5 text-xs text-stone-700 bg-white"><div class="flex justify-between"><b>單號: ${o.orderId}</b> <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${o.status}</span></div><div class="text-stone-400 mt-1">${o.items.join('<br>')}</div><div class="text-stone-500 mt-1">🚚 配送自取: ${o.shipping}</div><div class="text-[11px] text-warm-taupe">到貨日期：<span class="font-bold text-amber-700">${o.arrivalDate || "追加中"}</span></div></div>`; });
   });
