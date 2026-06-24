@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>伊利小編購後台 | 智慧雲端旗艦管理系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -67,8 +67,8 @@
     
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號 (A欄選填)</label>
-        <input type="text" id="pSku" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+        <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號 (A欄必填)</label>
+        <input type="text" id="pSku" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="請輸入主貨號">
       </div>
       <div class="sm:col-span-2">
         <label class="text-xs font-semibold text-stone-600 block mb-1">商品品名 (B欄必填)</label>
@@ -231,6 +231,9 @@ const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
 let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
 let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
 
+function adminCustomAlert(msg) { document.getElementById('adminAlertText').innerText = msg; document.getElementById('adminAlertModal').classList.remove('hidden'); document.getElementById('adminAlertModal').classList.add('flex'); }
+function closeAdminAlert() { document.getElementById('adminAlertModal').classList.add('hidden'); document.getElementById('adminAlertModal').classList.remove('flex'); }
+
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
@@ -291,17 +294,15 @@ function regenerateMatrixFromInputs() {
   });
 }
 
-// 🌟 完璧修正：點擊編輯時回填所有欄位並同時精準匹配下拉選單
 function startEdit(sku) {
   let p = globalProducts.find(x => x.sku === sku); if(!p) return;
   isEditMode = true; 
   document.getElementById('formActionTitle').innerText = `📝 編輯商品內容 - [ ${sku} ]`;
   
-  // 解鎖主貨號 A 欄點按編輯 (解決原代碼 disabled=true 導致發送空白的致命 Bug)
   var skuInput = document.getElementById('pSku');
   skuInput.value = p.sku; 
-  skuInput.removeAttribute('disabled');
-  skuInput.style.backgroundColor = "#F3F4F6"; // 加入淺灰背景提示只讀但仍可抓取數值
+  skuInput.setAttribute('readonly', 'readonly'); // 使用標準唯讀
+  skuInput.style.backgroundColor = "#F3F4F6"; // 視覺提示灰色，但仍可自由點擊
   
   document.getElementById('pName').value = p.name; 
   document.getElementById('pStatus').value = p.status;
@@ -312,7 +313,21 @@ function startEdit(sku) {
   document.getElementById('pImgs').value = p.allImgs ? p.allImgs.join('\n') : "";
   document.getElementById('pColors').value = p.color || "";
   document.getElementById('pSizes').value = p.size || "";
-  if(p.arrivalDate) document.getElementById('pArrivalDate').value = p.arrivalDate;
+  
+  if(p.arrivalDate) {
+    // 格式化日期以適應 HTML Date Input
+    let d = new Date(p.arrivalDate);
+    if(!isNaN(d.getTime())) {
+      let yyyy = d.getFullYear();
+      let mm = String(d.getMonth() + 1).padStart(2, '0');
+      let dd = String(d.getDate()).padStart(2, '0');
+      document.getElementById('pArrivalDate').value = `${yyyy}-${mm}-${dd}`;
+    } else {
+      document.getElementById('pArrivalDate').value = "";
+    }
+  } else {
+    document.getElementById('pArrivalDate').value = "";
+  }
   
   regenerateMatrixFromInputs();
   if(p.specsData) {
@@ -333,7 +348,6 @@ function startEdit(sku) {
   document.getElementById('cancelEditBtn').classList.remove('hidden'); switchTab('uploadTab');
 }
 
-// 🌟 完璧優修復：發送後解鎖 SKU 欄位且不重新整理網頁，直接就地刷新清單數據
 function publishProduct() {
   const sku = document.getElementById('pSku').value.trim(); const name = document.getElementById('pName').value.trim();
   if(!sku || !name) return adminCustomAlert("貨號與商品品名不可留空！");
@@ -348,20 +362,50 @@ function publishProduct() {
   });
   let method = isEditMode ? "editProduct" : "addNewProduct";
   
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: method, product: { sku: sku, name: name, status: document.getElementById('pStatus').value, major: document.getElementById('pMajorSelect').value, sub: document.getElementById('pSubSelect').value, tag: document.getElementById('pTag').value.trim(), desc: document.getElementById('pDesc').value.trim(), video: "", imgs: document.getElementById('pImgs').value.trim(), specsData: JSON.stringify(specs), oldPrice: oldPrices.join(','), price: prices.join(','), color: document.getElementById('pColors').value.trim() || "規格1", size: document.getElementById('pSizes').value.trim() || "規格2" } }) })
+  // 🌟 強力補齊關鍵欄位 arrivalDate，保證完整上架及就地更新
+  let pData = { 
+    sku: sku, 
+    name: name, 
+    status: document.getElementById('pStatus').value, 
+    major: document.getElementById('pMajorSelect').value, 
+    sub: document.getElementById('pSubSelect').value, 
+    tag: document.getElementById('pTag').value.trim(), 
+    desc: document.getElementById('pDesc').value.trim(), 
+    video: "", 
+    imgs: document.getElementById('pImgs').value.trim(), 
+    specsData: JSON.stringify(specs), 
+    oldPrice: oldPrices.join(','), 
+    price: prices.join(','), 
+    color: document.getElementById('pColors').value.trim() || "規格1", 
+    size: document.getElementById('pSizes').value.trim() || "規格2",
+    arrivalDate: document.getElementById('pArrivalDate').value
+  };
+  
+  adminCustomAlert("數據同步傳輸中...");
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: method, product: pData }) })
     .then(r => r.json()).then(res => { 
-      adminCustomAlert(res.message || "🎉 儲存更新成功！"); 
+      adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
       resetProductForm(); 
-      loadInventoryData(); // 免重整網頁，立刻就地更新拉取最新資料！
+      loadInventoryData(); // 免重整，立即在前端本端刷新列表
       switchTab('listTab'); 
-    });
+    }).catch(() => { adminCustomAlert("儲存失敗，請確認雙端部署或網路通訊。"); });
 }
 
 function resetProductForm() { 
   var skuInput = document.getElementById('pSku');
-  skuInput.value = ""; skuInput.removeAttribute('disabled'); skuInput.style.backgroundColor = "";
-  document.getElementById('pName').value = ""; document.getElementById('pColors').value = ""; document.getElementById('pSizes').value = ""; document.getElementById('pDesc').value = ""; document.getElementById('cancelEditBtn').classList.add('hidden'); isEditMode = false; regenerateMatrixFromInputs(); 
+  skuInput.value = ""; 
+  skuInput.removeAttribute('readonly'); // 🚀 完美修復：移出 readonly 屬性，確保下一次新增商品能正常輸入
+  skuInput.style.backgroundColor = "";
+  document.getElementById('pName').value = ""; 
+  document.getElementById('pColors').value = ""; 
+  document.getElementById('pSizes').value = ""; 
+  document.getElementById('pDesc').value = ""; 
+  document.getElementById('pArrivalDate').value = "";
+  document.getElementById('cancelEditBtn').classList.add('hidden'); 
+  isEditMode = false; 
+  regenerateMatrixFromInputs(); 
 }
+
 function loadInventoryData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) }).then(r => r.json()).then(res => { globalProducts = res.products; filteredProducts = [...globalProducts]; renderInventoryTable(); }); }
 function searchInventory() { let kw = document.getElementById('inventorySearchInput').value.toLowerCase().trim(); filteredProducts = globalProducts.filter(p => p.sku.toLowerCase().includes(kw) || p.name.toLowerCase().includes(kw)); currentInvPage = 1; renderInventoryTable(); }
 
@@ -375,7 +419,14 @@ function renderInventoryTable() {
     try { if (p.specsData) { let matrix = JSON.parse(p.specsData); let parsed = matrix.map(v => Number(v.price)).filter(v => v > 0); if (parsed.length > 0) minSpecPrice = Math.min(...parsed); } } catch(e){}
     if (!minSpecPrice || minSpecPrice === 0) minSpecPrice = p.price.toString().split(',')[0];
 
-    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${minSpecPrice}</td><td class="p-3 font-medium text-amber-800">${p.arrivalDate || "追加中"}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}')" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
+    // 格式化到貨日期
+    let dateShow = p.arrivalDate || "追加中";
+    if(dateShow.includes("GMT")) {
+      let d = new Date(dateShow);
+      if(!isNaN(d.getTime())) dateShow = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${minSpecPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}')" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
   }
 }
 function changeInvPage(amt) { currentInvPage += amt; renderInventoryTable(); }
@@ -404,6 +455,19 @@ function renderOrderTable() {
 
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
+    
+    // 🌟 完美修復：在前端渲染階段過濾、格式化英文字串類型的「到貨日期」
+    let cleanArrivalDate = o.arrivalDate || "追加中";
+    if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time"))) {
+      let d = new Date(cleanArrivalDate);
+      if(!isNaN(d.getTime())) {
+        let year = d.getFullYear();
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = String(d.getDate()).padStart(2, '0');
+        cleanArrivalDate = `${year}-${month}-${day}`;
+      }
+    }
+
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
         <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}"></td>
@@ -412,7 +476,7 @@ function renderOrderTable() {
         <td class="p-3"><b>${o.prodName}</b><br><span class="text-stone-400">${o.specs}</span></td>
         <td class="p-3 font-bold">$${o.total}</td>
         <td class="p-3"><b>${o.custName}</b><br><span>Tel:${o.phone}</span></td>
-        <td class="p-3 font-bold text-amber-800">${o.arrivalDate || "追加中"}</td>
+        <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
         <td class="p-3 font-medium text-stone-600"><span>${o.pickupTime || '常規自取'}</span><br><span class="text-[10px] text-stone-400">${o.address || ''}</span></td>
         <td class="p-3 relative">
           <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none">
@@ -446,20 +510,16 @@ function silentUpdateRemark(rowIdx, input) {
   });
 }
 
-// 🌟 即時變更：一經切換立刻在網頁本端就地更新藍字，完全阻斷卡頓！
 function silentUpdateStatus(rowIdx, select) {
   if(!select.value) return;
   let statusTextNode = select.previousElementSibling;
   let nextStatus = select.value;
   
-  // 1. 0秒即時跳轉藍色狀態字樣
   statusTextNode.innerText = nextStatus; 
   
-  // 2. 同步更新快取陣列防覆蓋
   let targetOrder = currentFilteredOrders.find(x => x.rowIdx === rowIdx);
   if(targetOrder) targetOrder.status = nextStatus;
 
-  // 3. 直接發送通訊，即便網路延遲也不干擾老闆點選
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: nextStatus }) });
   select.value = ""; 
 }
@@ -467,7 +527,7 @@ function silentUpdateStatus(rowIdx, select) {
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
-function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目"); if(!confirm("確定批次徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目"); if(!confirm("確定次徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 
 function fireBatchPrintInvoices() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目");
@@ -481,7 +541,11 @@ function fireBatchPrintInvoices() {
 function fireBatchExportToExcel() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
   let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,取貨時間,老闆備註,訂單狀態\n";
-  chks.forEach(box => { let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${o.phone},${o.address},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; });
+  chks.forEach(box => { 
+    let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
+    let safePhone = o.phone ? "'" + o.phone : "";
+    csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${o.address},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
+  });
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 </script>
