@@ -499,14 +499,28 @@ function renderOrderTable() {
     
     // 🚀 到貨日期修正：去除 GMT 長英文，精準轉為 YYYY-MM-DD 格式
     let cleanArrivalDate = o.arrivalDate || "追加中";
-    if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time"))) {
+    if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time") || cleanArrivalDate.includes("台北標準時間"))) {
       let d = new Date(cleanArrivalDate);
       if(!isNaN(d.getTime())) {
         cleanArrivalDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
     }
 
-    // 🚀 欄位加強：將到貨日期、預計取貨時間、配送方式、收貨地址、收件備註全部呈現在表格中供老闆出貨比對
+    // 🚀 核心大優化：根據配送方式，動態清洗並呈現乾淨的自取時間與送貨地址，徹底清除系統預設干擾
+    let displayTimeAndAddress = "";
+    if (o.shipping && (o.shipping.includes("來店取貨") || o.shipping.includes("自取"))) {
+      displayTimeAndAddress = `
+        <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 rounded font-bold">🏪 來店取貨</span><br>
+        <span class="block mt-1 text-stone-600 font-bold">⏱️ 自取時間: ${o.pickupTime || '未選取'}</span>
+      `;
+    } else {
+      displayTimeAndAddress = `
+        <span class="px-1.5 py-0.5 bg-blue-50 text-blue-800 rounded font-bold">🚚 配送到府</span><br>
+        <span class="block mt-1 text-stone-600">📦 物流：選宅配</span>
+        <span class="block text-[11px] text-red-700 font-bold bg-red-50 p-1 rounded mt-1">📍 送貨地址: ${o.address || '未填寫'}</span>
+      `;
+    }
+
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
         <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}"></td>
@@ -516,19 +530,12 @@ function renderOrderTable() {
         <td class="p-3 font-bold text-red-600">$${o.total}</td>
         <td class="p-3"><b>${o.custName}</b><br><span class="text-stone-500">Tel:${o.phone}</span><br><span class="text-stone-400">LINE:${o.lineName || ''}</span></td>
         
-        <!-- 🚀 到貨日期顯示 -->
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
         
-        <!-- 🚀 預計取貨時間與配送方式組合欄位 -->
-        <td class="p-3 font-medium text-stone-700">
-          <span class="px-1.5 py-0.5 bg-stone-100 text-stone-800 rounded font-bold">${o.shipping || '自取'}</span><br>
-          <span class="block mt-1 text-stone-600">⏱️ 時間: ${o.pickupTime || '常規時間'}</span>
-          <span class="block text-[11px] text-stone-500 font-normal">📍 地址: ${o.address || '現場取貨'}</span>
-        </td>
+        <td class="p-3 font-medium">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <!-- 🚀 收貨備註直接呈現在老闆備註輸入框上方，供出貨參考 -->
-          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註: ${o.orderRemark || '無'}</div>
+          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註: ${o.remark || o.orderRemark || '無'}</div>
           <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="點擊輸入對帳備註">
           <span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span>
         </td>
