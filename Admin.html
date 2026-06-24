@@ -67,8 +67,8 @@
     
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號 (A欄必填)</label>
-        <input type="text" id="pSku" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="請輸入主貨號">
+        <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號 (A欄無限制，任意更改)</label>
+        <input type="text" id="pSku" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-white outline-none focus:border-primary-taupe" placeholder="請輸入主貨號">
       </div>
       <div class="sm:col-span-2">
         <label class="text-xs font-semibold text-stone-600 block mb-1">商品品名 (B欄必填)</label>
@@ -94,26 +94,41 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單 (L欄，中英逗號隔開)</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
-      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單 (M欄，中英逗號隔開)</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單 (M欄，中英逗號隔開)</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單 (N欄，中英逗號隔開)</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
     </div>
 
     <div class="bg-stone-50 p-4 border border-border-soft rounded-xl">
       <div class="flex justify-between items-center mb-2">
-        <span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區 (同步生成前台無損 JSON 規格矩陣)</span>
+        <span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區 (精準對應 K欄原價 / L欄特價)</span>
         <button onclick="fireBatchSetMatrix()" class="bg-stone-700 text-white text-[10px] px-2.5 py-1 rounded hover:bg-stone-900 transition-all">⚡ 批量統一填入價格</button>
       </div>
       <table class="w-full text-left text-xs bg-white border border-border-soft">
         <thead>
           <tr class="bg-stone-100 text-stone-600">
             <th class="p-2">組合規格</th>
-            <th class="p-2 w-28">原價 (J欄)</th>
-            <th class="p-2 w-28">特價 (K欄必填單價)</th>
+            <th class="p-2 w-28">原價 (K欄)</th>
+            <th class="p-2 w-28">特價 (L欄必填單價)</th>
             <th class="p-2 w-24">庫存</th>
           </tr>
         </thead>
         <tbody id="matrixTableBody"></tbody>
       </table>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">YouTube/IG 導流網址 (H欄)</label>
+        <input type="text" id="pVideo" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">加購品名稱 (O欄)</label>
+        <input type="text" id="pAddonName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600 block mb-1">加購品加價金額 (P欄)</label>
+        <input type="number" id="pAddonPrice" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" value="0">
+      </div>
     </div>
 
     <div class="border-2 border-dashed border-stone-300 rounded-xl p-5 text-center bg-stone-50 cursor-pointer hover:bg-stone-100 transition-all" onclick="document.getElementById('bbFileInput').click()">
@@ -230,9 +245,11 @@ const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
 
 let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
 let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
+// 🚀 關鍵核心變數：記錄當前編輯中商品在試算表中的物理行號（拋棄以貨號匹配的舊邏輯）
+let currentEditingRowIdx = null; 
 
 function adminCustomAlert(msg) { document.getElementById('adminAlertText').innerText = msg; document.getElementById('adminAlertModal').classList.remove('hidden'); document.getElementById('adminAlertModal').classList.add('flex'); }
-function closeAdminAlert() { document.getElementById('adminAlertModal').classList.add('hidden'); document.getElementById('adminAlertModal').classList.remove('flex'); }
+function closeAdminAlert() { document.getElementById('adminAlertModal').className = "hidden"; }
 
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -294,15 +311,18 @@ function regenerateMatrixFromInputs() {
   });
 }
 
-function startEdit(sku) {
+function startEdit(sku, rowIdx) {
   let p = globalProducts.find(x => x.sku === sku); if(!p) return;
   isEditMode = true; 
-  document.getElementById('formActionTitle').innerText = `📝 編輯商品內容 - [ ${sku} ]`;
+  // 🚀 核心修改點：精準記住當前修改行號，完全不需要理會老闆是否隨意打亂貨號字串
+  currentEditingRowIdx = rowIdx; 
+  document.getElementById('formActionTitle').innerText = `📝 編輯商品內容 - [ 試算表物理第 ${rowIdx} 行 ]`;
   
+  // 完美開放：A欄貨號徹底解除唯讀，允許隨意修改、沒有任何限制！
   var skuInput = document.getElementById('pSku');
   skuInput.value = p.sku; 
-  skuInput.setAttribute('readonly', 'readonly'); // 使用標準唯讀
-  skuInput.style.backgroundColor = "#F3F4F6"; // 視覺提示灰色，但仍可自由點擊
+  skuInput.removeAttribute('readonly');
+  skuInput.style.backgroundColor = "#FFFFFF"; 
   
   document.getElementById('pName').value = p.name; 
   document.getElementById('pStatus').value = p.status;
@@ -314,8 +334,11 @@ function startEdit(sku) {
   document.getElementById('pColors').value = p.color || "";
   document.getElementById('pSizes').value = p.size || "";
   
+  if(document.getElementById('pVideo')) document.getElementById('pVideo').value = p.video || "";
+  if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = p.addonName || "";
+  if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = p.addonPrice || "0";
+
   if(p.arrivalDate) {
-    // 格式化日期以適應 HTML Date Input
     let d = new Date(p.arrivalDate);
     if(!isNaN(d.getTime())) {
       let yyyy = d.getFullYear();
@@ -345,12 +368,15 @@ function startEdit(sku) {
       }, 150);
     } catch(e){}
   }
-  document.getElementById('cancelEditBtn').classList.remove('hidden'); switchTab('uploadTab');
+  document.getElementById('cancelEditBtn').classList.remove('hidden'); 
+  switchTab('uploadTab');
 }
 
 function publishProduct() {
-  const sku = document.getElementById('pSku').value.trim(); const name = document.getElementById('pName').value.trim();
+  const sku = document.getElementById('pSku').value.trim(); 
+  const name = document.getElementById('pName').value.trim();
   if(!sku || !name) return adminCustomAlert("貨號與商品品名不可留空！");
+  
   let specs = [], prices = [], oldPrices = [];
   document.querySelectorAll('#matrixTableBody tr').forEach(row => {
     let pr = row.querySelector('.m-price').value;
@@ -360,49 +386,62 @@ function publishProduct() {
       oldPrices.push(row.querySelector('.m-old').value || "0"); 
     }
   });
+  
   let method = isEditMode ? "editProduct" : "addNewProduct";
   
-  // 🌟 強力補齊關鍵欄位 arrivalDate，保證完整上架及就地更新
+  // 🚀 數據流升級：直接把 rowIdx 綁在 Payload，後端直接用行號物理改資料，貨號想怎麼變就怎麼變！
   let pData = { 
-    sku: sku, 
+    sku: sku,                     // 這是格子裡打的全新/新自訂貨號
+    rowIdx: isEditMode ? currentEditingRowIdx : null, // 帶入行號進行絕對定位
     name: name, 
     status: document.getElementById('pStatus').value, 
     major: document.getElementById('pMajorSelect').value, 
     sub: document.getElementById('pSubSelect').value, 
     tag: document.getElementById('pTag').value.trim(), 
     desc: document.getElementById('pDesc').value.trim(), 
-    video: "", 
+    video: document.getElementById('pVideo') ? document.getElementById('pVideo').value.trim() : "", 
     imgs: document.getElementById('pImgs').value.trim(), 
     specsData: JSON.stringify(specs), 
     oldPrice: oldPrices.join(','), 
     price: prices.join(','), 
     color: document.getElementById('pColors').value.trim() || "規格1", 
     size: document.getElementById('pSizes').value.trim() || "規格2",
+    addonName: document.getElementById('pAddonName') ? document.getElementById('pAddonName').value.trim() : "",
+    addonPrice: document.getElementById('pAddonPrice') ? document.getElementById('pAddonPrice').value.trim() : "0",
     arrivalDate: document.getElementById('pArrivalDate').value
   };
   
   adminCustomAlert("數據同步傳輸中...");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: method, product: pData }) })
     .then(r => r.json()).then(res => { 
-      adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
-      resetProductForm(); 
-      loadInventoryData(); // 免重整，立即在前端本端刷新列表
-      switchTab('listTab'); 
-    }).catch(() => { adminCustomAlert("儲存失敗，請確認雙端部署或網路通訊。"); });
+      if(res.success) {
+        adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
+        resetProductForm(); 
+        loadInventoryData(); // 免重整就地刷新
+        switchTab('listTab'); 
+      } else {
+        adminCustomAlert("❌ 後端錯誤提示：" + res.error);
+      }
+    }).catch(() => { adminCustomAlert("儲存失敗，請確認網路連線。"); });
 }
 
 function resetProductForm() { 
   var skuInput = document.getElementById('pSku');
   skuInput.value = ""; 
-  skuInput.removeAttribute('readonly'); // 🚀 完美修復：移出 readonly 屬性，確保下一次新增商品能正常輸入
+  skuInput.removeAttribute('readonly'); 
   skuInput.style.backgroundColor = "";
   document.getElementById('pName').value = ""; 
   document.getElementById('pColors').value = ""; 
   document.getElementById('pSizes').value = ""; 
   document.getElementById('pDesc').value = ""; 
+  if(document.getElementById('pVideo')) document.getElementById('pVideo').value = "";
+  if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = "";
+  if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = "0";
   document.getElementById('pArrivalDate').value = "";
+  document.getElementById('formActionTitle').innerText = "✍ 商品快速配置 (精準對齊商品清單 A~Q 欄順序)";
   document.getElementById('cancelEditBtn').classList.add('hidden'); 
   isEditMode = false; 
+  currentEditingRowIdx = null;
   regenerateMatrixFromInputs(); 
 }
 
@@ -419,14 +458,16 @@ function renderInventoryTable() {
     try { if (p.specsData) { let matrix = JSON.parse(p.specsData); let parsed = matrix.map(v => Number(v.price)).filter(v => v > 0); if (parsed.length > 0) minSpecPrice = Math.min(...parsed); } } catch(e){}
     if (!minSpecPrice || minSpecPrice === 0) minSpecPrice = p.price.toString().split(',')[0];
 
-    // 格式化到貨日期
     let dateShow = p.arrivalDate || "追加中";
-    if(dateShow.includes("GMT")) {
+    if(dateShow.includes("GMT") || dateShow.includes("-")) {
       let d = new Date(dateShow);
       if(!isNaN(d.getTime())) dateShow = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${minSpecPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}')" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
+    // 🚀 物理行號：試算表從第 2 行開始 (i + 2) 傳入編輯觸發器
+    let trueRowIdx = i + 2; 
+
+    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${minSpecPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}', ${trueRowIdx})" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
   }
 }
 function changeInvPage(amt) { currentInvPage += amt; renderInventoryTable(); }
@@ -456,7 +497,6 @@ function renderOrderTable() {
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
     
-    // 🌟 完美修復：在前端渲染階段過濾、格式化英文字串類型的「到貨日期」
     let cleanArrivalDate = o.arrivalDate || "追加中";
     if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time"))) {
       let d = new Date(cleanArrivalDate);
