@@ -517,11 +517,13 @@ function submitFinalOrder() {
     if(res.success) {
       closeCustomAlert();
       setTimeout(() => {
-        showCustomAlert("下單完成！明細已發送至您的Mail信箱。也可輸入電話查詢狀態！\n訂單編號：" + res.orderId);
+        // 🚀 已修正：修改提示文字加入 (可能去垃圾信件)
+        showCustomAlert("下單完成！明細已發送至您的Mail信箱(可能去垃圾信件)。也可輸入電話於此商城查詢狀態！\n訂單編號：" + res.orderId);
         cart = []; currentDiscountValue = 0; activatedCouponName = ""; document.getElementById('couponCodeInput').value = ""; document.getElementById('discountMsgBlock').classList.add('hidden'); document.getElementById('txtDiscountLabel').innerText = ""; updateCartUI(); toggleCart(false);
       }, 300);
     } else {
-      showCustomAlert("訂單送出失敗，請與管理員聯絡。");
+      // 🚀 已修正：修改失敗提示文字，改為提示再次下單或與LINE客服聯絡
+      showCustomAlert("訂單送出失敗，請再次下單或與LINE客服聯絡");
     }
   }).catch(() => { showCustomAlert("網路連線逾時，請再試一次。"); });
 }
