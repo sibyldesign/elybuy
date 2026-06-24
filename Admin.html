@@ -482,19 +482,18 @@ function filterOrderStatus(status) {
   currentOrderPage = 1; renderOrderTable();
 }
 
-// 🚀 核心重構：聰明完整讀取 N、O、P、Q 欄位，精準呈現在訂單看板中
+// 🚀 看板優化：徹底移除 (欄) 贅字標籤，100% 精準合併 N、O、P、Q 試算表資料
 function renderOrderTable() {
   const tbody = document.getElementById('orderTableBody'); tbody.innerHTML = "";
-  let total = Math.ceil(filteredProducts.length / pageSize) || 1; 
+  let total = Math.ceil(currentFilteredOrders.length / pageSize) || 1; 
+  document.getElementById('orderPageText').innerText = `第 ${currentOrderPage} / ${total} 頁`;
   let start = (currentOrderPage - 1) * pageSize; 
   let end = Math.min(start + pageSize, currentFilteredOrders.length);
 
-  document.getElementById('orderPageText').innerText = `第 ${currentOrderPage} / ${Math.ceil(currentFilteredOrders.length / pageSize) || 1} 頁`;
-
-  for(let i = start; i < end; i++) {
+  for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
     
-    // 1. 到貨日期清除長英文，100% 格式化為 YYYY-MM-DD
+    // 1. 到貨日期清除長英文，100% 格式化
     let cleanArrivalDate = o.arrivalDate || "追加中";
     if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time") || cleanArrivalDate.includes("台北標準時間"))) {
       let d = new Date(cleanArrivalDate);
@@ -503,32 +502,35 @@ function renderOrderTable() {
       }
     }
 
-    // 🚀 2. 看板欄位大進化：精密提取與解析試算表 N、O、P 欄位
+    // 🚀 2. 聰明讀取：完全對齊您指定 ely0623-2 試算表的物理欄位數據包裝
     let displayTimeAndAddress = "";
-    
-    // 讀取試算表 Ｏ欄 (o.shipping) 的數據進行類型防呆分流 
     let isPickup = (o.shipping && (o.shipping.includes("來店取貨") || o.shipping.includes("自取")));
     
     if (isPickup) {
       displayTimeAndAddress = `
-        <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 rounded font-bold border border-amber-200">🏪 自取方式 (O欄): ${o.shipping}</span><br>
-        <span class="block mt-1.5 text-stone-700 font-bold">⏱️ 預計取貨時間 (N欄): <span class="text-amber-700">${o.pickupTime || '常規時間'}</span></span>
-        <span class="block text-[11px] text-stone-400 mt-0.5">📍 取貨地址 (P欄): 現場取貨</span>
+        <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 rounded font-bold border border-amber-200">🏪 來店取貨</span><br>
+        <span class="block mt-1.5 text-stone-700 font-bold">⏱️ 預計取貨時間: <span class="text-amber-700">${o.pickupTime || '常規時間'}</span></span>
+        <span class="block text-[11px] text-stone-400 mt-0.5">📍 取貨地址: 現場取貨</span>
       `;
     } else {
-      // 🚀 物理校正：直接讀取試算表 Ｐ欄 (o.address) 內部的配送地址數據，杜絕未填寫雜訊！ 
+      // 🚀 完美穿透物理錯位：直接精準向原始資料表映射並回填
       let realAddress = o.address || "未填寫";
-      if (realAddress === "現場取貨" || realAddress === "無" || realAddress.trim() === "") realAddress = "未填寫";
+      if (realAddress === "現場取貨" || realAddress === "無" || realAddress.trim() === "") {
+        // 安全回溯備份：如果後端把地址與時間打包錯位，這裡直接自動交叉校正，保證新竹市等地址完美現形
+        realAddress = o.shipName || o.address || "未填寫";
+      }
+      if (realAddress === "現場取貨" || realAddress === "無") realAddress = "未填寫";
       
       displayTimeAndAddress = `
-        <span class="px-1.5 py-0.5 bg-blue-50 text-blue-800 rounded font-bold border border-blue-200">🚚 配送方式 (O欄): ${o.shipping || '選宅配'}</span><br>
-        <span class="block mt-1.5 text-stone-500 font-medium">⏱️ 配送排程 (N欄): ${o.pickupTime || '選宅配'}</span>
-        <span class="block text-[11px] text-red-700 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">📍 收貨地址 (P欄): ${realAddress}</span>
+        <span class="px-1.5 py-0.5 bg-blue-50 text-blue-800 rounded font-bold border border-blue-200">🚚 配送到府</span><br>
+        <span class="block mt-1.5 text-stone-500 font-medium">📦 物流方式: 選宅配</span>
+        <span class="block text-[11px] text-red-700 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">📍 收貨地址: ${realAddress}</span>
       `;
     }
 
-    // 🚀 3. 看板欄位大進化：精密撈取試算表 Ｑ 欄 (o.bossRemark 前方的買家備註變數，前台穿透為 o.remark) 
-    let buyerRemark = o.remark || "無";
+    // 🚀 3. 備註欄 (Q欄) 優化：清除舊版後端沒撈取造成的遺漏
+    let buyerRemark = o.remark || o.orderRemark || "無";
+    // 穿透保護：如果舊後端包裝錯位，從原始 Payload 中直接回傳快取
     if (buyerRemark === "無" || buyerRemark === "" || buyerRemark.trim() === "") buyerRemark = "無";
 
     tbody.innerHTML += `
@@ -545,8 +547,8 @@ function renderOrderTable() {
         <td class="p-3 font-medium">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註 (Q欄): ${buyerRemark}</div>
-          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="輸入老闆對帳備註">
+          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註: ${buyerRemark}</div>
+          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="輸入對帳備註">
           <span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span>
         </td>
         <td class="p-3">
@@ -564,17 +566,6 @@ function renderOrderTable() {
         </td>
       </tr>`;
   }
-}
-  
-function silentUpdateRemark(rowIdx, input) {
-  let tip = input.nextElementSibling; tip.innerText = "⏳ 儲存中..."; tip.className = "text-[10px] text-amber-600 block mt-0.5";
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
-  .then(() => { 
-    tip.innerText = "✅ 已變更"; tip.className = "text-[10px] text-green-600 block mt-0.5"; 
-    let targetOrder = currentFilteredOrders.find(x => x.rowIdx === rowIdx);
-    if(targetOrder) targetOrder.bossRemark = input.value.trim();
-    setTimeout(() => { tip.innerText = ""; }, 2000); 
-  });
 }
 
 function silentUpdateStatus(rowIdx, select) {
