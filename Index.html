@@ -76,7 +76,7 @@
 
     <div id="queryResultArea" class="bg-white border border-border-soft rounded-xl p-4 shadow-md hidden">
       <div class="flex justify-between items-center mb-2 border-b pb-2">
-        <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單進度查詢看板</h4>
+        <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單進度查詢</h4>
         <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-2xl cursor-pointer px-1">×</span>
       </div>
       <div id="multiOrdersContainer" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-stone-100"></div>
@@ -283,7 +283,7 @@ window.onload = () => {
     if(res.promoText && res.promoText !== "暫無特定行銷活動") {
       let pBox = document.getElementById('marketingPromoBox');
       let span = document.getElementById('promoTextSpan');
-      span.innerText = "💥 當期優惠：" + res.promoText + " 💥";
+      span.innerText = res.promoText; 
       pBox.classList.remove('hidden');
     }
 
@@ -410,13 +410,13 @@ function toggleFavorite() {
 
 function shareProduct() { 
   let p = rawData[selectedIdx]; 
-  // 精準處理環境判斷，避免 CodePen 動態網域抓錯
   let baseDomain = window.location.hostname.includes('github.io') 
     ? window.location.origin + window.location.pathname 
-    : "https://sibyldesign.github.io/elybuy/Index.html";
+    : "https://sibyldesign.github.io/yili-select/Index.html";
     
   navigator.clipboard.writeText(baseDomain + "?sku=" + p.sku); 
-  showCustomAlert("🔗 該商品之官方連結已複製到您的剪貼簿！"); 
+  // 🚀 已修正：改為您指定的提示文字
+  showCustomAlert("🔗 分享連結已複製到您的剪貼簿！"); 
 }
 
 function addToCart() {
@@ -491,9 +491,30 @@ function fetchCustomerHistoryData() {
 
 function submitFinalOrder() {
   let ph = document.getElementById('custPhone'), name = document.getElementById('custName'), line = document.getElementById('lineName');
+  let shipMode = document.getElementById('shipSelectDropdown').value; // 配送自取方式
+  let pickupTime = document.getElementById('pickupTimeSelect').value; // 預計取貨時間
+  let addressInput = document.getElementById('custAddress'); // 收貨地址
+  
   if(!ph.value.trim()){ showCustomAlert("請填寫必填欄位：手機號碼！"); ph.scrollIntoView({ behavior: 'smooth' }); return; }
   if(!name.value.trim()){ showCustomAlert("請填寫必填欄位：訂購人姓名！"); name.scrollIntoView({ behavior: 'smooth' }); return; }
   if(!line.value.trim()){ showCustomAlert("請填寫必填欄位：LINE 暱稱！"); line.scrollIntoView({ behavior: 'smooth' }); return; }
+
+  // 🚀 核心優化：配送方式強制防呆鎖定
+  if (shipMode.includes("來店取貨") || shipMode.includes("自取")) {
+    if (!pickupTime || pickupTime.trim() === "") {
+      showCustomAlert("⚠️ 提示：您選擇來店取貨，請務必選取『預計取貨時間』！");
+      document.getElementById('pickupTimeSelect').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+  } else if (shipMode.includes("配送到府") || shipMode.includes("宅配")) {
+    if (!addressInput.value.trim()) {
+      showCustomAlert("⚠️ 提示：您選擇配送到府，請務必填寫完整的『收貨地址』！");
+      addressInput.focus();
+      addressInput.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+  }
+
   if(cart.length === 0) return showCustomAlert("購物車目前無任何品項。");
   
   showCustomAlert("訂單成立中，請稍候...");
