@@ -35,7 +35,6 @@
 </head>
 <body class="bg-white text-text-dark font-sans p-4 sm:p-6">
 
-<!-- 🔐 智慧管理後台安全驗證防護牆 -->
 <div id="adminAuthOverlay" class="fixed inset-0 bg-stone-100 z-[99999] flex flex-col justify-center items-center p-4">
   <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl text-center space-y-4 border border-border-soft">
     <div class="w-16 h-16 rounded-full overflow-hidden mx-auto border border-border-soft shadow-inner">
@@ -66,7 +65,6 @@
       </div>
     </div>
     
-    <!-- 右上角安全登出功能區組件 -->
     <div class="flex items-center gap-3 mt-3 sm:mt-0">
       <a id="viewStoreLink" href="#" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往前台行動商城</a>
       <button onclick="handleAdminLogout()" class="bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm hover:bg-red-700 transition-all">🚪 安全登出</button>
@@ -221,11 +219,15 @@
         <h2 class="text-sm font-bold text-stone-700">📋 訂單看板 (20筆一頁)</h2>
         <button onclick="loadOrdersData()" class="bg-stone-100 hover:bg-stone-200 border text-stone-700 px-2.5 py-1 rounded text-xs flex items-center gap-1 transition-all">🔄 重新整理</button>
       </div>
-      <div class="flex bg-stone-100 p-1 rounded-lg gap-1 text-xs">
-        <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800">全部</button>
-        <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500">新訂單</button>
-        <button onclick="filterOrderStatus('已對帳')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已對帳</button>
-        <button onclick="filterOrderStatus('已出貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
+      <div class="flex bg-stone-100 p-1 rounded-lg gap-1 text-xs overflow-x-auto max-w-full">
+        <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap">全部</button>
+        <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">新訂單</button>
+        <button onclick="filterOrderStatus('已確認訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">已確認訂單</button>
+        <button onclick="filterOrderStatus('等待到貨中')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">等待到貨中</button>
+        <button onclick="filterOrderStatus('延後取貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">延後取貨</button>
+        <button onclick="filterOrderStatus('已取貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">已取貨</button>
+        <button onclick="filterOrderStatus('待宅配出貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">待宅配出貨</button>
+        <button onclick="filterOrderStatus('取消不成立')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">取消不成立</button>
       </div>
     </div>
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
@@ -526,8 +528,8 @@ function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-
 function loadOrdersData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) }).then(r => r.json()).then(res => { rawOrders = res.orders || []; currentFilteredOrders = [...rawOrders]; renderOrderTable(); }); }
 
 function filterOrderStatus(status) {
-  document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400");
-  event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800";
+  document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400 whitespace-nowrap");
+  event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap";
   if(status === '全部') currentFilteredOrders = [...rawOrders]; else currentFilteredOrders = rawOrders.filter(o => o.status === status);
   currentOrderPage = 1; renderOrderTable();
 }
@@ -573,9 +575,11 @@ function renderOrderTable() {
           <select onchange="silentUpdateStatus(${o.rowIdx}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500">
             <option value="">狀態變更...</option>
             <option value="新訂單">新訂單</option>
-            <option value="已對帳">已對帳</option>
-            <option value="已出貨">已出貨</option>
+            <option value="已確認訂單">已確認訂單</option>
+            <option value="等待到貨中">等待到貨中</option>
+            <option value="延後取貨">延後取貨</option>
             <option value="已取貨">已取貨</option>
+            <option value="待宅配出貨">待宅配出貨</option>
             <option value="取消不成立">取消不成立</option>
           </select>
         </td>
