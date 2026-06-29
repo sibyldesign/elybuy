@@ -395,13 +395,10 @@ window.onload = () => {
 
 function setupCategoryTabs(cats) {
   const box = document.getElementById('categoryTabs');
-  // 🌟 選取狀態更變為極具美感的 indianred 印地安紅配白字與高階投影
   box.innerHTML = `<button id="tab-all" onclick="filterCat('all')" class="cat-tab-btn px-4 py-2 rounded-full whitespace-nowrap m-1 border border-[indianred] transition-all bg-[indianred] text-white shadow-md font-bold">全部商品</button>`;
   cats.forEach(c => {
-    // 🌟 平時分類狀態全部精密對齊更換為深火磚紅 #B22222 的框線與字體
     if(c) box.innerHTML += `<button id="tab-${c.trim()}" onclick="filterCat('${c.trim()}')" class="cat-tab-btn bg-white border border-[#B22222] text-[#B22222] text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all">${c.trim()}</button>`;
   });
-  // 🌟 我的收藏 符號正名
   box.innerHTML += `<button id="tab-fav" onclick="filterFavoritesOnly()" class="cat-tab-btn bg-white border border-rose-300 text-rose-500 text-sm font-bold px-4 py-2 rounded-full whitespace-nowrap m-1 shadow-sm transition-all">❤️ 我的收藏</button>`;
 }
 
@@ -466,7 +463,6 @@ function openProduct(idx) {
   buildDotsProgressBar(); showMediaImage();
   document.getElementById('itemTitle').innerText = p.name;
   
-  // 🌟 特色分類外框文字顏色對齊改為 #B22222
   document.getElementById('itemTagContainer').className = "inline-block bg-white border border-[#B22222] text-[#B22222] text-xs font-bold px-2.5 py-1 rounded-md mb-1 shadow-sm";
   document.getElementById('itemTagContainer').innerText = p.tag ? p.tag : "今日推薦";
   
@@ -480,7 +476,6 @@ function openProduct(idx) {
   const sSel = document.getElementById('sizeSelect'); sSel.innerHTML = "";
   p.sizes.forEach(s => { sSel.innerHTML += `<option value="${s.trim()}">${s.trim()}</option>`; });
 
-  // 🌟 收藏 狀態字樣正名
   let favs = JSON.parse(localStorage.getItem('yl_favs') || '[]');
   document.getElementById('favProductBtn').innerText = favs.includes(p.sku) ? "❤️ 已收藏" : "❤️ 收藏";
   syncMatrixPrice();
@@ -493,7 +488,6 @@ function syncMatrixPrice() {
   let matchedSpecsObj = p.rawSpecsData ? p.rawSpecsData.find(v => v.spec === targetKey) : null;
   let currentOldPrice = (matchedSpecsObj && matchedSpecsObj.oldPrice) ? matchedSpecsObj.oldPrice : p.oldPrice;
 
-  // 🌟 劃掉的原價全面加粗為 font-bold
   let oldPriceHtml = (currentOldPrice && currentOldPrice !== "0") ? `<span class="text-sm text-stone-400 font-bold line-through mr-1.5">NT$ ${currentOldPrice}</span>` : '';
 
   if (matchedPrice) {
@@ -538,7 +532,6 @@ function addToCart() {
 function removeCart(idx) { cart.splice(idx,1); updateCartUI(); }
 function toggleCart(show) { document.getElementById('cartDrawer').style.transform = show ? "translateY(0)" : "translateY(100%)"; }
 
-// 🌟 購物車清單美化：改為高階電商官網平鋪排版格式呈现，徹底移除公式公式計算感
 function updateCartUI() {
   const box = document.getElementById('cartList'); box.innerHTML = ""; let subtotal = 0;
   cart.forEach((item, idx) => {
@@ -574,59 +567,65 @@ function searchProducts() {
   renderCatalog(products);
 }
 
-// 🌟 狀態查詢全面復活正常：100% 精準去除多餘字串，同時橫跨穿透『訂單明細』與『歷史訂單』抓取全量明細資料
+// 🌟 狀態查詢全面復活正常：將等待提示精簡優化為「查詢中...」，並透過原始字串完整交互比對
 function checkOrderHistory() {
   let phone = document.getElementById('searchInput').value.trim(); if(!phone) return showCustomAlert("請先輸入您的手機號碼！");
   const container = document.getElementById('multiOrdersContainer');
-  container.innerHTML = "<span class='text-xs text-stone-400 animate-pulse'>正在為您向試算表「訂單明細」與「歷史訂單」穿透翻查進度...</span>"; 
+  
+  // ⚡ 依照指示優化：文字精簡修改為最俐落的「查詢中...」
+  container.innerHTML = "<div class='text-xs text-stone-400 py-3 animate-pulse flex items-center justify-center gap-1'><span>⏳</span>查詢中...</div>"; 
   document.getElementById('queryResultArea').classList.remove('hidden');
 
-  let cleanPhone = phone.replace(/[^0-9]/g, "").trim();
-
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: cleanPhone }) })
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "queryOrder", phone: phone }) })
   .then(r => r.json()).then(res => {
     if(!res.success || !res.allOrders || res.allOrders.length === 0) { 
-      container.innerHTML = "<p class='text-xs text-stone-400 py-2'>查無此手機號碼的預訂歷史紀錄，請再次核對號碼。</p>"; 
+      container.innerHTML = "<p class='text-xs text-stone-400 py-4 text-center'>查無此手機號碼的預訂歷史紀錄，請再次核對號碼。</p>"; 
       return; 
     }
     container.innerHTML = "";
     res.allOrders.forEach(o => {
       let orderItemsHtml = "";
-      if (o.items && o.items.length > 0) {
-        o.items.forEach(itemText => {
-          orderItemsHtml += `<div class="text-stone-600 bg-stone-50 p-2.5 rounded border border-stone-100 text-xs my-1 font-medium leading-tight">${itemText}</div>`;
-        });
+      
+      // 🚀 核心相容修正：安全相容字串陣列或舊版 HTML 格式，確保 100% 渲染商品明細不報錯中斷
+      if (o.items) {
+        if (Array.isArray(o.items)) {
+          o.items.forEach(itemText => {
+            orderItemsHtml += `<div class="text-stone-700 bg-stone-50 p-2.5 rounded border border-stone-100 text-xs my-1 font-medium leading-normal">${itemText}</div>`;
+          });
+        } else {
+          orderItemsHtml += `<div class="text-stone-700 bg-stone-50 p-2.5 rounded border border-stone-100 text-xs my-1 font-medium leading-normal">${o.items}</div>`;
+        }
       }
       
       container.innerHTML += `
-        <div class="py-3 text-sm text-stone-700 bg-white space-y-1.5">
-          <div class="flex justify-between items-center border-b border-dashed pb-1">
-            <b>單號: <span class="text-blue-900 select-all font-mono">${o.orderId}</span></b> 
-            <span class="px-2.5 py-0.5 bg-blue-100 text-blue-700 rounded-full font-bold text-xs">${o.status}</span>
+        <div class="py-4 text-sm text-stone-700 bg-white space-y-2 border-b border-stone-100 last:border-none">
+          <div class="flex justify-between items-center border-b border-dashed pb-1.5">
+            <b>單號: <span class="text-blue-950 select-all font-mono">${o.orderId || '無單號'}</span></b> 
+            <span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full font-bold text-xs">${o.status || '處理中'}</span>
           </div>
           <div class="space-y-1">${orderItemsHtml}</div>
           <div class="grid grid-cols-2 gap-1 text-xs text-stone-500 pt-1">
-            <div>配送自取：<b>${o.shipping || '自取'}</b></div>
-            <div>取件時間：<b>${o.pickupTime || '常規'}</b></div>
+            <div>配送自取：<b class="text-stone-800">${o.shipping || '自取'}</b></div>
+            <div>取件時間：<b class="text-stone-800">${o.pickupTime || '未備註'}</b></div>
           </div>
-          <div class="text-xs text-stone-500">到貨日期：<span class="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">${o.arrivalDate || '追加中'}</span></div>
-          <div class="text-right text-xs font-bold text-stone-900 pt-1 border-t border-stone-50">預訂應付總計：<span class="text-red-600 font-bold text-sm">NT$ ${o.total || '0'}</span></div>
+          <div class="text-xs text-stone-500 flex items-center gap-1 pt-0.5">
+            <span>到貨日期：</span>
+            <span class="font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">${o.arrivalDate || '追加中'}</span>
+          </div>
+          <div class="text-right text-xs font-bold text-stone-900 pt-1.5 border-t border-stone-50">預訂應付總計：<span class="text-red-600 font-extrabold text-base">NT$ ${o.total || '0'}</span></div>
         </div>`;
     });
-  }).catch(() => { container.innerHTML = "<p class='text-xs text-red-500 py-2'>主端通道連線異常，請稍後重新操作。</p>"; });
+  }).catch(() => { container.innerHTML = "<p class='text-xs text-red-500 py-3 text-center font-medium'>主端通道連線異常，請稍後重新操作。</p>"; });
 }
 
-// 🌟 帶入資料全面修復復活正常操作：100% 深入同時翻查訂單明細與歷史訂單
+// 🌟 帶入資料全面修復復活正常操作：取消移除特殊字元的 replace，完整發送字串以完美應對試算表的前置單引號
 function fetchCustomerHistoryData() {
   if(globalFetchLock) return;
   let phone = document.getElementById('custPhone').value.trim(); if(!phone) return showCustomAlert("請先在下方的手機號碼欄位中填寫，再點擊帶入資料！");
   let btn = document.getElementById('btnFetchHistory'); 
-  // 🌟 更名為：查詢帶入中...
   btn.innerText = "查詢帶入中..."; btn.disabled = true; globalFetchLock = true;
   
-  let cleanPhone = phone.replace(/[^0-9]/g, "").trim();
-
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getCustomerHistory", phone: cleanPhone }) })
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getCustomerHistory", phone: phone }) })
   .then(r => r.json()).then(res => {
     btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false;
     if (res && res.success && res.data) {
@@ -637,7 +636,7 @@ function fetchCustomerHistoryData() {
       if(res.data.remark) document.getElementById('orderRemark').value = res.data.remark;
       showCustomAlert("🎉 帶入成功！已為您自動填入過往的預訂人核對資訊。");
     } else { showCustomAlert("查無過往訂購紀錄，請手動填寫新聯絡資訊。"); }
-  }).catch(() => { btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false; });
+  }).catch(() => { btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false; showCustomAlert("網路連線逾時，無法帶入歷史紀錄。"); });
 }
 
 function submitFinalOrder() {
