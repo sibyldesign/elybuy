@@ -199,9 +199,8 @@
       <div class="flex bg-stone-100 p-1 rounded-lg gap-1 text-xs">
         <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800">全部</button>
         <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500">新訂單</button>
-        <button onclick="filterOrderStatus('已確認訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已確認訂單</button>
-        <button onclick="filterOrderStatus('等待到貨中')" class="order-filter-btn px-3 py-1 rounded text-stone-500">等待到貨中</button>
-        <button onclick="filterOrderStatus('已取貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已取貨</button>
+        <button onclick="filterOrderStatus('已對帳')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已對帳</button>
+        <button onclick="filterOrderStatus('已出貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
       </div>
     </div>
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
@@ -416,6 +415,7 @@ function publishProduct() {
         adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
         resetProductForm(); 
         loadInventoryData(); 
+        // 🌟 編輯/快速上架完畢後，鎖定並停留於商品清單分頁
         switchTab('listTab'); 
       } else {
         adminCustomAlert("❌ 後端錯誤提示：" + res.error);
@@ -482,7 +482,7 @@ function filterOrderStatus(status) {
   currentOrderPage = 1; renderOrderTable();
 }
 
-// 🚀 看板優化：徹底移除 (欄) 贅字標籤，100% 精準合併 N、O、P、Q 試算表資料
+// 🚀 100% 完整平鋪無損重構版：精密解析並展示試算表訂單明細的 N, O, P, Q 欄位資料
 function renderOrderTable() {
   const tbody = document.getElementById('orderTableBody'); tbody.innerHTML = "";
   let total = Math.ceil(currentFilteredOrders.length / pageSize) || 1; 
@@ -502,36 +502,15 @@ function renderOrderTable() {
       }
     }
 
-    // 🚀 2. 聰明讀取：完全對齊您指定 ely0623-2 試算表的物理欄位數據包裝
-    let displayTimeAndAddress = "";
-    let isPickup = (o.shipping && (o.shipping.includes("來店取貨") || o.shipping.includes("自取")));
-    
-    if (isPickup) {
-      displayTimeAndAddress = `
-        <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 rounded font-bold border border-amber-200">🏪 來店取貨</span><br>
-        <span class="block mt-1.5 text-stone-700 font-bold">⏱️ 預計取貨時間: <span class="text-amber-700">${o.pickupTime || '常規時間'}</span></span>
-        <span class="block text-[11px] text-stone-400 mt-0.5">📍 取貨地址: 現場取貨</span>
-      `;
-    } else {
-      // 🚀 完美穿透物理錯位：直接精準向原始資料表映射並回填
-      let realAddress = o.address || "未填寫";
-      if (realAddress === "現場取貨" || realAddress === "無" || realAddress.trim() === "") {
-        // 安全回溯備份：如果後端把地址與時間打包錯位，這裡直接自動交叉校正，保證新竹市等地址完美現形
-        realAddress = o.shipName || o.address || "未填寫";
-      }
-      if (realAddress === "現場取貨" || realAddress === "無") realAddress = "未填寫";
-      
-      displayTimeAndAddress = `
-        <span class="px-1.5 py-0.5 bg-blue-50 text-blue-800 rounded font-bold border border-blue-200">🚚 配送到府</span><br>
-        <span class="block mt-1.5 text-stone-500 font-medium">📦 物流方式: 選宅配</span>
-        <span class="block text-[11px] text-red-700 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">📍 收貨地址: ${realAddress}</span>
-      `;
-    }
-
-    // 🚀 3. 備註欄 (Q欄) 優化：清除舊版後端沒撈取造成的遺漏
-    let buyerRemark = o.remark || o.orderRemark || "無";
-    // 穿透保護：如果舊後端包裝錯位，從原始 Payload 中直接回傳快取
-    if (buyerRemark === "無" || buyerRemark === "" || buyerRemark.trim() === "") buyerRemark = "無";
+    // 🚀 2. 聰明讀取平鋪：精準讀取 N欄(預計取貨)、O欄(配送自取方式)、P欄(收貨地址)、Q欄(買家備註) 封包
+    let displayTimeAndAddress = `
+      <div class="space-y-0.5 text-[11px] leading-tight text-stone-600">
+        <div>⏱️ <b>取貨：</b>${o.pickupTime || "常規時間"}</div>
+        <div>🚚 <b>方式：</b>${o.shipping || "面交自取"}</div>
+        <div>📍 <b>收件：</b>${o.shipAddress || "現場自取"}</div>
+        <div class="text-blue-600 font-semibold">📝 <b>備註：</b>${o.remark || "無"}</div>
+      </div>
+    `;
 
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
@@ -544,10 +523,10 @@ function renderOrderTable() {
         
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
         
+        <!-- 🎯 漂亮平鋪展示於「預計取貨時間/地址」格子內 -->
         <td class="p-3 font-medium">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <div class="text-[10px] text-purple-700 font-bold mb-1">買家備註: ${buyerRemark}</div>
           <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="輸入對帳備註">
           <span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span>
         </td>
@@ -579,6 +558,13 @@ function silentUpdateStatus(rowIdx, select) {
   select.value = ""; 
 }
 
+function silentUpdateRemark(rowIdx, input) {
+  let tip = input.nextElementSibling;
+  tip.innerText = "⏳ 儲存中...";
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
+    .then(r => r.json()).then(res => { if(res.success) tip.innerText = "✅ 已同步試算表"; });
+}
+
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
@@ -588,18 +574,21 @@ function fireBatchPrintInvoices() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目");
   let w = window.open('', '_blank');
   let html = `<html><head><title>揀貨預訂清單</title><style>body{font-family:sans-serif;padding:20px;} div{padding:10px; font-size:14px;}</style></head><body>`;
-  chks.forEach(b => { let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); html += `<div><b>預訂單號:</b> ${o.orderId} | <b>姓名:</b> ${o.custName} | <b>商品明細:</b> ${o.prodName} (${o.specs}) | <b>取貨地址時間:</b> ${o.address}</div><hr style="border:1px dashed #ccc;">`; });
+  chks.forEach(b => { 
+    let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); 
+    html += `<div><b>預訂單號:</b> ${o.orderId} | <b>姓名:</b> ${o.custName} | <b>商品明細:</b> ${o.prodName} (${o.specs}) | <b>自取時間：</b>${o.pickupTime} | <b>物流方式：</b>${o.shipping} | <b>收貨地址：</b>${o.shipAddress} | <b>買家備註：</b>${o.remark}</div><hr style="border:1px dashed #ccc;">`; 
+  });
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
 function fireBatchExportToExcel() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
-  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,取貨時間,老闆備註,訂單狀態\n";
+  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,預計取貨時間,配送方式,收貨地址,買家備註,老闆備註,訂單狀態\n";
   chks.forEach(box => { 
     let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
     let safePhone = o.phone ? "'" + o.phone : "";
-    csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${o.address},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
+    csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${o.pickupTime},${o.shipping},${(o.shipAddress || "").replace(/,/g," ")},${(o.remark || "").replace(/,/g," ")},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
   });
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
