@@ -222,7 +222,7 @@
         <div class="space-y-1.5">
           <label class="text-base font-extrabold text-stone-900 block">使用專屬折扣碼</label>
           <div class="bg-white border border-stone-400 rounded-xl p-2 flex gap-2 items-center shadow-sm">
-            <input type="text" id="couponCodeInput" class="text-base pl-2 py-2 outline-none flex-1 font-mono uppercase bg-transparent text-stone-900" placeholder="輸入折扣碼折抵金額">
+            <input type="text" id="couponCodeInput" class="text-base pl-2 py-2 outline-none flex-1 font-mono uppercase bg-transparent text-stone-900" placeholder="輸入折扣碼">
             <button onclick="applyDiscountCode()" class="bg-stone-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all h-10 hover:bg-stone-900">應用折抵</button>
           </div>
           <div id="discountMsgBlock" class="text-sm text-green-600 font-bold hidden px-1"></div>
@@ -236,7 +236,7 @@
 
         <div class="flex justify-between items-baseline py-2 border-b border-stone-300">
           <div id="txtDiscountLabel" class="text-base text-red-500 font-bold"></div>
-          <div class="text-lg font-extrabold text-stone-700 ml-auto">整個視窗應付總額：<span class="text-sm font-medium text-stone-400">NT$</span> <span id="grandTotal" class="text-3xl font-black text-[#B22222]">0</span></div>
+          <div class="text-lg font-extrabold text-stone-700 ml-auto">訂單總額：<span class="text-sm font-medium text-stone-400">NT$</span> <span id="grandTotal" class="text-3xl font-black text-[#B22222]">0</span></div>
         </div>
 
         <!-- 3. 手機號碼 (帶入資料正常啟用，🌟 長輩大字體) -->
@@ -589,7 +589,7 @@ function updateCartUI() {
         <div class="space-y-1 flex-1 pr-3">
           <!-- 🌟 商品品名與貨號字體放大 2 號 (text-lg) -->
           <div class="font-extrabold text-stone-900 text-lg leading-tight">${item.prodName}</div>
-          <div class="text-stone-500 text-sm font-bold">貨號：${item.sku} | 規格項目：${item.color} / ${item.size}</div>
+          <div class="text-stone-500 text-sm font-bold">貨號：${item.sku} | 規格：${item.color} / ${item.size}</div>
           <!-- 到貨日期亮橘醒目大字 -->
           <div class="mt-1"><span class="text-xs font-black text-amber-950 bg-amber-100 border border-amber-400 px-2.5 py-0.5 rounded inline-block shadow-sm">🎯 預計到貨日：${item.arrivalDate}</span></div>
         </div>
@@ -598,9 +598,9 @@ function updateCartUI() {
       
       <!-- 🌟 數量、單價、小計全部下移，且改用對比清晰的高階杏仁灰底色（#F2EFEA），長輩快查超流暢 -->
       <div class="flex justify-between items-center bg-[#F2EFEA] p-3 rounded-xl border border-stone-300/80 w-full text-base font-extrabold text-stone-900">
-        <div>預訂數量：<span class="text-stone-950 font-black text-lg">${item.qty} 件</span></div>
+        <div>數量：<span class="text-stone-950 font-black text-lg">${item.qty} 件</span></div>
         <div class="text-stone-500 text-sm">單價: $${item.price}</div>
-        <div class="text-[#B22222] text-lg font-black">小計額: $${item.price * item.qty}</div>
+        <div class="text-[#B22222] text-lg font-black">小計: $${item.price * item.qty}</div>
       </div>
     </div>`;
   });
@@ -682,7 +682,7 @@ function fetchCustomerHistoryData() {
       document.getElementById('custEmail').value = res.data.email || "";
       if(res.data.address) document.getElementById('custAddress').value = res.data.address;
       if(res.data.remark) document.getElementById('orderRemark').value = res.data.remark;
-      showCustomAlert("🎉 帶入成功！已為您自動填入過往的預訂人核對資訊。");
+      showCustomAlert("🎉 帶入成功！已為您自動填入過往的聯絡資訊。");
     } else { showCustomAlert("查無過往訂購紀錄，請手動填寫新聯絡資訊。"); }
   }).catch(() => { btn.innerText = "帶入資料"; btn.disabled = false; globalFetchLock = false; showCustomAlert("網路連線逾時，無法帶入歷史紀錄。"); });
 }
