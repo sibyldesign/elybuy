@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>伊利小編購後台 | 智慧雲端旗艦管理系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -42,7 +42,7 @@
         <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Logo">
       </div>
       <div class="text-left">
-        <h1 class="text-xl font-bold tracking-wider text-text-dark">伊利小編購 智慧管理後台</h1>
+        <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">伊利小編購 智慧管理後台</h1>
         <p class="text-xs text-primary-taupe mt-0.5">2026 團購平鋪型雙端控制中樞</p>
       </div>
     </div>
@@ -75,8 +75,8 @@
         <input type="text" id="pName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
       </div>
       <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">到貨日期 (Q欄)</label>
-        <input type="date" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
+        <label class="text-xs font-semibold text-stone-600 block mb-1">到貨日期 (Q欄純文字化)</label>
+        <input type="text" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="如：6/25 或 追加中">
       </div>
     </div>
 
@@ -160,11 +160,14 @@
       </div>
       <input type="text" id="inventorySearchInput" oninput="searchInventory()" class="text-xs p-2 border rounded-lg max-w-xs bg-stone-50 outline-none" placeholder="快速篩選貨號或品名...">
     </div>
+    
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center flex-wrap gap-2 text-xs">
+      <span class="font-bold text-stone-600 mr-2">🛠️ 商品批量管理區：</span>
       <button onclick="fireBatchCopy()" class="bg-stone-600 text-white px-3 py-1.5 rounded hover:bg-stone-700 transition-all">複製勾選商品</button>
       <button onclick="fireBatchArchive()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 transition-all">封存勾選商品</button>
       <button onclick="fireBatchDeleteProducts()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-all">徹底刪除商品</button>
     </div>
+    
     <div class="overflow-x-auto border rounded-lg">
       <table class="w-full text-left text-xs bg-white">
         <thead class="bg-stone-50 border-b">
@@ -175,7 +178,7 @@
             <th class="p-3">商品品名</th>
             <th class="p-3">主/副分類</th>
             <th class="p-3">單價</th>
-            <th class="p-3 font-bold text-amber-700">到貨日期</th>
+            <th class="p-3 font-bold text-amber-800">到貨日期</th>
             <th class="p-3">狀態</th>
             <th class="p-3">編輯</th>
           </tr>
@@ -200,12 +203,12 @@
         <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800">全部</button>
         <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500">新訂單</button>
         <button onclick="filterOrderStatus('已對帳')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已對帳</button>
-        <button onclick="filterOrderStatus('已出貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
+        <button onclick="filterOrderStatus('決策中')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
       </div>
     </div>
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
       <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700">✅ 批量結案 (移至歷史訂單)</button>
-      <button onclick="fireBatchPrintInvoices()" class="bg-blue-600 text-white px-3 py-1.5 rounded font-bold hover:bg-blue-700">🖨️ 批量生成揀貨單並列印</button>
+      <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark">🖨️ 批量生成揀貨單並列印</button>
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">❌ 批量徹底刪除訂單</button>
     </div>
@@ -336,19 +339,7 @@ function startEdit(sku, rowIdx) {
   if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = p.addonName || "";
   if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = p.addonPrice || "0";
 
-  if(p.arrivalDate) {
-    let d = new Date(p.arrivalDate);
-    if(!isNaN(d.getTime())) {
-      let yyyy = d.getFullYear();
-      let mm = String(d.getMonth() + 1).padStart(2, '0');
-      let dd = String(d.getDate()).padStart(2, '0');
-      document.getElementById('pArrivalDate').value = `${yyyy}-${mm}-${dd}`;
-    } else {
-      document.getElementById('pArrivalDate').value = "";
-    }
-  } else {
-    document.getElementById('pArrivalDate').value = "";
-  }
+  document.getElementById('pArrivalDate').value = p.arrivalDate || "";
   
   regenerateMatrixFromInputs();
   if(p.specsData) {
@@ -386,7 +377,6 @@ function publishProduct() {
   });
   
   let method = isEditMode ? "editProduct" : "addNewProduct";
-  
   let pData = { 
     sku: sku,                     
     rowIdx: isEditMode ? currentEditingRowIdx : null, 
@@ -405,7 +395,7 @@ function publishProduct() {
     size: document.getElementById('pSizes').value.trim() || "規格2",
     addonName: document.getElementById('pAddonName') ? document.getElementById('pAddonName').value.trim() : "",
     addonPrice: document.getElementById('pAddonPrice') ? document.getElementById('pAddonPrice').value.trim() : "0",
-    arrivalDate: document.getElementById('pArrivalDate').value
+    arrivalDate: document.getElementById('pArrivalDate').value.trim() 
   };
   
   adminCustomAlert("數據同步傳輸中...");
@@ -415,7 +405,6 @@ function publishProduct() {
         adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
         resetProductForm(); 
         loadInventoryData(); 
-        // 🌟 編輯/快速上架完畢後，鎖定並停留於商品清單分頁
         switchTab('listTab'); 
       } else {
         adminCustomAlert("❌ 後端錯誤提示：" + res.error);
@@ -425,22 +414,15 @@ function publishProduct() {
 
 function resetProductForm() { 
   var skuInput = document.getElementById('pSku');
-  skuInput.value = ""; 
-  skuInput.removeAttribute('readonly'); 
-  skuInput.style.backgroundColor = "";
-  document.getElementById('pName').value = ""; 
-  document.getElementById('pColors').value = ""; 
-  document.getElementById('pSizes').value = ""; 
-  document.getElementById('pDesc').value = ""; 
+  skuInput.value = ""; skuInput.removeAttribute('readonly'); skuInput.style.backgroundColor = "";
+  document.getElementById('pName').value = ""; document.getElementById('pColors').value = ""; document.getElementById('pSizes').value = ""; document.getElementById('pDesc').value = ""; 
   if(document.getElementById('pVideo')) document.getElementById('pVideo').value = "";
   if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = "";
   if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = "0";
   document.getElementById('pArrivalDate').value = "";
   document.getElementById('formActionTitle').innerText = "✍ 商品快速配置 (精準對齊商品清單 A~Q 欄順序)";
   document.getElementById('cancelEditBtn').classList.add('hidden'); 
-  isEditMode = false; 
-  currentEditingRowIdx = null;
-  regenerateMatrixFromInputs(); 
+  isEditMode = false; currentEditingRowIdx = null; regenerateMatrixFromInputs(); 
 }
 
 function loadInventoryData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) }).then(r => r.json()).then(res => { globalProducts = res.products; filteredProducts = [...globalProducts]; renderInventoryTable(); }); }
@@ -454,12 +436,8 @@ function renderInventoryTable() {
     let p = filteredProducts[i];
     let minPrice = p.price;
     let dateShow = p.arrivalDate || "追加中";
-    if(dateShow.includes("GMT") || dateShow.includes("-")) {
-      let d = new Date(dateShow);
-      if(!isNaN(d.getTime())) dateShow = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
     let trueRowIdx = i + 2; 
-    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold">$${minPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}', ${trueRowIdx})" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
+    tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold text-stone-700">$${minPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}', ${trueRowIdx})" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
   }
 }
 
@@ -470,19 +448,18 @@ function fireBatchCopy() {
   let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCopyProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData());
 }
-function fireBatchArchive() { let chks = document.querySelectorAll('.inv-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchArchiveProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData()); }
-function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return alert("請勾選項目"); if(!confirm("確定徹底刪除商品？")) return; Promise.all(Array.from(chks).map(c => fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "deleteProduct", sku: c.value }) }))).then(() => loadInventoryData()); }
+function fireBatchArchive() { let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchArchiveProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData()); }
+function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); if(!confirm("確定徹底刪除商品？")) return; Promise.all(Array.from(chks).map(c => fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "deleteProduct", sku: c.value }) }))).then(() => loadInventoryData()); }
 
 function loadOrdersData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) }).then(r => r.json()).then(res => { rawOrders = res.orders || []; currentFilteredOrders = [...rawOrders]; renderOrderTable(); }); }
 
 function filterOrderStatus(status) {
-  document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-500");
+  document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400");
   event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800";
   if(status === '全部') currentFilteredOrders = [...rawOrders]; else currentFilteredOrders = rawOrders.filter(o => o.status === status);
   currentOrderPage = 1; renderOrderTable();
 }
 
-// 🚀 100% 完整平鋪無損重構版：精密解析並展示試算表訂單明細的 N, O, P, Q 欄位資料
 function renderOrderTable() {
   const tbody = document.getElementById('orderTableBody'); tbody.innerHTML = "";
   let total = Math.ceil(currentFilteredOrders.length / pageSize) || 1; 
@@ -493,20 +470,13 @@ function renderOrderTable() {
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
     
-    // 1. 到貨日期清除長英文，100% 格式化
+    // 🌟 補齊最新需求：訂單看板「到貨日期」只撈取、原裝呈現該筆訂單成立當下的純文字到貨日期
     let cleanArrivalDate = o.arrivalDate || "追加中";
-    if(cleanArrivalDate && (cleanArrivalDate.includes("GMT") || cleanArrivalDate.includes("Time") || cleanArrivalDate.includes("台北標準時間"))) {
-      let d = new Date(cleanArrivalDate);
-      if(!isNaN(d.getTime())) {
-        cleanArrivalDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      }
-    }
 
-    // 🚀 2. 聰明讀取平鋪：精準讀取 N欄(預計取貨)、O欄(配送自取方式)、P欄(收貨地址)、Q欄(買家備註) 封包
     let displayTimeAndAddress = `
       <div class="space-y-0.5 text-[11px] leading-tight text-stone-600">
         <div>⏱️ <b>取貨：</b>${o.pickupTime || "常規時間"}</div>
-        <div>🚚 <b>方式：</b>${o.shipping || "面交自取"}</div>
+        <div>🚚 <b>方式：</b>${o.shipping || "自取"}</div>
         <div>📍 <b>收件：</b>${o.shipAddress || "現場自取"}</div>
         <div class="text-blue-600 font-semibold">📝 <b>備註：</b>${o.remark || "無"}</div>
       </div>
@@ -522,24 +492,20 @@ function renderOrderTable() {
         <td class="p-3"><b>${o.custName}</b><br><span class="text-stone-500">Tel:${o.phone}</span><br><span class="text-stone-400">LINE:${o.lineName || ''}</span></td>
         
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
-        
-        <!-- 🎯 漂亮平鋪展示於「預計取貨時間/地址」格子內 -->
         <td class="p-3 font-medium">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none" placeholder="輸入對帳備註">
-          <span class="status-tip text-[10px] text-stone-400 block mt-0.5"></span>
+          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入對帳備註">
+          <span class="status-tip text-[10px] text-stone-400 block mt-0.5 font-bold"></span>
         </td>
         <td class="p-3">
           <span class="block font-bold text-blue-600 mb-1 order-status-text">${o.status}</span>
           <select onchange="silentUpdateStatus(${o.rowIdx}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500">
             <option value="">狀態變更...</option>
             <option value="新訂單">新訂單</option>
-            <option value="已確認訂單">已確認訂單</option>
-            <option value="等待到貨中">等待到貨中</option>
-            <option value="延後取貨">延後取貨</option>
+            <option value="已對帳">已對帳</option>
+            <option value="已出貨">已出貨</option>
             <option value="已取貨">已取貨</option>
-            <option value="待宅配出貨">待宅配出貨</option>
             <option value="取消不成立">取消不成立</option>
           </select>
         </td>
@@ -560,30 +526,43 @@ function silentUpdateStatus(rowIdx, select) {
 
 function silentUpdateRemark(rowIdx, input) {
   let tip = input.nextElementSibling;
+  tip.className = "status-tip text-[10px] text-amber-600 block mt-0.5 font-bold";
   tip.innerText = "⏳ 儲存中...";
+  
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
-    .then(r => r.json()).then(res => { if(res.success) tip.innerText = "✅ 已同步試算表"; });
+    .then(r => r.json()).then(res => { 
+      if(res && res.success) { 
+        tip.className = "status-tip text-[10px] text-green-600 block mt-0.5 font-bold";
+        tip.innerText = "✅ 已同步試算表"; 
+      } else { 
+        tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold";
+        tip.innerText = "❌ 儲存未成功"; 
+      }
+    }).catch(() => { 
+      tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold";
+      tip.innerText = "❌ 連線超時"; 
+    });
 }
 
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
-function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
-function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目"); if(!confirm("確定次徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目"); if(!confirm("確定次徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 
 function fireBatchPrintInvoices() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return alert("請勾選項目");
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目");
   let w = window.open('', '_blank');
   let html = `<html><head><title>揀貨預訂清單</title><style>body{font-family:sans-serif;padding:20px;} div{padding:10px; font-size:14px;}</style></head><body>`;
   chks.forEach(b => { 
     let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); 
-    html += `<div><b>預訂單號:</b> ${o.orderId} | <b>姓名:</b> ${o.custName} | <b>商品明細:</b> ${o.prodName} (${o.specs}) | <b>自取時間：</b>${o.pickupTime} | <b>物流方式：</b>${o.shipping} | <b>收貨地址：</b>${o.shipAddress} | <b>買家備註：</b>${o.remark}</div><hr style="border:1px dashed #ccc;">`; 
+    html += `<div><b>預訂單號:</b> ${o.orderId} | <b>姓名:</b> ${o.custName} | <b>商品明細:</b> ${o.prodName} (${o.specs}) | <b>取貨時間：</b>${o.pickupTime} | <b>方式：</b>${o.shipping} | <b>地址：</b>${o.shipAddress} | <b>備註：</b>${o.remark}</div><hr style="border:1px dashed #ccc;">`; 
   });
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
 function fireBatchExportToExcel() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return alert("請勾選項目");
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目");
   let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,預計取貨時間,配送方式,收貨地址,買家備註,老闆備註,訂單狀態\n";
   chks.forEach(box => { 
     let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
