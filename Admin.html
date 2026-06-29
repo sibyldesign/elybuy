@@ -160,14 +160,12 @@
       </div>
       <input type="text" id="inventorySearchInput" oninput="searchInventory()" class="text-xs p-2 border rounded-lg max-w-xs bg-stone-50 outline-none" placeholder="快速篩選貨號或品名...">
     </div>
-    
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center flex-wrap gap-2 text-xs">
       <span class="font-bold text-stone-600 mr-2">🛠️ 商品批量管理區：</span>
       <button onclick="fireBatchCopy()" class="bg-stone-600 text-white px-3 py-1.5 rounded hover:bg-stone-700 transition-all">複製勾選商品</button>
       <button onclick="fireBatchArchive()" class="bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 transition-all">封存勾選商品</button>
       <button onclick="fireBatchDeleteProducts()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-all">徹底刪除商品</button>
     </div>
-    
     <div class="overflow-x-auto border rounded-lg">
       <table class="w-full text-left text-xs bg-white">
         <thead class="bg-stone-50 border-b">
@@ -203,7 +201,7 @@
         <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800">全部</button>
         <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500">新訂單</button>
         <button onclick="filterOrderStatus('已對帳')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已對帳</button>
-        <button onclick="filterOrderStatus('決策中')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
+        <button onclick="filterOrderStatus('已出貨')" class="order-filter-btn px-3 py-1 rounded text-stone-500">已出貨</button>
       </div>
     </div>
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
@@ -232,7 +230,7 @@
       </table>
     </div>
     <div class="flex justify-center items-center gap-4 text-xs font-bold pt-2">
-      <button onclick="changeOrderPage(-1)" id="prevOrderBtn" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">上一頁</button>
+      <button onclick="changeOrderPage(-1)" id="prevOrderBtn" class="px-3 py-1.5 bg-stone-100 border rounded disabled:opacity-40 hover:bg-stone-200">上一頁</button>
       <span id="orderPageText" class="text-stone-700">第 1 / 1 頁</span>
       <button onclick="changeOrderPage(1)" id="nextOrderBtn" class="px-3 py-1.5 bg-stone-100 border rounded hover:bg-stone-200">下一頁</button>
     </div>
@@ -469,8 +467,6 @@ function renderOrderTable() {
 
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
-    
-    // 🌟 補齊最新需求：訂單看板「到貨日期」只撈取、原裝呈現該筆訂單成立當下的純文字到貨日期
     let cleanArrivalDate = o.arrivalDate || "追加中";
 
     let displayTimeAndAddress = `
@@ -547,29 +543,77 @@ function silentUpdateRemark(rowIdx, input) {
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
-function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目"); if(!confirm("確定次徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
+function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目"); if(!confirm("確定徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 
+// 🌟 補齊需求：🖨️ 批量生成揀貨單並列印 (完美對齊 9 大狀態欄位)
 function fireBatchPrintInvoices() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目");
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請先勾選欲列印的訂單項目！");
   let w = window.open('', '_blank');
-  let html = `<html><head><title>揀貨預訂清單</title><style>body{font-family:sans-serif;padding:20px;} div{padding:10px; font-size:14px;}</style></head><body>`;
-  chks.forEach(b => { 
-    let o = JSON.parse(b.closest('tr').getAttribute('data-order-raw')); 
-    html += `<div><b>預訂單號:</b> ${o.orderId} | <b>姓名:</b> ${o.custName} | <b>商品明細:</b> ${o.prodName} (${o.specs}) | <b>取貨時間：</b>${o.pickupTime} | <b>方式：</b>${o.shipping} | <b>地址：</b>${o.shipAddress} | <b>備註：</b>${o.remark}</div><hr style="border:1px dashed #ccc;">`; 
+  let html = `<html><head><title>伊利小編購 - 揀貨單列印中心</title><style>
+    body{font-family:sans-serif;padding:20px;background:#fff;color:#000;} 
+    .invoice-card{border:2px solid #000; padding:20px; border-radius:12px; margin-bottom:25px; page-break-after:always; line-height:1.6; font-size:14px;}
+    .title{font-size:18px; font-weight:bold; border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:12px;}
+    .grid-2{display:grid; grid-template-cols:1fr 1fr; gap:10px;}
+    .item-list{background:#f8f9fa; border:1px solid #dee2e6; padding:12px; border-radius:6px; margin:10px 0;}
+  </style></head><body>`;
+  
+  chks.forEach(box => { 
+    let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
+    html += `
+      <div class="invoice-card">
+        <div class="title">🛒 伊利小編購 - 揀貨出貨自取明細單</div>
+        <div class="grid-2">
+          <div><b>1. 下單時間：</b>${o.time}</div>
+          <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${o.orderId}</span></div>
+        </div>
+        <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
+        <div class="item-list">
+          <b>3. 預訂品項貨號明細：</b><br>
+          <span style="font-size:15px; font-weight:bold; color:#B22222;">${o.prodName}</span><br>
+          <span style="color:#555;">[ 規格矩陣配給：${o.specs} ]</span>
+        </div>
+        <div class="grid-2">
+          <div><b>4. 應付總額：</b><span style="color:#dc3545; font-weight:bold; font-size:16px;">$ ${o.total} 元</span> (${o.payStatus || '未付款'})</div>
+          <div><b>5. 客戶聯絡資訊：</b><b>${o.custName}</b> (Tel: ${o.phone} / LINE: ${o.lineName || '無'})</div>
+        </div>
+        <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
+        <div><b>6. 商品到貨日期：</b><span style="color:#d97706; font-weight:bold;">${o.arrivalDate || '追加中'}</span></div>
+        <div style="background:#fff3cd; border:1px solid #ffeeba; padding:10px; border-radius:6px; margin:8px 0;">
+          <b>7. 預計取貨時間/配送地址：</b><br>
+          ⏱️ 預計取貨時間：<span style="font-weight:bold; color:#795548;">${o.pickupTime || '常規時間'}</span><br>
+          🚚 配送或自取方式：<b>${o.shipping || '自取'}</b><br>
+          📍 收貨地址/店面：<b>${o.shipAddress || '現場面交'}</b>
+        </div>
+        <div style="color:#4a148c; font-weight:bold;"><b>8. 老闆點擊對帳備註：</b>${o.bossRemark || "暫無任何備註"}</div>
+        <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${o.status}</span></div>
+      </div>`; 
   });
+  
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
+// 🌟 補齊需求：頂級規格化 格式匯出 EXCEL (完美對齊 9 大狀態欄位)
 function fireBatchExportToExcel() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目");
-  let csvContent = "\uFEFF下單時間,訂單單號,商品品名,規格細節,應付金額,客戶姓名,聯絡電話,預計取貨時間,配送方式,收貨地址,買家備註,老闆備註,訂單狀態\n";
+  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目！");
+  // 設置標準對齊表頭 
+  let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
+  
   chks.forEach(box => { 
     let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
     let safePhone = o.phone ? "'" + o.phone : "";
-    csvContent += `${o.time},${o.orderId},${o.prodName.replace(/,/g," ")},${o.specs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${o.pickupTime},${o.shipping},${(o.shipAddress || "").replace(/,/g," ")},${(o.remark || "").replace(/,/g," ")},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
+    let safeSpecs = `${o.prodName} (${o.specs})`;
+    
+    csvContent += `${o.time},${o.orderId},${safeSpecs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${(o.lineName || "").replace(/,/g," ")},${(o.arrivalDate || "追加中").replace(/,/g," ")},${(o.pickupTime || "常規").replace(/,/g," ")},${(o.shipping || "自取").replace(/,/g," ")},${(o.shipAddress || "現場").replace(/,/g," ")},${(o.remark || "無").replace(/,/g," ")},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
   });
-  let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `伊利出貨核對表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  
+  let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
+  let link = document.createElement("a"); 
+  link.href = URL.createObjectURL(blob); 
+  link.setAttribute("download", `伊利出貨訂單核對總表(9大狀態對齊版).csv`); 
+  document.body.appendChild(link); 
+  link.click(); 
+  document.body.removeChild(link);
 }
 </script>
 </body>
