@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>伊利小編購後台 | 智慧雲端旗艦管理系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -34,9 +34,28 @@
   </style>
 </head>
 <body class="bg-white text-text-dark font-sans p-4 sm:p-6">
+
+<!-- 🔐 智慧管理後台安全驗證防護牆 -->
+<div id="adminAuthOverlay" class="fixed inset-0 bg-stone-100 z-[99999] flex flex-col justify-center items-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl text-center space-y-4 border border-border-soft">
+    <div class="w-16 h-16 rounded-full overflow-hidden mx-auto border border-border-soft shadow-inner">
+      <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Verification Logo">
+    </div>
+    <div class="space-y-1">
+      <h3 class="text-base font-bold text-stone-800">管理後台安全驗證</h3>
+      <p class="text-xs text-stone-400">請輸入四位數管理員安全通行密碼</p>
+    </div>
+    <div>
+      <input type="password" id="adminPwdInput" placeholder="••••" maxlength="4" class="w-full text-2xl p-3 border border-stone-300 rounded-xl bg-stone-50 outline-none text-center tracking-[1em] font-mono focus:bg-white focus:border-primary-taupe transition-colors">
+      <div id="authErrorMsg" class="text-xs text-red-600 font-bold mt-2 hidden">⚠️ 密碼驗證錯誤，請重新輸入！</div>
+    </div>
+    <button onclick="verifyAdminPassword()" class="w-full bg-primary-taupe text-white text-sm font-bold py-3 rounded-xl shadow hover:bg-taupe-dark transition-all">確 認 登 入</button>
+  </div>
+</div>
+
 <div class="max-w-7xl mx-auto relative admin-panel-ui bg-white">
 
-  <div class="flex flex-col sm:flex-row justify-between items-center border-b border-border-soft pb-4 mb-6">
+  <div class="flex flex-col sm:flex-row justify-between items-center border-b border-border-soft pb-4 mb-6 relative">
     <div class="flex items-center gap-3 cursor-pointer select-none group" onclick="backToDashboardHome()">
       <div class="w-12 h-12 rounded-full overflow-hidden border border-border-soft shadow-sm group-hover:scale-105 transition-transform">
         <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Logo">
@@ -46,7 +65,12 @@
         <p class="text-xs text-primary-taupe mt-0.5">V20260629</p>
       </div>
     </div>
-    <a id="viewStoreLink" href="#" target="_blank" class="mt-3 sm:mt-0 bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往前台行動商城</a>
+    
+    <!-- 右上角安全登出功能區組件 -->
+    <div class="flex items-center gap-3 mt-3 sm:mt-0">
+      <a id="viewStoreLink" href="#" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往前台行動商城</a>
+      <button onclick="handleAdminLogout()" class="bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm hover:bg-red-700 transition-all">🚪 安全登出</button>
+    </div>
   </div>
 
   <div class="flex gap-1 border-b border-border-soft overflow-x-auto mb-6 tab-nav-ui">
@@ -76,7 +100,7 @@
       </div>
       <div>
         <label class="text-xs font-semibold text-stone-600 block mb-1">到貨日期 (Q欄)</label>
-        <input type="text" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="如：6/25 或 追加中">
+        <input type="text" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="">
       </div>
     </div>
 
@@ -240,12 +264,44 @@
 <div id="printArea" class="print-invoice-area"></div>
 
 <script>
+// 🌟【自訂安全密碼修改位置】日後若要更換通行密碼，直接修改下方引號內的四位數即可！
+const ADMIN_SECURITY_PASSWORD = "8888";
+
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
 const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
 
 let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
 let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
 let currentEditingRowIdx = null; 
+
+// 🔐 安全密碼驗證引擎
+function verifyAdminPassword() {
+  const pwdInput = document.getElementById("adminPwdInput");
+  const errorMsg = document.getElementById("authErrorMsg");
+  const overlay = document.getElementById("adminAuthOverlay");
+  
+  if (pwdInput.value.trim() === ADMIN_SECURITY_PASSWORD) {
+    sessionStorage.setItem("yili_admin_authed", "true");
+    errorMsg.classList.add("hidden");
+    overlay.style.display = "none";
+    // 登入成功後自發啟動基礎店鋪配置同步
+    initStoreConfigurations();
+  } else {
+    errorMsg.classList.remove("hidden");
+    pwdInput.value = "";
+    pwdInput.focus();
+  }
+}
+
+// 🚪 安全登出模組
+function handleAdminLogout() {
+  if (confirm("確定要登出伊利雲端智慧管理後台系統嗎？")) {
+    sessionStorage.removeItem("yili_admin_authed");
+    document.getElementById("adminPwdInput").value = "";
+    document.getElementById("authErrorMsg").classList.add("hidden");
+    document.getElementById("adminAuthOverlay").style.display = "flex";
+  }
+}
 
 function adminCustomAlert(msg) { document.getElementById('adminAlertText').innerText = msg; document.getElementById('adminAlertModal').classList.remove('hidden'); document.getElementById('adminAlertModal').classList.add('flex'); }
 function closeAdminAlert() { document.getElementById('adminAlertModal').className = "hidden"; }
@@ -264,9 +320,8 @@ function switchTab(id) {
 
 function backToDashboardHome() { window.location.reload(); }
 
-window.onload = function() {
-  document.getElementById('viewStoreLink').href = window.location.href.replace('Admin.html','Index.html').split('?')[0];
-  
+// 獨立拉出初始化，受 Session 晶片安全保護
+function initStoreConfigurations() {
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
     .then(r => r.json()).then(res => {
       if(!res || !res.success) return adminCustomAlert("中轉連線失敗，請檢查二端 GAS 權限部署！");
@@ -277,6 +332,25 @@ window.onload = function() {
       
       globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
     });
+}
+
+window.onload = function() {
+  document.getElementById('viewStoreLink').href = window.location.href.replace('Admin.html','Index.html').split('?')[0];
+  
+  // 密碼 Enter 按鈕鍵盤監聽咬合
+  document.getElementById("adminPwdInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") { verifyAdminPassword(); }
+  });
+
+  // 實時持久檢測 Session 狀態
+  if (sessionStorage.getItem("yili_admin_authed") === "true") {
+    document.getElementById("adminAuthOverlay").style.display = "none";
+    document.getElementById("authErrorMsg").classList.add("hidden");
+    initStoreConfigurations();
+  } else {
+    document.getElementById("adminAuthOverlay").style.display = "flex";
+    document.getElementById("adminPwdInput").focus();
+  }
 };
 
 function fireBatchSetMatrix() {
@@ -545,7 +619,6 @@ function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c 
 function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目"); if(!confirm("確定徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 
-// 🌟 補齊需求：🖨️ 批量生成揀貨單並列印 (完美對齊 9 大狀態欄位)
 function fireBatchPrintInvoices() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請先勾選欲列印的訂單項目！");
   let w = window.open('', '_blank');
@@ -593,10 +666,8 @@ function fireBatchPrintInvoices() {
   w.document.write(html); w.document.close();
 }
 
-// 🌟 補齊需求：頂級規格化 格式匯出 EXCEL (完美對齊 9 大狀態欄位)
 function fireBatchExportToExcel() {
   let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目！");
-  // 設置標準對齊表頭 
   let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
   
   chks.forEach(box => { 
@@ -615,6 +686,63 @@ function fireBatchExportToExcel() {
   link.click(); 
   document.body.removeChild(link);
 }
+
+function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
+function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
+
+/**
+ * 🔐 ADMIN 後台安全登入與持久身分狀態控管
+ */
+function verifyAdminPassword() {
+  const pwdInput = document.getElementById("adminPwdInput");
+  const errorMsg = document.getElementById("authErrorMsg");
+  const overlay = document.getElementById("adminAuthOverlay");
+  
+  // 比對上方的安全靜態變數密碼值
+  if (pwdInput.value.trim() === ADMIN_SECURITY_PASSWORD) {
+    sessionStorage.setItem("yili_admin_authed_session", "true");
+    errorMsg.classList.add("hidden");
+    overlay.style.display = "none";
+    // 通行解鎖後，即刻自動拉取並初始化店鋪遠端連線配置數據
+    fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
+      .then(r => r.json()).then(res => {
+        if(!res || !res.success) return;
+        const maj = document.getElementById('pMajorSelect'); const sub = document.getElementById('pSubSelect');
+        maj.innerHTML = ""; sub.innerHTML = "";
+        res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
+        if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
+        globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
+      });
+  } else {
+    errorMsg.classList.remove("hidden");
+    pwdInput.value = "";
+    pwdInput.focus();
+  }
+}
+
+function handleAdminLogout() {
+  if (confirm("確定要安全登出伊利小編購後台管理系統嗎？")) {
+    sessionStorage.removeItem("yili_admin_authed_session");
+    document.getElementById("adminPwdInput").value = "";
+    document.getElementById("authErrorMsg").classList.add("hidden");
+    document.getElementById("adminAuthOverlay").style.display = "flex";
+    document.getElementById("adminPwdInput").focus();
+  }
+}
+
+// 實時掛載身分審查器，杜絕重新整理頁面重複輸入密碼的體驗黑洞
+document.addEventListener("DOMContentLoaded", function() {
+  const sessionStatus = sessionStorage.getItem("yili_admin_authed_session");
+  const overlay = document.getElementById("adminAuthOverlay");
+  
+  if (sessionStatus === "true") {
+    if(overlay) overlay.style.display = "none";
+  } else {
+    if(overlay) overlay.style.display = "flex";
+    const input = document.getElementById("adminPwdInput");
+    if(input) input.focus();
+  }
+});
 </script>
 </body>
 </html>
