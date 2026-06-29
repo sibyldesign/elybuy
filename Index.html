@@ -98,7 +98,7 @@
   <!-- 智慧核心搜尋區 -->
   <div class="px-4 py-2 space-y-2 bg-white">
     <div class="bg-white border border-border-soft rounded-xl p-2 flex items-center shadow-sm gap-2 max-w-full overflow-hidden">
-      <input type="text" id="searchInput" class="bg-transparent pl-2 py-2 text-sm outline-none flex-1 text-carbon-black font-medium min-w-0" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼快查訂單進度與收藏...">
+      <input type="text" id="searchInput" class="bg-transparent pl-2 py-2 text-sm outline-none flex-1 text-carbon-black font-medium min-w-0" placeholder="輸入品名貨號搜尋商品，或輸入電話號碼查詢訂單進度與收藏...">
       <button onclick="searchProducts()" class="bg-warm-taupe text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">搜尋<br>商品</button>
       <button onclick="checkOrderHistory()" class="bg-misty-rose text-white text-xs font-bold w-12 h-10 py-1 rounded-lg leading-tight shrink-0 flex items-center justify-center text-center">狀態<br>查詢</button>
     </div>
@@ -106,7 +106,7 @@
     <!-- 訂單實時進度快查面板 -->
     <div id="queryResultArea" class="bg-white border border-border-soft rounded-xl p-4 shadow-md hidden">
       <div class="flex justify-between items-center mb-2 border-b pb-2">
-        <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單進度快查（試算表全量穿透反查機制）</h4>
+        <h4 class="text-sm font-bold text-warm-taupe tracking-wide">📋 訂單進度查詢</h4>
         <span onclick="closeQueryPanel()" class="text-stone-400 font-bold text-2xl cursor-pointer px-1">×</span>
       </div>
       <div id="memberFavoritesContainer" class="mb-3 p-2.5 bg-rose-50/40 border border-rose-100 rounded-lg text-xs text-rose-900 font-medium hidden"></div>
@@ -206,7 +206,7 @@
   <!-- 🌟 購物車明細抽屜 (補齊需求：製作極富美感的優雅燕麥暖杏色 bg-[#F9F8F6] 作為視窗主底色，與純白首頁形成強烈對比，長輩秒分辨！) -->
   <div id="cartDrawer" class="fixed bottom-0 left-0 right-0 bg-[#F9F8F6] border-t-2 border-stone-300 rounded-t-3xl z-[2800] max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col translate-y-full transition-transform duration-300">
     <div class="sticky top-0 bg-[#F4F1EA] px-5 pt-5 pb-3 border-b border-stone-300 flex justify-between items-center z-50 shrink-0 shadow-sm">
-      <h3 class="text-lg font-extrabold text-stone-900 tracking-wider flex items-center gap-1">🛒 <span class="bg-stone-900 text-white text-xs px-2 py-0.5 rounded-md">目前進入</span> 您的預訂購物車視窗</h3>
+      <h3 class="text-lg font-extrabold text-stone-900 tracking-wider flex items-center gap-1">🛒 <span class="bg-stone-900 text-white text-xs px-2 py-0.5 rounded-md">目前進入</span> 購物車明細</h3>
       <span onclick="toggleCart(false)" class="text-stone-500 font-bold text-3xl cursor-pointer p-1 hover:text-carbon-black select-none">✕</span>
     </div>
     
@@ -228,9 +228,9 @@
           <div id="discountMsgBlock" class="text-sm text-green-600 font-bold hidden px-1"></div>
         </div>
 
-        <!-- 2. 收款資訊說明 -->
+        <!-- 2. 🛒 購物說明 -->
         <div class="bg-amber-50/50 p-4 border border-amber-200 text-base leading-relaxed text-amber-900 rounded-xl shadow-sm">
-          <div class="font-extrabold text-lg text-stone-900 mb-1">💰 收款資訊說明</div>
+          <div class="font-extrabold text-lg text-stone-900 mb-1">🛒 購物說明</div>
           <div id="paymentConfigText" class="font-bold text-stone-800 text-base"></div>
         </div>
 
@@ -262,9 +262,11 @@
 
         <!-- 6. 電子郵件 (🌟 長輩大字體) -->
         <div class="bg-white p-3 border border-stone-200 rounded-xl shadow-sm">
-          <label class="text-base font-extrabold text-stone-900 block mb-1">電子郵件 <span class="text-red-600">(必填)</span></label>
-          <input type="email" id="custEmail" placeholder="如 example@gmail.com" class="text-base p-3.5 border-2 border-stone-300 rounded-lg bg-stone-50 font-bold text-stone-900 w-full h-12 focus:bg-white focus:border-stone-600 outline-none">
-        </div>
+  <label class="text-base font-extrabold text-stone-900 block mb-1">
+    電子郵件 <span class="text-stone-400 font-medium text-sm ml-1">*</span>
+  </label>
+  <input type="email" id="custEmail" placeholder="如 example@gmail.com" class="text-base p-3.5 border-2 border-stone-300 rounded-lg bg-stone-50 font-bold text-stone-900 w-full h-12 focus:bg-white focus:border-stone-600 outline-none">
+</div>
 
         <!-- 7. 配送或自取方式 -->
         <div class="bg-white p-3 border border-stone-200 rounded-xl shadow-sm">
@@ -695,7 +697,6 @@ function submitFinalOrder() {
   if(!name.value.trim()){ showCustomAlert("請填寫必填欄位：訂購人姓名！"); name.focus(); return; }
   if(!ph.value.trim()){ showCustomAlert("請填寫必填欄位：手機號碼！"); ph.focus(); return; }
   if(!line.value.trim()){ showCustomAlert("請填寫必填欄位：LINE 暱稱！"); line.focus(); return; }
-  if(!mail.value.trim()){ showCustomAlert("請填寫必填欄位：電子郵件！"); mail.focus(); return; }
 
   let finalTimeField = "";
   let finalAddressField = "";
