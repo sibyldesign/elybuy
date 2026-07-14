@@ -234,7 +234,7 @@
             <th style="width: 3.5%;" class="p-3"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
             <th style="width: 8.0%;" class="p-3">下單時間</th>
             <th style="width: 10.0%;" class="p-3">單號</th>
-            <th style="width: 26.0%;" class="p-3 font-bold text-stone-900 text-sm">合併同品項明細 (核心對貨格子)</th>
+            <th style="width: 26.0%;" class="p-3 font-bold text-stone-900 text-sm">合併同品項明細</th>
             <th style="width: 6.0%;" class="p-3">應付總額</th>
             <th style="width: 9.0%;" class="p-3">客戶資訊</th>
             <th style="width: 7.0%;" class="p-3 font-bold text-amber-800">到貨日期</th>
@@ -294,6 +294,28 @@ function handleAdminLogout() {
     document.getElementById("adminAuthOverlay").style.display = "flex";
     document.getElementById("adminPwdInput").focus();
   }
+}
+
+// 點擊複製地址提示功能
+function copyToClipboard(text, element) {
+  navigator.clipboard.writeText(text).then(() => {
+    // 視覺回饋提示
+    const originalBg = element.style.backgroundColor;
+    element.style.backgroundColor = '#dcfce7'; // 淺綠色背景閃爍
+    const statusTip = element.querySelector('.copy-status') || document.createElement('span');
+    statusTip.className = "copy-status text-[10px] text-green-600 ml-1 font-bold";
+    statusTip.innerText = " (已複製!)";
+    if (!element.querySelector('.copy-status')) {
+      element.appendChild(statusTip);
+    }
+    
+    setTimeout(() => {
+      element.style.backgroundColor = originalBg;
+      statusTip.remove();
+    }, 1500);
+  }).catch(err => {
+    console.error('複製失敗: ', err);
+  });
 }
 
 function adminCustomAlert(msg) { document.getElementById('adminAlertText').innerText = msg; document.getElementById('adminAlertModal').classList.remove('hidden'); document.getElementById('adminAlertModal').classList.add('flex'); }
@@ -573,11 +595,17 @@ function renderOrderTable() {
     let isCheckedStr = selectedOrderKeysMap[uniqueKey] ? "checked" : "";
     let specsHtmlStr = mo.specsLines.join('<br>');
 
+    // 🌟 優化關鍵：移除原本 CSS 截斷限制、加上 pointer 鼠標提示及點擊自動複製地址與點擊效果
+    let safeAddressText = (mo.shipAddress || "現場").replace(/"/g, '&quot;');
     let displayTimeAndAddress = `
       <div class="space-y-0.5 text-[11px] leading-tight text-stone-500">
         <div>⏱️ <b>取貨：</b>${mo.pickupTime || "常規"}</div>
         <div>🚚 <b>方式：</b>${mo.shipping || "自取"}</div>
-        <div class="truncate max-w-[120px]" title="${mo.shipAddress || ''}">📍 <b>收件：</b>${mo.shipAddress || "現場"}</div>
+        <div class="cursor-pointer hover:bg-stone-100 p-0.5 rounded transition-colors" 
+             onclick="copyToClipboard('${safeAddressText}', this)" 
+             title="點擊可複製完整地址">
+          📍 <b>收件：</b>${mo.shipAddress || "現場"}
+        </div>
         <div class="text-blue-600 font-semibold truncate max-w-[120px]" title="${mo.remark || ''}">📝 <b>備註：</b>${mo.remark || "無"}</div>
       </div>
     `;
