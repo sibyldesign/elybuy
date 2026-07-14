@@ -760,7 +760,12 @@ function fireBatchPrintInvoices() {
         <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${inv.status}</span></div>
       </div>`; 
   }
-  html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
+  html += `<script>
+    setTimeout(function() {
+      window.print();
+      window.close();
+    }, 500);
+  <\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
@@ -788,13 +793,15 @@ function fireBatchExportToExcel() {
   document.body.removeChild(link);
 }
 
-// ✨ 「生成 EXCEL 並列印」 (最左側手寫留白，並移除 [ ] 符號)
+// ✨ 「生成 EXCEL 並列印」 (解決當機 & 確保同單同品項合併於同一列)
 function fireBatchExportAndPrintCombined() {
   let selectedItems = getSelectedRawOrdersArray();
   if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目！");
   
+  // 先下載 EXCEL 檔
   fireBatchExportToExcel();
   
+  // 延遲 1 秒，確保檔案下載與列印新視窗建立不衝突，並安全觸發 print 視窗
   setTimeout(() => {
     let w = window.open('', '_blank');
     let html = `<html><head><title>伊利出貨訂單核對總表</title><style>
@@ -829,33 +836,46 @@ function fireBatchExportAndPrintCombined() {
       </thead>
       <tbody>`;
     
+    // 改為迭代已合併同單同商品之項目 (不跑原始單細項迴圈)
     selectedItems.forEach(item => {
-      item.rawItemsRefs.forEach(ref => {
-        let cleanPhone = ref.phone ? ref.phone.replace(/'/g, "") : "";
-        html += `
-          <tr>
-            <!-- 最左側手寫留白，已完全移除 [ ] 符號 -->
-            <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
-            <td class="aux-info">${ref.time}</td>
-            <td class="font-mono-id">${ref.orderId}</td>
-            <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
-            <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
-            <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
-            <td class="aux-info" style="font-family:monospace;">${cleanPhone}</td>
-            <td class="aux-info">${ref.lineName || ""}</td>
-            <td style="font-weight:bold; color:#d97706;">${ref.arrivalDate || "追加中"}</td>
-            <td class="aux-info">${ref.pickupTime || "常規"}</td>
-            <td><b>${ref.shipping || "自取"}</b></td>
-            <td class="aux-info">${ref.shipAddress || "現場"}</td>
-            <td class="aux-info" style="word-break:break-all;">${ref.remark || "無"}</td>
-          </tr>`;
-      });
+      let cleanPhone = item.phone ? item.phone.replace(/'/g, "") : "";
+      let specsHtmlStr = item.specsLines.join('<br>'); // 用 <br> 把同商品的規格換行串接在同一個格子
+      
+      html += `
+        <tr>
+          <!-- 最左側手寫留白 -->
+          <td class="center" style="background:#fff;"></td>
+          <td class="aux-info">${item.time}</td>
+          <td class="font-mono-id">${item.orderId}</td>
+          <td style="background:#fff;">
+            <b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${item.prodName}</b>
+            <span style="color:#262626; font-size:13px; font-weight:500; display:block; line-height:1.4;">${specsHtmlStr}</span>
+          </td>
+          <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${item.total}</td>
+          <td><b style="font-size:13px; color:#111827;">${item.custName}</b></td>
+          <td class="aux-info" style="font-family:monospace;">${cleanPhone}</td>
+          <td class="aux-info">${item.lineName || ""}</td>
+          <td style="font-weight:bold; color:#d97706;">${item.arrivalDate || "追加中"}</td>
+          <td class="aux-info">${item.pickupTime || "常規"}</td>
+          <td><b>${item.shipping || "自取"}</b></td>
+          <td class="aux-info">${item.shipAddress || "現場"}</td>
+          <td class="aux-info" style="word-break:break-all;">${item.remark || "無"}</td>
+        </tr>`;
     });
     
     html += `</tbody></table>`;
-    html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
-    w.document.write(html); w.document.close();
-  }, 800);
+    
+    // 使用 setTimeout 避開 onload 無法正常在 document.write 中偵測的問題
+    html += `<script>
+      setTimeout(function() {
+        window.print();
+        window.close();
+      }, 500);
+    <\/script></body></html>`;
+    
+    w.document.write(html); 
+    w.document.close();
+  }, 1000);
 }
 </script>
 </body>
