@@ -678,7 +678,7 @@ function fireBatchPrintInvoices() {
   if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的項目 (支援跨頁)！");
   
   let w = window.open('', '_blank');
-  let html = `<html><head><title>伊利出貨訂單核對總表(跨頁合併最終版)</title><style>
+  let html = `<html><head><title>伊利出貨訂單核對總表</title><style>
     body{font-family:sans-serif;padding:10px;background:#fff;color:#000;} 
     .header-title{font-size:22px; font-weight:bold; text-align:center; margin-bottom:15px; letter-spacing:1px; color:#1a1a1a;}
     table{width:100%; border-collapse:collapse; font-size:12px; margin-top:5px; table-layout:fixed;}
@@ -689,7 +689,7 @@ function fireBatchPrintInvoices() {
     .aux-info{color:#6b7280; font-size:11px;} /* 輔助資料灰色降噪 */
   </style></head><body>`;
   
-  html += `<div class="header-title">伊利出貨訂單核對總表(跨頁合併最終版)</div>`;
+  html += `<div class="header-title">伊利出貨訂單核對總表</div>`;
   html += `<table>
     <thead>
       <tr>
@@ -697,7 +697,7 @@ function fireBatchPrintInvoices() {
         <th style="width:11%;">1.下單時間</th>
         <th style="width:11%;">2.訂單單號</th>
         <!-- 🌟 重磅調整：極致拉寬黃金主要欄位佔比 (從原本20%暴增至32%)，給予最舒服的檢視空間 -->
-        <th style="width:32%;">3.商品品名與規格明細 (主要對貨區)</th>
+        <th style="width:32%;">3.商品品名與規格明細</th>
         <th style="width:5.5%;" class="center">4.總額</th>
         <th style="width:7.5%;">5.姓名</th>
         <th style="width:10.5%;">6.聯絡電話</th>
@@ -717,7 +717,7 @@ function fireBatchPrintInvoices() {
       html += `
         <tr>
           <!-- 🌟 左側專屬打勾白底方格 -->
-          <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;">[  ]</td>
+          <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
           <td class="aux-info">${ref.time}</td>
           <td class="font-mono-id">${ref.orderId}</td>
           
