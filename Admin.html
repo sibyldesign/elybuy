@@ -222,7 +222,7 @@
       <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark font-bold">🖨️ 批量生成揀貨單並列印</button>
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       
-      <!-- 🌟 生成 EXCEL 並列印大按鈕 -->
+      <!-- 生成 EXCEL 並列印大按鈕 -->
       <button onclick="fireBatchExportAndPrintCombined()" class="bg-teal-700 text-white px-3 py-1.5 rounded font-bold hover:bg-teal-900 shadow">✨ 生成 EXCEL 並列印</button>
       
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold">❌ 批量徹底刪除訂單</button>
@@ -270,6 +270,7 @@ let currentEditingRowIdx = null;
 
 let selectedOrderKeysMap = {}; 
 
+// 🔐 安全驗證機制 (確保進入頁面時強制跳出密碼遮罩)
 function verifyAdminPassword() {
   const pwdInput = document.getElementById("adminPwdInput");
   const errorMsg = document.getElementById("authErrorMsg");
@@ -321,15 +322,12 @@ function initStoreConfigurations() {
       maj.innerHTML = ""; sub.innerHTML = "";
       res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
       if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
+      
       globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
     });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById('viewStoreLink').href = window.location.href.replace('Admin.html','Index.html').split('?')[0];
-  document.getElementById("adminPwdInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") { verifyAdminPassword(); }
-  });
+window.onload = function() {
   if (sessionStorage.getItem("yili_admin_authed") === "true") {
     document.getElementById("adminAuthOverlay").style.display = "none";
     initStoreConfigurations();
@@ -337,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("adminAuthOverlay").style.display = "flex";
     document.getElementById("adminPwdInput").focus();
   }
-});
+};
 
 function fireBatchSetMatrix() {
   let p = prompt("請輸入欲批次套用的規格特價單價："); if(!p) return;
@@ -674,63 +672,67 @@ function fireBatchDeleteOrders() {
   }); 
 }
 
-// 🌟 100% 依照指示全新改版：簡單精準的「平鋪表格揀貨清單」！無須一客人一張，全部擠在同一個乾淨的大表格供老闆手寫打勾！
+// 🌟 最終大完美排版革命：大幅壓縮輔助欄位、極致拉大商品格子、文字橫向舒服展開不緊湊！
 function fireBatchPrintInvoices() {
   let selectedItems = getSelectedRawOrdersArray();
   if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的項目 (支援跨頁)！");
   
   let w = window.open('', '_blank');
   let html = `<html><head><title>伊利出貨訂單核對總表(跨頁合併最終版)</title><style>
-    body{font-family:sans-serif;padding:15px;background:#fff;color:#000;} 
-    .header-title{font-size:20px; font-weight:bold; text-align:center; margin-bottom:15px; letter-spacing:1px;}
-    table{width:100%; border-collapse:collapse; font-size:12px; margin-top:5px;}
-    th, td{border:1px solid #000; padding:8px 6px; text-align:left; line-height:1.4;}
-    th{background-color:#e0e0e0; font-weight:bold;}
+    body{font-family:sans-serif;padding:10px;background:#fff;color:#000;} 
+    .header-title{font-size:22px; font-weight:bold; text-align:center; margin-bottom:15px; letter-spacing:1px; color:#1a1a1a;}
+    table{width:100%; border-collapse:collapse; font-size:12px; margin-top:5px; table-layout:fixed;}
+    th, td{border:1px solid #000; padding:10px 6px; text-align:left; line-height:1.4; word-wrap:break-word; overflow:hidden;}
+    th{background-color:#f2f2f2; font-weight:bold; color:#000;}
     .center{text-align:center;}
-    .font-mono-id{font-family:monospace; font-weight:bold;}
+    .font-mono-id{font-family:monospace; font-weight:bold; color:#1e3a8a;}
+    .aux-info{color:#6b7280; font-size:11px;} /* 輔助資料灰色降噪 */
   </style></head><body>`;
   
   html += `<div class="header-title">伊利出貨訂單核對總表(跨頁合併最終版)</div>`;
   html += `<table>
     <thead>
       <tr>
-        <th style="width:40px;" class="center">勾選</th>
-        <th style="width:130px;">1.下單時間</th>
-        <th style="width:100px;">2.訂單單號</th>
-        <th>3.商品品名與規格明細</th>
-        <th style="width:60px;" class="center">4.總額</th>
-        <th style="width:60px;">5.姓名</th>
-        <th style="width:90px;">6.聯絡電話</th>
-        <th style="width:80px;">7.LINE暱稱</th>
-        <th style="width:85px;">8.到貨日期</th>
-        <th style="width:80px;">9.取貨時間</th>
-        <th style="width:70px;">10.配送方式</th>
-        <th style="width:100px;">11.詳細收貨地址</th>
-        <th>12.買家備註</th>
+        <th style="width:4.5%;" class="center">勾選</th>
+        <th style="width:11%;">1.下單時間</th>
+        <th style="width:11%;">2.訂單單號</th>
+        <!-- 🌟 重磅調整：極致拉寬黃金主要欄位佔比 (從原本20%暴增至32%)，給予最舒服的檢視空間 -->
+        <th style="width:32%;">3.商品品名與規格明細 (主要對貨區)</th>
+        <th style="width:5.5%;" class="center">4.總額</th>
+        <th style="width:7.5%;">5.姓名</th>
+        <th style="width:10.5%;">6.聯絡電話</th>
+        <th style="width:9%;">7.LINE暱稱</th>
+        <th style="width:9%;">8.到貨日期</th>
+        <th style="width:10%;">9.取貨時間</th>
+        <th style="width:8.5%;">10.配送方式</th>
+        <th style="width:11%;">11.詳細收貨地址</th>
+        <th style="width:11%;">12.買家備註</th>
       </tr>
     </thead>
     <tbody>`;
   
-  // 遍歷所有勾選的品項列，完全比照 EXCEL 平鋪成極致省紙的 Table Rows 結構
   selectedItems.forEach(item => {
     item.rawItemsRefs.forEach(ref => {
       let cleanPhone = ref.phone ? ref.phone.replace(/'/g, "") : "";
       html += `
         <tr>
-          <!-- 🌟 提供給老闆實體手寫原子筆打勾的純白正方形小方格 -->
-          <td class="center" style="font-size:16px; font-weight:bold; color:#ccc;">[  ]</td>
-          <td>${ref.time}</td>
-          <td class="font-mono-id text-blue-900">${ref.orderId}</td>
-          <td><b style="color:#B22222; font-size:13px;">${ref.prodName}</b><br><span style="color:#444;">(${ref.specs})</span></td>
-          <td class="center" style="font-weight:bold; color:#dc3545;">$${ref.total}</td>
-          <td><b>${ref.custName}</b></td>
-          <td style="font-family:monospace;">${cleanPhone}</td>
-          <td>${ref.lineName || ""}</td>
+          <!-- 🌟 左側專屬打勾白底方格 -->
+          <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;">[  ]</td>
+          <td class="aux-info">${ref.time}</td>
+          <td class="font-mono-id">${ref.orderId}</td>
+          
+          <!-- 🌟 黃金主視覺：品名大兩號、加粗、顏色鮮明，規格橫向完美舒展不擠壓 -->
+          <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
+          
+          <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
+          <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
+          <td class="aux-info" style="font-family:monospace;">${cleanPhone}</td>
+          <td class="aux-info">${ref.lineName || ""}</td>
           <td style="font-weight:bold; color:#d97706;">${ref.arrivalDate || "追加中"}</td>
-          <td>${ref.pickupTime || "常規"}</td>
+          <td class="aux-info">${ref.pickupTime || "常規"}</td>
           <td><b>${ref.shipping || "自取"}</b></td>
-          <td>${ref.shipAddress || "現場"}</td>
-          <td style="color:#555; font-size:11px;">${ref.remark || "無"}</td>
+          <td class="aux-info">${ref.shipAddress || "現場"}</td>
+          <td class="aux-info" style="word-break:break-all;">${ref.remark || "無"}</td>
         </tr>`;
     });
   });
