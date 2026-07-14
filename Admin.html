@@ -28,6 +28,7 @@
       body { background: white; color: black; padding: 0; }
       .admin-panel-ui, .tab-nav-ui, button, select, input { display: none !important; }
       .print-invoice-area { display: block !important; width: 100%; }
+      .invoice-card { border: 2px solid #000 !important; padding: 20px !important; border-radius: 12px !important; margin-bottom: 25px !important; page-break-after: always !important; font-size: 14px !important; line-height: 1.6 !important; background: #white !important; }
     }
     .print-invoice-area { display: none; }
   </style>
@@ -113,7 +114,7 @@
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">副分類 (E欄)</label><select id="pSubSelect" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50"></select></div>
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤 (F欄)</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單 (M欄，中英逗號隔開)</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單 (N欄，中英逗號隔開)</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
     </div>
@@ -219,10 +220,13 @@
 
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
       <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 font-bold">✅ 批量結案</button>
+      
+      <!-- 🌟 按鈕1：精美一件單號一頁出貨明細（如圖二，宅配使用） -->
       <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark font-bold">🖨️ 批量生成揀貨單並列印</button>
+      
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       
-      <!-- 生成 EXCEL 並列印大按鈕 -->
+      <!-- 🌟 按鈕2：生成 EXCEL 並列印平鋪表格總清單（如圖一，現場揀貨使用） -->
       <button onclick="fireBatchExportAndPrintCombined()" class="bg-teal-700 text-white px-3 py-1.5 rounded font-bold hover:bg-teal-900 shadow">✨ 生成 EXCEL 並列印</button>
       
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold">❌ 批量徹底刪除訂單</button>
@@ -270,7 +274,6 @@ let currentEditingRowIdx = null;
 
 let selectedOrderKeysMap = {}; 
 
-// 🔐 安全驗證機制 (確保進入頁面時強制跳出密碼遮罩)
 function verifyAdminPassword() {
   const pwdInput = document.getElementById("adminPwdInput");
   const errorMsg = document.getElementById("authErrorMsg");
@@ -440,6 +443,7 @@ function renderInventoryTable() {
 }
 function changeInvPage(amt) { currentInvPage += amt; renderInventoryTable(); }
 function toggleAllProducts(m) { document.querySelectorAll('.inv-chk').forEach(c => c.checked = m.checked); }
+
 function fireBatchCopy() {
   let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCopyProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData());
@@ -672,72 +676,84 @@ function fireBatchDeleteOrders() {
   }); 
 }
 
-// 🌟 最終大完美排版革命：大幅壓縮輔助欄位、極致拉大商品格子、文字橫向舒服展開不緊湊！
+// 🌟 100% 精準對齊需求：生成精美、一個訂單號多品項完美在「同一頁」大字卡（如圖二，主要供宅配出貨包裹核對貼上使用）
 function fireBatchPrintInvoices() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的項目 (支援跨頁)！");
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的宅配項目 (支援跨頁)！");
   
-  let w = window.open('', '_blank');
-  let html = `<html><head><title>伊利出貨訂單核對總表</title><style>
-    body{font-family:sans-serif;padding:10px;background:#fff;color:#000;} 
-    .header-title{font-size:22px; font-weight:bold; text-align:center; margin-bottom:15px; letter-spacing:1px; color:#1a1a1a;}
-    table{width:100%; border-collapse:collapse; font-size:12px; margin-top:5px; table-layout:fixed;}
-    th, td{border:1px solid #000; padding:10px 6px; text-align:left; line-height:1.4; word-wrap:break-word; overflow:hidden;}
-    th{background-color:#f2f2f2; font-weight:bold; color:#000;}
-    .center{text-align:center;}
-    .font-mono-id{font-family:monospace; font-weight:bold; color:#1e3a8a;}
-    .aux-info{color:#6b7280; font-size:11px;} /* 輔助資料灰色降噪 */
-  </style></head><body>`;
-  
-  html += `<div class="header-title">伊利出貨訂單核對總表</div>`;
-  html += `<table>
-    <thead>
-      <tr>
-        <th style="width:4.5%;" class="center">勾選</th>
-        <th style="width:11%;">1.下單時間</th>
-        <th style="width:11%;">2.訂單單號</th>
-        <!-- 🌟 重磅調整：極致拉寬黃金主要欄位佔比 (從原本20%暴增至32%)，給予最舒服的檢視空間 -->
-        <th style="width:32%;">3.商品品名與規格明細</th>
-        <th style="width:5.5%;" class="center">4.總額</th>
-        <th style="width:7.5%;">5.姓名</th>
-        <th style="width:10.5%;">6.聯絡電話</th>
-        <th style="width:9%;">7.LINE暱稱</th>
-        <th style="width:9%;">8.到貨日期</th>
-        <th style="width:10%;">9.取貨時間</th>
-        <th style="width:8.5%;">10.配送方式</th>
-        <th style="width:11%;">11.詳細收貨地址</th>
-        <th style="width:11%;">12.買家備註</th>
-      </tr>
-    </thead>
-    <tbody>`;
-  
+  // 1. 建立完全單號字典：將同單號的所有品項，毫秒級快取打包
+  let groupedInvoices = {};
   selectedItems.forEach(item => {
     item.rawItemsRefs.forEach(ref => {
-      let cleanPhone = ref.phone ? ref.phone.replace(/'/g, "") : "";
-      html += `
-        <tr>
-          <!-- 🌟 左側專屬打勾白底方格 -->
-          <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
-          <td class="aux-info">${ref.time}</td>
-          <td class="font-mono-id">${ref.orderId}</td>
-          
-          <!-- 🌟 黃金主視覺：品名大兩號、加粗、顏色鮮明，規格橫向完美舒展不擠壓 -->
-          <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
-          
-          <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
-          <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
-          <td class="aux-info" style="font-family:monospace;">${cleanPhone}</td>
-          <td class="aux-info">${ref.lineName || ""}</td>
-          <td style="font-weight:bold; color:#d97706;">${ref.arrivalDate || "追加中"}</td>
-          <td class="aux-info">${ref.pickupTime || "常規"}</td>
-          <td><b>${ref.shipping || "自取"}</b></td>
-          <td class="aux-info">${ref.shipAddress || "現場"}</td>
-          <td class="aux-info" style="word-break:break-all;">${ref.remark || "無"}</td>
-        </tr>`;
+      if (!groupedInvoices[ref.orderId]) {
+        groupedInvoices[ref.orderId] = {
+          time: ref.time, orderId: ref.orderId, total: ref.total, custName: ref.custName,
+          phone: ref.phone ? ref.phone.replace(/'/g, "") : "", lineName: ref.lineName, arrivalDate: ref.arrivalDate,
+          pickupTime: ref.pickupTime, shipping: ref.shipping, shipAddress: ref.shipAddress,
+          remark: ref.remark, bossRemark: ref.bossRemark, status: ref.status, payStatus: ref.payStatus,
+          productItemsList: []
+        };
+      }
+      let isDup = groupedInvoices[ref.orderId].productItemsList.some(x => x.specs === ref.specs && x.prodName === ref.prodName);
+      if(!isDup) {
+        groupedInvoices[ref.orderId].productItemsList.push({ prodName: ref.prodName, specs: ref.specs });
+      }
     });
   });
+
+  let w = window.open('', '_blank');
+  let html = `<html><head><title>伊利小編購 - 揀貨單列印中心</title><style>
+    body{font-family:sans-serif;padding:20px;background:#fff;color:#000;} 
+    .invoice-card{border:2px solid #000; padding:20px; border-radius:12px; margin-bottom:25px; page-break-after:always; line-height:1.6; font-size:14px;}
+    .title{font-size:18px; font-weight:bold; border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:12px;}
+    .grid-2{display:grid; grid-template-cols:1fr 1fr; gap:10px;}
+    .item-list-box{background:#f8f9fa; border:1px solid #dee2e6; padding:12px; border-radius:6px; margin:10px 0;}
+    .single-item-row{border-bottom:1px dashed #ccc; padding:6px 0;}
+    .single-item-row:last-child{border:none;}
+  </style></head><body>`;
   
-  html += `</tbody></table>`;
+  for (let orderId in groupedInvoices) {
+    let inv = groupedInvoices[orderId];
+    let mergedItemsHtml = "";
+    inv.productItemsList.forEach((prod, index) => {
+      mergedItemsHtml += `
+        <div class="single-item-row">
+          <span style="font-weight:bold;">品項 ${index + 1}：</span>
+          <span style="font-size:15px; font-weight:bold; color:#B22222;">${prod.prodName}</span>
+          <span style="color:#555; font-size:13px; margin-left:8px;">[ 規格：${prod.specs} ]</span>
+        </div>`;
+    });
+
+    html += `
+      <div class="invoice-card">
+        <div class="title">🛒 伊利小編購 - 出貨明細單</div>
+        <div class="grid-2">
+          <div><b>1. 下單時間：</b>${inv.time}</div>
+          <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${inv.orderId}</span></div>
+        </div>
+        <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
+        
+        <!-- 🌟 精美大模組：一個單號底下的多品項完全歸併在同一頁呈現！供宅配核對 -->
+        <div class="item-list-box">
+          <b>3. 預訂品項貨號明細：</b>
+          <div style="margin-top:6px;">${mergedItemsHtml}</div>
+        </div>
+        <div class="grid-2">
+          <div><b>4. 應付總額：</b><span style="color:#dc3545; font-weight:bold; font-size:16px;">$ ${inv.total} 元</span> (${inv.payStatus || '未付款'})</div>
+          <div><b>5. 客戶聯絡資訊：</b><b>${inv.custName}</b> (Tel: ${inv.phone} / LINE: ${inv.lineName || '無'})</div>
+        </div>
+        <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
+        <div><b>6. 商品到貨日期：</b><span style="color:#d97706; font-weight:bold;">${inv.arrivalDate || '追加中'}</span></div>
+        <div style="background:#fff3cd; border:1px solid #ffeeba; padding:10px; border-radius:6px; margin:8px 0;">
+          <b>7. 預計取貨時間/配送地址：</b><br>
+          ⏱️ 預計取貨時間：<span style="font-weight:bold; color:#795548;">${inv.pickupTime || '常規時間'}</span><br>
+          🚚 配送或自取方式：<b>${inv.shipping || '自取'}</b><br>
+          📍 收貨地址/店面：<b>${inv.shipAddress || '現場面交'}</b>
+        </div>
+        <div style="color:#4a148c; font-weight:bold;"><b>8. 老闆點擊對帳備註：</b>${inv.bossRemark || "暫無任何備註"}</div>
+        <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${inv.status}</span></div>
+      </div>`; 
+  }
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
@@ -766,14 +782,74 @@ function fireBatchExportToExcel() {
   document.body.removeChild(link);
 }
 
-// 一鍵雙雕『生成 EXCEL 並列印』
+// 🌟 按鈕功能大歸位：一鍵雙雕『生成 EXCEL 並列印』觸發如圖一的表格總清單，供老闆娘拿原子筆打勾手寫配貨
 function fireBatchExportAndPrintCombined() {
   let selectedItems = getSelectedRawOrdersArray();
   if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目 (支援跨頁)！");
   
+  // 1. 先安全下載 EXCEL 檔案
   fireBatchExportToExcel();
+  
+  // 2. 延時建立印出如圖一的表格揀貨總表網頁
   setTimeout(() => {
-    fireBatchPrintInvoices();
+    let w = window.open('', '_blank');
+    let html = `<html><head><title>伊利出貨訂單核對總表</title><style>
+      body{font-family:sans-serif;padding:10px;background:#fff;color:#000;} 
+      .header-title{font-size:22px; font-weight:bold; text-align:center; margin-bottom:15px; letter-spacing:1px; color:#1a1a1a;}
+      table{width:100%; border-collapse:collapse; font-size:12px; margin-top:5px; table-layout:fixed;}
+      th, td{border:1px solid #000; padding:10px 6px; text-align:left; line-height:1.4; word-wrap:break-word; overflow:hidden;}
+      th{background-color:#f2f2f2; font-weight:bold; color:#000;}
+      .center{text-align:center;}
+      .font-mono-id{font-family:monospace; font-weight:bold; color:#1e3a8a;}
+      .aux-info{color:#6b7280; font-size:11px;}
+    </style></head><body>`;
+    
+    html += `<div class="header-title">伊利出貨訂單核對總表</div>`;
+    html += `<table>
+      <thead>
+        <tr>
+          <th style="width:4.5%;" class="center">勾選</th>
+          <th style="width:11%;">1.下單時間</th>
+          <th style="width:11%;">2.訂單單號</th>
+          <th style="width:32%;">3.商品品名與規格明細</th>
+          <th style="width:5.5%;" class="center">4.總額</th>
+          <th style="width:7.5%;">5.姓名</th>
+          <th style="width:10.5%;">6.聯絡電話</th>
+          <th style="width:9%;">7.LINE暱稱</th>
+          <th style="width:9%;">8.到貨日期</th>
+          <th style="width:10%;">9.取貨時間</th>
+          <th style="width:8.5%;">10.配送方式</th>
+          <th style="width:11%;">11.詳細收貨地址</th>
+          <th style="width:11%;">12.買家備註</th>
+        </tr>
+      </thead>
+      <tbody>`;
+    
+    selectedItems.forEach(item => {
+      item.rawItemsRefs.forEach(ref => {
+        let cleanPhone = ref.phone ? ref.phone.replace(/'/g, "") : "";
+        html += `
+          <tr>
+            <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
+            <td class="aux-info">${ref.time}</td>
+            <td class="font-mono-id">${ref.orderId}</td>
+            <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
+            <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
+            <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
+            <td class="aux-info" style="font-family:monospace;">${cleanPhone}</td>
+            <td class="aux-info">${ref.lineName || ""}</td>
+            <td style="font-weight:bold; color:#d97706;">${ref.arrivalDate || "追加中"}</td>
+            <td class="aux-info">${ref.pickupTime || "常規"}</td>
+            <td><b>${ref.shipping || "自取"}</b></td>
+            <td class="aux-info">${ref.shipAddress || "現場"}</td>
+            <td class="aux-info" style="word-break:break-all;">${ref.remark || "無"}</td>
+          </tr>`;
+      });
+    });
+    
+    html += `</tbody></table>`;
+    html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
+    w.document.write(html); w.document.close();
   }, 800);
 }
 </script>
