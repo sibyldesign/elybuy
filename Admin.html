@@ -35,7 +35,7 @@
 </head>
 <body class="bg-white text-text-dark font-sans p-4 sm:p-6">
 
-<!-- 🔐 智慧管理後台安全驗證防護牆 (密碼預設 8888) -->
+<!-- 🔐 智慧管理後台安全驗證防護牆 (密碼預設 8888)[cite: 2] -->
 <div id="adminAuthOverlay" class="fixed inset-0 bg-stone-100 z-[99999] flex flex-col justify-center items-center p-4">
   <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl text-center space-y-4 border border-border-soft">
     <div class="w-16 h-16 rounded-full overflow-hidden mx-auto border border-border-soft shadow-inner">
@@ -67,7 +67,8 @@
     </div>
     
     <div class="flex items-center gap-3 mt-3 sm:mt-0">
-      <a id="viewStoreLink" href="#" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往台行動商城</a>
+      <!-- 🌟 局部改動：固定前往官方正式前台行動商城網址 -->
+      <a id="viewStoreLink" href="https://sibyldesign.github.io/elybuy/Index.html" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前前往台行動商城</a>
       <button onclick="handleAdminLogout()" class="bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm hover:bg-red-700 transition-all">🚪 安全登出</button>
     </div>
   </div>
@@ -221,12 +222,12 @@
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
       <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 font-bold">✅ 批量結案</button>
       
-      <!-- 按鈕1：精美一件單號一頁出貨明細（宅配使用） -->
+      <!-- 按鈕1：精美一件單號一頁出貨明細（宅配使用）[cite: 2] -->
       <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark font-bold">🖨️ 批量生成揀貨單並列印</button>
       
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       
-      <!-- 按鈕2：生成 EXCEL 並列印平鋪表格總清單（現場揀貨使用） -->
+      <!-- 按鈕2：生成 EXCEL 並列印平鋪表格總清單（現場揀貨使用）[cite: 2] -->
       <button onclick="fireBatchExportAndPrintCombined()" class="bg-teal-700 text-white px-3 py-1.5 rounded font-bold hover:bg-teal-900 shadow">✨ 生成 EXCEL 並列印</button>
       
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold">❌ 批量徹底刪除訂單</button>
@@ -234,21 +235,22 @@
     </div>
 
     <div class="overflow-x-auto border rounded-lg">
-      <!-- 🌟 重磅調整：大幅拉寬商品明細格子佔比 (指定各欄百分比，給予商品明細 30% 舒展大空間，其他次要降噪) -->
-      <table class="w-full text-left text-xs bg-white border-collapse" style="table-layout: fixed;">
+      <!-- 🌟 精密微調大優化：精密配給各個物理格子寬度，完美達成「商品舒適展開」且「備註選單絕不擠壓重疊」！ -->
+      <table class="w-full text-left text-xs bg-white border-collapse" style="table-layout: fixed; min-width: 1100px;">
         <thead>
           <tr class="bg-stone-50 border-b">
             <th style="width: 3.5%;" class="p-3"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
-            <th style="width: 9.5%;" class="p-3">下單時間</th>
-            <th style="width: 10.5%;" class="p-3">單號</th>
-            <!-- 🌟 核心放大區 -->
-            <th style="width: 30.0%;" class="p-3 font-bold text-stone-900 text-sm">合併同品項明細 (核心對貨格子)</th>
-            <th style="width: 6.5%;" class="p-3">應付總額</th>
-            <th style="width: 9.5%;" class="p-3">客戶資訊</th>
-            <th style="width: 7.5%;" class="p-3 font-bold text-amber-800">到貨日期</th>
-            <th style="width: 11.5%;" class="p-3">預計取貨時間/地址</th>
-            <th style="width: 7.5%;" class="p-3 text-blue-700 font-bold">老闆備註</th>
-            <th style="width: 4.0%;" class="p-3">狀態流轉</th>
+            <th style="width: 8.0%;" class="p-3">下單時間</th>
+            <th style="width: 10.0%;" class="p-3">單號</th>
+            <!-- 商品明細格子微調為 26%，維持寬敞舒展 -->
+            <th style="width: 26.0%;" class="p-3 font-bold text-stone-900 text-sm">合併同品項明細 (核心對貨格子)</th>
+            <th style="width: 6.0%;" class="p-3">應付總額</th>
+            <th style="width: 9.0%;" class="p-3">客戶資訊</th>
+            <th style="width: 7.0%;" class="p-3 font-bold text-amber-800">到貨日期</th>
+            <th style="width: 11.0%;" class="p-3">預計取貨時間/地址</th>
+            <!-- 🌟 核心放大區：備註與流轉全面拓寬，賦予完美操作空間，徹底告別重疊！ -->
+            <th style="width: 13.5%;" class="p-3 text-blue-700 font-bold">老闆點擊備註</th>
+            <th style="width: 10.0%;" class="p-3 text-stone-700 font-bold">狀態流轉</th>
           </tr>
         </thead>
         <tbody id="orderTableBody" class="divide-y divide-stone-100"></tbody>
@@ -276,6 +278,7 @@ let currentEditingRowIdx = null;
 
 let selectedOrderKeysMap = {}; 
 
+// 🔐 安全驗證機制 (確保進入頁面時強制跳出密碼遮罩)[cite: 2]
 function verifyAdminPassword() {
   const pwdInput = document.getElementById("adminPwdInput");
   const errorMsg = document.getElementById("authErrorMsg");
@@ -462,33 +465,6 @@ function loadOrdersData() {
     }); 
 }
 
-function handleSingleOrderCheckbox(box, uniqueKey) {
-  if (box.checked) {
-    selectedOrderKeysMap[uniqueKey] = true;
-  } else {
-    delete selectedOrderKeysMap[uniqueKey];
-  }
-  updateCheckedIndicatorUI();
-}
-
-function toggleAllOrdersOnCurrentPage(headerBox) {
-  document.querySelectorAll('.order-chk').forEach(c => {
-    c.checked = headerBox.checked;
-    if (headerBox.checked) {
-      selectedOrderKeysMap[c.value] = true;
-    } else {
-      delete selectedOrderKeysMap[c.value];
-    }
-  });
-  updateCheckedIndicatorUI();
-}
-
-function updateCheckedIndicatorUI() {
-  let count = Object.keys(selectedOrderKeysMap).length;
-  document.getElementById('checkedCountIndicator').innerText = `當前已勾選：${count} 個品項單據 (支援跨頁記憶)`;
-}
-
-// 🌟 精密合流優化引擎：同單號、同品名的物理行，強制壓縮聚合在一起
 function preprocessAndMergeOrders(ordersList) {
   let grouped = {};
   ordersList.forEach(o => {
@@ -542,16 +518,14 @@ function renderOrderTable() {
     let cleanArrivalDate = mo.arrivalDate || "追加中";
     let uniqueKey = mo.orderId + "_" + mo.prodName.trim();
     let isCheckedStr = selectedOrderKeysMap[uniqueKey] ? "checked" : "";
-    
-    // 🌟 核心成果：橫向舒服展開的商品規格明細牆（明細內部用分行乾淨鋪開）
     let specsHtmlStr = mo.specsLines.join('<br>');
 
     let displayTimeAndAddress = `
       <div class="space-y-0.5 text-[11px] leading-tight text-stone-500">
         <div>⏱️ <b>取貨：</b>${mo.pickupTime || "常規"}</div>
         <div>🚚 <b>方式：</b>${mo.shipping || "自取"}</div>
-        <div class="truncate max-w-[130px]" title="${mo.shipAddress || ''}">📍 <b>收件：</b>${mo.shipAddress || "現場"}</div>
-        <div class="text-blue-600 font-semibold truncate max-w-[130px]" title="${mo.remark || ''}">📝 <b>備註：</b>${mo.remark || "無"}</div>
+        <div class="truncate max-w-[120px]" title="${mo.shipAddress || ''}">📍 <b>收件：</b>${mo.shipAddress || "現場"}</div>
+        <div class="text-blue-600 font-semibold truncate max-w-[120px]" title="${mo.remark || ''}">📝 <b>備註：</b>${mo.remark || "無"}</div>
       </div>
     `;
 
@@ -563,7 +537,7 @@ function renderOrderTable() {
         <td class="p-3 text-stone-400 leading-tight">${mo.time}</td>
         <td class="p-3 font-bold text-blue-900 font-mono">${mo.orderId}</td>
         
-        <!-- 🌟 拓寬後的黃金大格子：大字體、高對比，橫向毫無壓力，絕不折行縮成窄窄一條 -->
+        <!-- 商品舒適展開大格子 (26%) -->
         <td class="p-3 font-medium text-stone-900 bg-stone-50/40">
           <div class="text-stone-950 font-bold text-[14px] mb-1">${mo.prodName}</div>
           <div class="text-stone-600 text-xs leading-relaxed font-semibold">${specsHtmlStr}</div>
@@ -574,14 +548,17 @@ function renderOrderTable() {
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
         <td class="p-3">${displayTimeAndAddress}</td>
         
-        <td class="p-3 relative">
-          <input type="text" value="${mo.bossRemark || ""}" onchange="silentUpdateRemarkForMultipleRows(${rowIdxsJsonAttr}, this)" class="p-1 border border-stone-300 rounded text-xs w-24 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入備註">
+        <!-- 🌟 右側對仗大優化：老闆備註輸入框拓寬並內縮文字，絕不重疊 -->
+        <td class="p-3">
+          <input type="text" value="${mo.bossRemark || ""}" onchange="silentUpdateRemarkForMultipleRows(${rowIdxsJsonAttr}, this)" class="p-2 border border-stone-300 rounded text-xs w-full min-w-[110px] max-w-[140px] focus:border-blue-500 outline-none focus:bg-white" placeholder="對帳備註">
           <span class="status-tip text-[9px] text-stone-400 block mt-0.5 font-bold"></span>
         </td>
-        <td class="p-3">
-          <span class="block font-bold text-blue-600 mb-1 text-[11px] whitespace-nowrap order-status-text">${mo.status}</span>
-          <select onchange="silentUpdateStatusForMultipleRows(${rowIdxsJsonAttr}, this)" class="block p-0.5 border text-[10px] rounded bg-white outline-none focus:border-blue-500">
-            <option value="">變更...</option>
+        
+        <!-- 🌟 右側對仗大優化：狀態流轉添加強制防折行白名單（whitespace-nowrap），徹底阻斷重疊與擠壓變形！ -->
+        <td class="p-3 whitespace-nowrap">
+          <span class="block font-bold text-blue-600 mb-1.5 text-[12px] order-status-text tracking-wide">${mo.status}</span>
+          <select onchange="silentUpdateStatusForMultipleRows(${rowIdxsJsonAttr}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500 font-medium">
+            <option value="">狀態變更...</option>
             <option value="新訂單">新訂單</option>
             <option value="已確認訂單">已確認訂單</option>
             <option value="等待到貨中">等待到貨中</option>
@@ -657,10 +634,10 @@ function fireBatchDeleteOrders() {
   }); 
 }
 
-// 🌟 🖨️ 「批量生成揀貨單並列印」：精美大字卡，同單號多品項完全歸併在同一個卡片頁面上（數據 100% 同步合流）
+// 🖨️ 「批量生成揀貨單並列印」：精美大字卡，宅配使用 (數據 100% 同步合流)[cite: 2]
 function fireBatchPrintInvoices() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的宅配項目！");
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的宅配項目 (支援跨頁)！");
   
   let groupedInvoices = {};
   selectedItems.forEach(item => {
@@ -711,7 +688,7 @@ function fireBatchPrintInvoices() {
         </div>
         <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
         <div class="item-list-box">
-          <b>3. 預訂品項貨號明細：</b>
+          <b>3. 預訂品項貨號明細 (已合併同單號品項)：</b>
           <div style="margin-top:6px;">${mergedItemsHtml}</div>
         </div>
         <div class="grid-2">
@@ -737,7 +714,7 @@ function fireBatchPrintInvoices() {
 // 跨頁 EXCEL 匯出模組
 function fireBatchExportToExcel() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目！");
+  if(selectedItems.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目 (支援跨頁)！");
   
   let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
   
@@ -758,7 +735,7 @@ function fireBatchExportToExcel() {
   document.body.removeChild(link);
 }
 
-// 🌟 ✨ 「生成 EXCEL 並列印」：一鍵雙雕下載跨頁大資料，同時彈出寬敞舒服、商品格子放到最大的平鋪式核對總表！（100% 同步合流數據）
+// ✨ 「生成 EXCEL 並列印」
 function fireBatchExportAndPrintCombined() {
   let selectedItems = getSelectedRawOrdersArray();
   if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目！");
@@ -785,7 +762,6 @@ function fireBatchExportAndPrintCombined() {
           <th style="width:4.5%;" class="center">勾選</th>
           <th style="width:11%;">1.下單時間</th>
           <th style="width:11%;">2.訂單單號</th>
-          <!-- 🌟 列印表格同步拓寬主要品項佔比，達到完美舒服的閱讀體驗 -->
           <th style="width:32%;">3.商品品名與規格明細</th>
           <th style="width:5.5%;" class="center">4.總額</th>
           <th style="width:7.5%;">5.姓名</th>
@@ -808,7 +784,6 @@ function fireBatchExportAndPrintCombined() {
             <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
             <td class="aux-info">${ref.time}</td>
             <td class="font-mono-id">${ref.orderId}</td>
-            <!-- 🌟 100% 數據完全對齊看板，毫無差錯 -->
             <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
             <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
             <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
