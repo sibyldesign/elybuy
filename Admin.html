@@ -62,7 +62,7 @@
       </div>
       <div class="text-left">
         <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">伊利小編購 智慧管理後台</h1>
-        <p class="text-xs text-primary-taupe mt-0.5">V20260714</p>
+        <p class="text-xs text-primary-taupe mt-0.5">V20260629</p>
       </div>
     </div>
     
@@ -221,12 +221,12 @@
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
       <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 font-bold">✅ 批量結案</button>
       
-      <!-- 🌟 按鈕1：精美一件單號一頁出貨明細（如圖二，宅配使用） -->
+      <!-- 按鈕1：精美一件單號一頁出貨明細（宅配使用） -->
       <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark font-bold">🖨️ 批量生成揀貨單並列印</button>
       
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       
-      <!-- 🌟 按鈕2：生成 EXCEL 並列印平鋪表格總清單（如圖一，現場揀貨使用） -->
+      <!-- 按鈕2：生成 EXCEL 並列印平鋪表格總清單（現場揀貨使用） -->
       <button onclick="fireBatchExportAndPrintCombined()" class="bg-teal-700 text-white px-3 py-1.5 rounded font-bold hover:bg-teal-900 shadow">✨ 生成 EXCEL 並列印</button>
       
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold">❌ 批量徹底刪除訂單</button>
@@ -234,19 +234,21 @@
     </div>
 
     <div class="overflow-x-auto border rounded-lg">
-      <table class="w-full text-left text-xs bg-white border-collapse">
+      <!-- 🌟 重磅調整：大幅拉寬商品明細格子佔比 (指定各欄百分比，給予商品明細 30% 舒展大空間，其他次要降噪) -->
+      <table class="w-full text-left text-xs bg-white border-collapse" style="table-layout: fixed;">
         <thead>
           <tr class="bg-stone-50 border-b">
-            <th class="p-3 w-8"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
-            <th class="p-3">下單時間</th>
-            <th class="p-3">單號</th>
-            <th class="p-3">合併同品項明細</th>
-            <th class="p-3">應付總額</th>
-            <th class="p-3">客戶資訊</th>
-            <th class="p-3 font-bold text-amber-800">到貨日期</th>
-            <th class="p-3 text-stone-700 font-bold">預計取貨時間/地址</th>
-            <th class="p-3 text-blue-700 font-bold">老闆點擊備註</th>
-            <th class="p-3">狀態流轉</th>
+            <th style="width: 3.5%;" class="p-3"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
+            <th style="width: 9.5%;" class="p-3">下單時間</th>
+            <th style="width: 10.5%;" class="p-3">單號</th>
+            <!-- 🌟 核心放大區 -->
+            <th style="width: 30.0%;" class="p-3 font-bold text-stone-900 text-sm">合併同品項明細 (核心對貨格子)</th>
+            <th style="width: 6.5%;" class="p-3">應付總額</th>
+            <th style="width: 9.5%;" class="p-3">客戶資訊</th>
+            <th style="width: 7.5%;" class="p-3 font-bold text-amber-800">到貨日期</th>
+            <th style="width: 11.5%;" class="p-3">預計取貨時間/地址</th>
+            <th style="width: 7.5%;" class="p-3 text-blue-700 font-bold">老闆備註</th>
+            <th style="width: 4.0%;" class="p-3">狀態流轉</th>
           </tr>
         </thead>
         <tbody id="orderTableBody" class="divide-y divide-stone-100"></tbody>
@@ -460,33 +462,6 @@ function loadOrdersData() {
     }); 
 }
 
-function filterOrderStatus(status) {
-  document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400 whitespace-nowrap");
-  event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap";
-  if(status === '全部') currentFilteredOrders = [...rawOrders]; else currentFilteredOrders = rawOrders.filter(o => o.status === status);
-  document.getElementById('orderDetailSearchInput').value = ""; 
-  currentOrderPage = 1; 
-  renderOrderTable();
-}
-
-function searchOrdersByDetails() {
-  let kw = document.getElementById('orderDetailSearchInput').value.toLowerCase().trim();
-  if (!kw) {
-    currentFilteredOrders = [...rawOrders];
-  } else {
-    currentFilteredOrders = rawOrders.filter(o => {
-      return (o.prodName && o.prodName.toLowerCase().includes(kw)) ||
-             (o.specs && o.specs.toLowerCase().includes(kw)) ||
-             (o.sku && o.sku.toLowerCase().includes(kw)) ||
-             (o.orderId && o.orderId.toLowerCase().includes(kw)) ||
-             (o.custName && o.custName.toLowerCase().includes(kw)) ||
-             (o.phone && o.phone.toLowerCase().includes(kw));
-    });
-  }
-  currentOrderPage = 1; 
-  renderOrderTable();
-}
-
 function handleSingleOrderCheckbox(box, uniqueKey) {
   if (box.checked) {
     selectedOrderKeysMap[uniqueKey] = true;
@@ -513,6 +488,7 @@ function updateCheckedIndicatorUI() {
   document.getElementById('checkedCountIndicator').innerText = `當前已勾選：${count} 個品項單據 (支援跨頁記憶)`;
 }
 
+// 🌟 精密合流優化引擎：同單號、同品名的物理行，強制壓縮聚合在一起
 function preprocessAndMergeOrders(ordersList) {
   let grouped = {};
   ordersList.forEach(o => {
@@ -566,14 +542,16 @@ function renderOrderTable() {
     let cleanArrivalDate = mo.arrivalDate || "追加中";
     let uniqueKey = mo.orderId + "_" + mo.prodName.trim();
     let isCheckedStr = selectedOrderKeysMap[uniqueKey] ? "checked" : "";
+    
+    // 🌟 核心成果：橫向舒服展開的商品規格明細牆（明細內部用分行乾淨鋪開）
     let specsHtmlStr = mo.specsLines.join('<br>');
 
     let displayTimeAndAddress = `
-      <div class="space-y-0.5 text-[11px] leading-tight text-stone-600">
-        <div>⏱️ <b>取貨：</b>${mo.pickupTime || "常規時間"}</div>
+      <div class="space-y-0.5 text-[11px] leading-tight text-stone-500">
+        <div>⏱️ <b>取貨：</b>${mo.pickupTime || "常規"}</div>
         <div>🚚 <b>方式：</b>${mo.shipping || "自取"}</div>
-        <div>📍 <b>收件：</b>${mo.shipAddress || "現場自取"}</div>
-        <div class="text-blue-600 font-semibold">📝 <b>備註：</b>${mo.remark || "無"}</div>
+        <div class="truncate max-w-[130px]" title="${mo.shipAddress || ''}">📍 <b>收件：</b>${mo.shipAddress || "現場"}</div>
+        <div class="text-blue-600 font-semibold truncate max-w-[130px]" title="${mo.remark || ''}">📝 <b>備註：</b>${mo.remark || "無"}</div>
       </div>
     `;
 
@@ -582,23 +560,28 @@ function renderOrderTable() {
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-merge-key="${uniqueKey}">
         <td class="p-3"><input type="checkbox" class="order-chk" value="${uniqueKey}" ${isCheckedStr} onchange="handleSingleOrderCheckbox(this, '${uniqueKey}')"></td>
-        <td class="p-3 font-mono text-stone-400">${mo.time}</td>
-        <td class="p-3 font-bold text-blue-900">${mo.orderId}</td>
-        <td class="p-3"><b class="text-stone-900 text-sm">${mo.prodName}</b><br><span class="text-stone-500 font-medium leading-relaxed">${specsHtmlStr}</span></td>
-        <td class="p-3 font-bold text-red-600">$${mo.total}</td>
-        <td class="p-3"><b>${mo.custName}</b><br><span class="text-stone-500">Tel:${mo.phone}</span><br><span class="text-stone-400">LINE:${mo.lineName || ''}</span></td>
+        <td class="p-3 text-stone-400 leading-tight">${mo.time}</td>
+        <td class="p-3 font-bold text-blue-900 font-mono">${mo.orderId}</td>
         
+        <!-- 🌟 拓寬後的黃金大格子：大字體、高對比，橫向毫無壓力，絕不折行縮成窄窄一條 -->
+        <td class="p-3 font-medium text-stone-900 bg-stone-50/40">
+          <div class="text-stone-950 font-bold text-[14px] mb-1">${mo.prodName}</div>
+          <div class="text-stone-600 text-xs leading-relaxed font-semibold">${specsHtmlStr}</div>
+        </td>
+        
+        <td class="p-3 font-bold text-red-600 text-sm">$${mo.total}</td>
+        <td class="p-3"><b>${mo.custName}</b><br><span class="text-stone-400 text-[11px]">Tel:${mo.phone}</span></td>
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
-        <td class="p-3 font-medium">${displayTimeAndAddress}</td>
+        <td class="p-3">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <input type="text" value="${mo.bossRemark || ""}" onchange="silentUpdateRemarkForMultipleRows(${rowIdxsJsonAttr}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入對帳備註">
-          <span class="status-tip text-[10px] text-stone-400 block mt-0.5 font-bold"></span>
+          <input type="text" value="${mo.bossRemark || ""}" onchange="silentUpdateRemarkForMultipleRows(${rowIdxsJsonAttr}, this)" class="p-1 border border-stone-300 rounded text-xs w-24 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入備註">
+          <span class="status-tip text-[9px] text-stone-400 block mt-0.5 font-bold"></span>
         </td>
         <td class="p-3">
-          <span class="block font-bold text-blue-600 mb-1 order-status-text">${mo.status}</span>
-          <select onchange="silentUpdateStatusForMultipleRows(${rowIdxsJsonAttr}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500">
-            <option value="">狀態變更...</option>
+          <span class="block font-bold text-blue-600 mb-1 text-[11px] whitespace-nowrap order-status-text">${mo.status}</span>
+          <select onchange="silentUpdateStatusForMultipleRows(${rowIdxsJsonAttr}, this)" class="block p-0.5 border text-[10px] rounded bg-white outline-none focus:border-blue-500">
+            <option value="">變更...</option>
             <option value="新訂單">新訂單</option>
             <option value="已確認訂單">已確認訂單</option>
             <option value="等待到貨中">等待到貨中</option>
@@ -618,7 +601,6 @@ function silentUpdateStatusForMultipleRows(rowIdxsList, select) {
   let statusTextNode = select.previousElementSibling;
   let nextStatus = select.value;
   statusTextNode.innerText = nextStatus; 
-  
   rowIdxsList.forEach(rowIdx => {
     let targetOrder = rawOrders.find(x => x.rowIdx === rowIdx);
     if(targetOrder) targetOrder.status = nextStatus;
@@ -641,7 +623,6 @@ function silentUpdateRemarkForMultipleRows(rowIdxsList, input) {
 }
 
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
-function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 
 function getSelectedRawOrdersArray() {
   let activeKeys = Object.keys(selectedOrderKeysMap);
@@ -676,12 +657,11 @@ function fireBatchDeleteOrders() {
   }); 
 }
 
-// 🌟 100% 精準對齊需求：生成精美、一個訂單號多品項完美在「同一頁」大字卡（如圖二，主要供宅配出貨包裹核對貼上使用）
+// 🌟 🖨️ 「批量生成揀貨單並列印」：精美大字卡，同單號多品項完全歸併在同一個卡片頁面上（數據 100% 同步合流）
 function fireBatchPrintInvoices() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的宅配項目 (支援跨頁)！");
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的宅配項目！");
   
-  // 1. 建立完全單號字典：將同單號的所有品項，毫秒級快取打包
   let groupedInvoices = {};
   selectedItems.forEach(item => {
     item.rawItemsRefs.forEach(ref => {
@@ -695,9 +675,7 @@ function fireBatchPrintInvoices() {
         };
       }
       let isDup = groupedInvoices[ref.orderId].productItemsList.some(x => x.specs === ref.specs && x.prodName === ref.prodName);
-      if(!isDup) {
-        groupedInvoices[ref.orderId].productItemsList.push({ prodName: ref.prodName, specs: ref.specs });
-      }
+      if(!isDup) { groupedInvoices[ref.orderId].productItemsList.push({ prodName: ref.prodName, specs: ref.specs }); }
     });
   });
 
@@ -720,7 +698,7 @@ function fireBatchPrintInvoices() {
         <div class="single-item-row">
           <span style="font-weight:bold;">品項 ${index + 1}：</span>
           <span style="font-size:15px; font-weight:bold; color:#B22222;">${prod.prodName}</span>
-          <span style="color:#555; font-size:13px; margin-left:8px;">[ 規格：${prod.specs} ]</span>
+          <span style="color:#333; font-size:13px; margin-left:8px;">[ 規格規格：${prod.specs} ]</span>
         </div>`;
     });
 
@@ -732,8 +710,6 @@ function fireBatchPrintInvoices() {
           <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${inv.orderId}</span></div>
         </div>
         <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
-        
-        <!-- 🌟 精美大模組：一個單號底下的多品項完全歸併在同一頁呈現！供宅配核對 -->
         <div class="item-list-box">
           <b>3. 預訂品項貨號明細：</b>
           <div style="margin-top:6px;">${mergedItemsHtml}</div>
@@ -761,7 +737,7 @@ function fireBatchPrintInvoices() {
 // 跨頁 EXCEL 匯出模組
 function fireBatchExportToExcel() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目 (支援跨頁)！");
+  if(selectedItems.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目！");
   
   let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
   
@@ -776,21 +752,19 @@ function fireBatchExportToExcel() {
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
   let link = document.createElement("a"); 
   link.href = URL.createObjectURL(blob); 
-  link.setAttribute("download", `伊利出貨訂單核對總表(跨頁完美合流版).csv`); 
+  link.setAttribute("download", `伊利出貨訂單核對總表.csv`); 
   document.body.appendChild(link); 
   link.click(); 
   document.body.removeChild(link);
 }
 
-// 🌟 按鈕功能大歸位：一鍵雙雕『生成 EXCEL 並列印』觸發如圖一的表格總清單，供老闆娘拿原子筆打勾手寫配貨
+// 🌟 ✨ 「生成 EXCEL 並列印」：一鍵雙雕下載跨頁大資料，同時彈出寬敞舒服、商品格子放到最大的平鋪式核對總表！（100% 同步合流數據）
 function fireBatchExportAndPrintCombined() {
   let selectedItems = getSelectedRawOrdersArray();
-  if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目 (支援跨頁)！");
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目！");
   
-  // 1. 先安全下載 EXCEL 檔案
   fireBatchExportToExcel();
   
-  // 2. 延時建立印出如圖一的表格揀貨總表網頁
   setTimeout(() => {
     let w = window.open('', '_blank');
     let html = `<html><head><title>伊利出貨訂單核對總表</title><style>
@@ -811,6 +785,7 @@ function fireBatchExportAndPrintCombined() {
           <th style="width:4.5%;" class="center">勾選</th>
           <th style="width:11%;">1.下單時間</th>
           <th style="width:11%;">2.訂單單號</th>
+          <!-- 🌟 列印表格同步拓寬主要品項佔比，達到完美舒服的閱讀體驗 -->
           <th style="width:32%;">3.商品品名與規格明細</th>
           <th style="width:5.5%;" class="center">4.總額</th>
           <th style="width:7.5%;">5.姓名</th>
@@ -833,6 +808,7 @@ function fireBatchExportAndPrintCombined() {
             <td class="center" style="font-size:16px; font-weight:bold; color:#d1d5db; background:#fff;"></td>
             <td class="aux-info">${ref.time}</td>
             <td class="font-mono-id">${ref.orderId}</td>
+            <!-- 🌟 100% 數據完全對齊看板，毫無差錯 -->
             <td style="background:#fff;"><b style="color:#B22222; font-size:15px; font-weight:700; display:block; margin-bottom:2px;">${ref.prodName}</b><span style="color:#262626; font-size:13px; font-weight:500;">(${ref.specs})</span></td>
             <td class="center" style="font-weight:bold; color:#dc3545; font-size:13px;">$${ref.total}</td>
             <td><b style="font-size:13px; color:#111827;">${ref.custName}</b></td>
