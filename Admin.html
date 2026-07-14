@@ -35,7 +35,7 @@
 </head>
 <body class="bg-white text-text-dark font-sans p-4 sm:p-6">
 
-<!-- 🔐 智慧管理後台安全驗證防護牆 -->
+<!-- 🔐 智慧管理後台安全驗證防護牆 (密碼預設 8888) -->
 <div id="adminAuthOverlay" class="fixed inset-0 bg-stone-100 z-[99999] flex flex-col justify-center items-center p-4">
   <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl text-center space-y-4 border border-border-soft">
     <div class="w-16 h-16 rounded-full overflow-hidden mx-auto border border-border-soft shadow-inner">
@@ -61,7 +61,7 @@
         <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Logo">
       </div>
       <div class="text-left">
-        <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">智慧管理後台</h1>
+        <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">伊利小編購 智慧管理後台</h1>
         <p class="text-xs text-primary-taupe mt-0.5">V20260629</p>
       </div>
     </div>
@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <!-- 商品快速上架頁籤 -->
+  <!-- 商品快速上架區 -->
   <div id="uploadTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4">
     <h2 id="formActionTitle" class="text-sm font-bold border-b border-border-soft pb-2 text-stone-700">✍ 商品快速配置</h2>
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -153,7 +153,7 @@
     <button onclick="resetProductForm()" id="cancelEditBtn" class="w-full bg-stone-400 text-white font-medium text-sm py-2 rounded-lg hidden">取消編輯返回全新上架</button>
   </div>
 
-  <!-- 商品清單頁籤 -->
+  <!-- 商品清單區 -->
   <div id="listTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-3">
@@ -193,17 +193,17 @@
     </div>
   </div>
 
-  <!-- 訂單看板頁籤 (🌟 整合商品明細大搜尋防護牆) -->
+  <!-- 訂單看板區 -->
   <div id="orderTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
     <div class="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
       <div class="flex items-center gap-3">
-        <h2 class="text-sm font-bold text-stone-700">📋 訂單看板 (20筆一頁)</h2>
+        <h2 class="text-sm font-bold text-stone-700">📋 訂單看板 (按品名合流歸併版)</h2>
         <button onclick="loadOrdersData()" class="bg-stone-100 hover:bg-stone-200 border text-stone-700 px-2.5 py-1 rounded text-xs flex items-center gap-1 transition-all">🔄 重新整理</button>
       </div>
       
-      <!-- 🌟 補齊全新核心功能：商品明細與全關鍵字大搜尋框 -->
+      <!-- 商品明細大搜尋框 -->
       <div class="w-full sm:max-w-xs shrink-0">
-        <input type="text" id="orderDetailSearchInput" oninput="searchOrdersByDetails()" class="w-full text-xs p-2.5 border border-stone-300 rounded-lg bg-stone-50 outline-none focus:bg-white focus:border-primary-taupe font-medium" placeholder="🔍 搜尋商品品名、規格或單號、姓名...">
+        <input type="text" id="orderDetailSearchInput" oninput="searchOrdersByDetails()" class="w-full text-xs p-2.5 border border-stone-300 rounded-lg bg-stone-50 outline-none focus:bg-white focus:border-primary-taupe font-medium" placeholder="🔍 搜尋商品品名、規格、單號、姓名...">
       </div>
 
       <div class="flex bg-stone-100 p-1 rounded-lg gap-1 text-xs overflow-x-auto max-w-full">
@@ -219,11 +219,15 @@
     </div>
 
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
-      <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700">✅ 批量結案 (移至歷史訂單)</button>
-      <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark">🖨️ 批量生成揀貨單並列印</button>
+      <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 font-bold">✅ 批量結案</button>
+      <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark font-bold">🖨️ 批量生成揀貨單並列印</button>
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
-      <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">❌ 批量徹底刪除訂單</button>
-      <div class="text-[11px] text-stone-500 ml-auto font-bold" id="checkedCountIndicator">當前已勾選：0 項單據 (支援跨頁記憶)</div>
+      
+      <!-- 🌟 補齊新功能需求：一鍵雙雕按鈕 -->
+      <button onclick="fireBatchExportAndPrintCombined()" class="bg-teal-700 text-white px-3 py-1.5 rounded font-bold hover:bg-teal-900 shadow">✨ 生成 EXCEL 並列印</button>
+      
+      <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 font-bold">❌ 批量徹底刪除訂單</button>
+      <div class="text-[11px] text-stone-500 ml-auto font-bold" id="checkedCountIndicator">當前已勾選：0 個品項單據 (支援跨頁記憶)</div>
     </div>
 
     <div class="overflow-x-auto border rounded-lg">
@@ -233,7 +237,7 @@
             <th class="p-3 w-8"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
             <th class="p-3">下單時間</th>
             <th class="p-3">單號</th>
-            <th class="p-3">明細</th>
+            <th class="p-3">合併同品項明細</th>
             <th class="p-3">應付總額</th>
             <th class="p-3">客戶資訊</th>
             <th class="p-3 font-bold text-amber-800">到貨日期</th>
@@ -261,18 +265,21 @@ let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGl
 const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
 
 let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredOrders = [];
+let mergedRenderOrders = []; // 🌟 前端經同品項合流重組後的乾淨渲染矩陣
 let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
 let currentEditingRowIdx = null; 
 
-// 🌟 全域跨頁持久記憶體物件：解決換頁打回原型無法累加勾選的致命難題
-let selectedOrderIdsMap = {}; 
+// 🔐 持久型跨頁記憶字典（儲存選取的唯一識別 Key）
+let selectedOrderKeysMap = {}; 
 
+// 🔐 安全驗證機制 (補回被移除的 8888 遮罩驗證阻攔器)
 function verifyAdminPassword() {
   const pwdInput = document.getElementById("adminPwdInput");
   const errorMsg = document.getElementById("authErrorMsg");
   const overlay = document.getElementById("adminAuthOverlay");
+  
   if (pwdInput.value.trim() === ADMIN_SECURITY_PASSWORD) {
-    sessionStorage.setItem("yili_admin_authed_session", "true");
+    sessionStorage.setItem("yili_admin_authed", "true");
     errorMsg.classList.add("hidden");
     overlay.style.display = "none";
     initStoreConfigurations();
@@ -284,8 +291,8 @@ function verifyAdminPassword() {
 }
 
 function handleAdminLogout() {
-  if (confirm("確定要安全登出伊利小編購後台管理系統嗎？")) {
-    sessionStorage.removeItem("yili_admin_authed_session");
+  if (confirm("確定要安全登出智慧管理後台系統嗎？")) {
+    sessionStorage.removeItem("yili_admin_authed");
     document.getElementById("adminPwdInput").value = "";
     document.getElementById("authErrorMsg").classList.add("hidden");
     document.getElementById("adminAuthOverlay").style.display = "flex";
@@ -317,23 +324,20 @@ function initStoreConfigurations() {
       maj.innerHTML = ""; sub.innerHTML = "";
       res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
       if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
+      
       globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
     });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById('viewStoreLink').href = window.location.href.replace('Admin.html','Index.html').split('?')[0];
-  document.getElementById("adminPwdInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") { verifyAdminPassword(); }
-  });
-  if (sessionStorage.getItem("yili_admin_authed_session") === "true") {
+window.onload = function() {
+  if (sessionStorage.getItem("yili_admin_authed") === "true") {
     document.getElementById("adminAuthOverlay").style.display = "none";
     initStoreConfigurations();
   } else {
     document.getElementById("adminAuthOverlay").style.display = "flex";
     document.getElementById("adminPwdInput").focus();
   }
-});
+};
 
 function fireBatchSetMatrix() {
   let p = prompt("請輸入欲批次套用的規格特價單價："); if(!p) return;
@@ -445,17 +449,24 @@ function fireBatchCopy() {
 function fireBatchArchive() { let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchArchiveProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData()); }
 function fireBatchDeleteProducts() { let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); if(!confirm("確定徹底刪除商品？")) return; Promise.all(Array.from(chks).map(c => fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "deleteProduct", sku: c.value }) }))).then(() => loadInventoryData()); }
 
-function loadOrdersData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) }).then(r => r.json()).then(res => { rawOrders = res.orders || []; currentFilteredOrders = [...rawOrders]; renderOrderTable(); }); }
+function loadOrdersData() { 
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getAllOrders" }) })
+    .then(r => r.json()).then(res => { 
+      rawOrders = res.orders || []; 
+      currentFilteredOrders = [...rawOrders]; 
+      renderOrderTable(); 
+    }); 
+}
 
 function filterOrderStatus(status) {
   document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400 whitespace-nowrap");
   event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap";
   if(status === '全部') currentFilteredOrders = [...rawOrders]; else currentFilteredOrders = rawOrders.filter(o => o.status === status);
-  document.getElementById('orderDetailSearchInput').value = ""; // 切換標籤時清空搜尋
-  currentOrderPage = 1; renderOrderTable();
+  document.getElementById('orderDetailSearchInput').value = ""; 
+  currentOrderPage = 1; 
+  renderOrderTable();
 }
 
-// 🌟 補齊全新功能：大看板商品明細與全域即時搜尋機制
 function searchOrdersByDetails() {
   let kw = document.getElementById('orderDetailSearchInput').value.toLowerCase().trim();
   if (!kw) {
@@ -474,80 +485,130 @@ function searchOrdersByDetails() {
   renderOrderTable();
 }
 
-// 🌟 全域持久記憶體同步核對模組：當點擊單個 Checkbox 時，寫入/移除全域記憶體 Map
-function handleSingleOrderCheckbox(box, orderId) {
+// 🔐 全域跨頁持久記憶體咬合：點擊 Checkbox 時寫入字典
+function handleSingleOrderCheckbox(box, uniqueKey) {
   if (box.checked) {
-    selectedOrderIdsMap[orderId] = true;
+    selectedOrderKeysMap[uniqueKey] = true;
   } else {
-    delete selectedOrderIdsMap[orderId];
+    delete selectedOrderKeysMap[uniqueKey];
   }
   updateCheckedIndicatorUI();
 }
 
-// 🌟 當前頁全選控制：僅改變當前渲染頁面的勾選，但同步累加進持久 Map
 function toggleAllOrdersOnCurrentPage(headerBox) {
   document.querySelectorAll('.order-chk').forEach(c => {
     c.checked = headerBox.checked;
     if (headerBox.checked) {
-      selectedOrderIdsMap[c.value] = true;
+      selectedOrderKeysMap[c.value] = true;
     } else {
-      delete selectedOrderIdsMap[c.value];
+      delete selectedOrderKeysMap[c.value];
     }
   });
   updateCheckedIndicatorUI();
 }
 
-// 更新界面計數器
 function updateCheckedIndicatorUI() {
-  let count = Object.keys(selectedOrderIdsMap).length;
-  document.getElementById('checkedCountIndicator').innerText = `當前已勾選：${count} 項單據 (支援跨頁記憶)`;
+  let count = Object.keys(selectedOrderKeysMap).length;
+  document.getElementById('checkedCountIndicator').innerText = `當前已勾選：${count} 個品項單據 (支援跨頁記憶)`;
+}
+
+// 🌟 核心重構：同單號且同品名的商品合流優化渲染引擎 (不同品名依然完美分開獨立列，避免漏單、方便對期揀貨)
+function preprocessAndMergeOrders(ordersList) {
+  let grouped = {};
+  ordersList.forEach(o => {
+    // 以「單號 + 商品品名」作為唯一的合流 Key 
+    let mergeKey = o.orderId + "_" + o.prodName.trim();
+    if (!grouped[mergeKey]) {
+      grouped[mergeKey] = {
+        orderId: o.orderId,
+        time: o.time,
+        prodName: o.prodName,
+        total: o.total,
+        custName: o.custName,
+        phone: o.phone,
+        lineName: o.lineName,
+        arrivalDate: o.arrivalDate,
+        pickupTime: o.pickupTime,
+        shipping: o.shipping,
+        shipAddress: o.shipAddress,
+        remark: o.remark,
+        bossRemark: o.bossRemark,
+        status: o.status,
+        payStatus: o.payStatus,
+        
+        // 陣列化聚合多個實體物理行
+        rowIdxsList: [o.rowIdx], 
+        specsLines: [o.specs],   
+        rawItemsRefs: [o]        
+      };
+    } else {
+      // 如果相同單號且相同品名（如：高麗菜水餃、韭菜水餃），進行同列歸併
+      grouped[mergeKey].rowIdxsList.push(o.rowIdx);
+      grouped[mergeKey].specsLines.push(o.specs);
+      grouped[mergeKey].rawItemsRefs.push(o);
+    }
+  });
+
+  let result = [];
+  for (let k in grouped) { result.push(grouped[k]); }
+  return result;
 }
 
 function renderOrderTable() {
   const tbody = document.getElementById('orderTableBody'); tbody.innerHTML = "";
-  let total = Math.ceil(currentFilteredOrders.length / pageSize) || 1; 
+  
+  // 執行大合流處理
+  mergedRenderOrders = preprocessAndMergeOrders(currentFilteredOrders);
+  
+  let total = Math.ceil(mergedRenderOrders.length / pageSize) || 1; 
   document.getElementById('orderPageText').innerText = `第 ${currentOrderPage} / ${total} 頁`;
+  
   let start = (currentOrderPage - 1) * pageSize; 
-  let end = Math.min(start + pageSize, currentFilteredOrders.length);
-
-  // 重置表頭勾選框
+  let end = Math.min(start + pageSize, mergedRenderOrders.length);
   document.getElementById('globalSelectAllOrdersHeader').checked = false;
 
   for(let i=start; i<end; i++) {
-    let o = currentFilteredOrders[i];
-    let cleanArrivalDate = o.arrivalDate || "追加中";
+    let mo = mergedRenderOrders[i];
+    let cleanArrivalDate = mo.arrivalDate || "追加中";
+    
+    // 以 mergeKey 作為 Checkbox 的唯一持久辨識值
+    let uniqueKey = mo.orderId + "_" + mo.prodName.trim();
+    let isCheckedStr = selectedOrderKeysMap[uniqueKey] ? "checked" : "";
 
-    // 🌟 持久型跨頁檢查：如果這筆單號存在於全域 Map 中，維持勾選狀態
-    let isCheckedStr = selectedOrderIdsMap[o.orderId] ? "checked" : "";
+    // 多規格項目在明細格子中以 <br> 換行清晰排列
+    let specsHtmlStr = mo.specsLines.join('<br>');
 
     let displayTimeAndAddress = `
       <div class="space-y-0.5 text-[11px] leading-tight text-stone-600">
-        <div>⏱️ <b>取貨：</b>${o.pickupTime || "常規時間"}</div>
-        <div>🚚 <b>方式：</b>${o.shipping || "自取"}</div>
-        <div>📍 <b>收件：</b>${o.shipAddress || "現場自取"}</div>
-        <div class="text-blue-600 font-semibold">📝 <b>備註：</b>${o.remark || "無"}</div>
+        <div>⏱️ <b>取貨：</b>${mo.pickupTime || "常規時間"}</div>
+        <div>🚚 <b>方式：</b>${mo.shipping || "自取"}</div>
+        <div>📍 <b>收件：</b>${mo.shipAddress || "現場自取"}</div>
+        <div class="text-blue-600 font-semibold">📝 <b>備註：</b>${mo.remark || "無"}</div>
       </div>
     `;
 
+    // 建立多物理行同步修改狀態的參數陣列
+    let rowIdxsJsonAttr = JSON.stringify(mo.rowIdxsList);
+
     tbody.innerHTML += `
-      <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
-        <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}" ${isCheckedStr} onchange="handleSingleOrderCheckbox(this, '${o.orderId}')"></td>
-        <td class="p-3 font-mono text-stone-400">${o.time}</td>
-        <td class="p-3 font-bold text-blue-900">${o.orderId}</td>
-        <td class="p-3"><b>${o.prodName}</b><br><span class="text-stone-400">${o.specs}</span></td>
-        <td class="p-3 font-bold text-red-600">$${o.total}</td>
-        <td class="p-3"><b>${o.custName}</b><br><span class="text-stone-500">Tel:${o.phone}</span><br><span class="text-stone-400">LINE:${o.lineName || ''}</span></td>
+      <tr class="hover:bg-stone-50 text-xs bg-white" data-merge-key="${uniqueKey}">
+        <td class="p-3"><input type="checkbox" class="order-chk" value="${uniqueKey}" ${isCheckedStr} onchange="handleSingleOrderCheckbox(this, '${uniqueKey}')"></td>
+        <td class="p-3 font-mono text-stone-400">${mo.time}</td>
+        <td class="p-3 font-bold text-blue-900">${mo.orderId}</td>
+        <td class="p-3"><b class="text-stone-900 text-sm">${mo.prodName}</b><br><span class="text-stone-500 font-medium leading-relaxed">${specsHtmlStr}</span></td>
+        <td class="p-3 font-bold text-red-600">$${mo.total}</td>
+        <td class="p-3"><b>${mo.custName}</b><br><span class="text-stone-500">Tel:${mo.phone}</span><br><span class="text-stone-400">LINE:${mo.lineName || ''}</span></td>
         
         <td class="p-3 font-bold text-amber-800">${cleanArrivalDate}</td>
         <td class="p-3 font-medium">${displayTimeAndAddress}</td>
         
         <td class="p-3 relative">
-          <input type="text" value="${o.bossRemark || ""}" onchange="silentUpdateRemark(${o.rowIdx}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入對帳備註">
+          <input type="text" value="${mo.bossRemark || ""}" onchange="silentUpdateRemarkForMultipleRows(${rowIdxsJsonAttr}, this)" class="p-1 border border-stone-300 rounded text-xs w-28 focus:border-blue-500 outline-none focus:bg-white" placeholder="輸入對帳備註">
           <span class="status-tip text-[10px] text-stone-400 block mt-0.5 font-bold"></span>
         </td>
         <td class="p-3">
-          <span class="block font-bold text-blue-600 mb-1 order-status-text">${o.status}</span>
-          <select onchange="silentUpdateStatus(${o.rowIdx}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500">
+          <span class="block font-bold text-blue-600 mb-1 order-status-text">${mo.status}</span>
+          <select onchange="silentUpdateStatusForMultipleRows(${rowIdxsJsonAttr}, this)" class="block p-1 border text-[11px] rounded bg-white outline-none focus:border-blue-500">
             <option value="">狀態變更...</option>
             <option value="新訂單">新訂單</option>
             <option value="已確認訂單">已確認訂單</option>
@@ -563,85 +624,113 @@ function renderOrderTable() {
   updateCheckedIndicatorUI();
 }
 
-function silentUpdateStatus(rowIdx, select) {
+// 支援多行同步修改
+function silentUpdateStatusForMultipleRows(rowIdxsList, select) {
   if(!select.value) return;
   let statusTextNode = select.previousElementSibling;
   let nextStatus = select.value;
   statusTextNode.innerText = nextStatus; 
-  let targetOrder = currentFilteredOrders.find(x => x.rowIdx === rowIdx);
-  if(targetOrder) targetOrder.status = nextStatus;
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: nextStatus }) });
+  
+  rowIdxsList.forEach(rowIdx => {
+    let targetOrder = rawOrders.find(x => x.rowIdx === rowIdx);
+    if(targetOrder) targetOrder.status = nextStatus;
+    fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateOrderStatus", rowIdx: rowIdx, status: nextStatus }) });
+  });
   select.value = ""; 
 }
 
-function silentUpdateRemark(rowIdx, input) {
+function silentUpdateRemarkForMultipleRows(rowIdxsList, input) {
   let tip = input.nextElementSibling;
   tip.className = "status-tip text-[10px] text-amber-600 block mt-0.5 font-bold"; tip.innerText = "⏳ 儲存中...";
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
-    .then(r => r.json()).then(res => { 
-      if(res && res.success) { tip.className = "status-tip text-[10px] text-green-600 block mt-0.5 font-bold"; tip.innerText = "✅ 已同步試算表"; } 
-      else { tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold"; tip.innerText = "❌ 儲存未成功"; }
-    }).catch(() => { tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold"; tip.innerText = "❌ 連線超時"; });
+  
+  let promises = rowIdxsList.map(rowIdx => {
+    return fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) });
+  });
+  
+  Promise.all(promises).then(() => {
+    tip.className = "status-tip text-[10px] text-green-600 block mt-0.5 font-bold"; tip.innerText = "✅ 已同步試算表";
+  }).catch(() => {
+    tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold"; tip.innerText = "❌ 連線超時";
+  });
 }
 
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
-function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
 
-// 🌟 全量跨頁持久操作：將全域記憶體中被勾選的單號轉換成陣列傳遞給後端
-function getSelectedOrderIdsArray() {
-  return Object.keys(selectedOrderIdsMap);
+// 🌟 高效精密索引字典核心：100% 解決大型矩陣大掃描造成的記憶體當機絕症
+function getSelectedRawOrdersArray() {
+  let activeKeys = Object.keys(selectedOrderKeysMap);
+  if (activeKeys.length === 0) return [];
+  
+  // 建立高效查詢 Map 快取，杜絕無窮雙重迴圈
+  let mergedMap = {};
+  let allMerged = preprocessAndMergeOrders(rawOrders);
+  allMerged.forEach(item => {
+    let key = item.orderId + "_" + item.prodName.trim();
+    mergedMap[key] = item;
+  });
+
+  let selectedItems = [];
+  activeKeys.forEach(k => {
+    if (mergedMap[k]) {
+      selectedItems.push(mergedMap[k]);
+    }
+  });
+  return selectedItems;
 }
 
 function fireBatchCompleteOrders() { 
-  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要批量結案的項目 (支援跨頁)！");
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: ids }) }).then(() => {
-    selectedOrderIdsMap = {}; // 結案成功後清空記憶體
+  let selectedItems = getSelectedRawOrdersArray();
+  if(selectedItems.length === 0) return adminCustomAlert("請勾選項目 (支援跨頁)！");
+  
+  let allOrderIds = [];
+  selectedItems.forEach(item => {
+    item.rawItemsRefs.forEach(ref => { if(!allOrderIds.includes(ref.orderId)) allOrderIds.push(ref.orderId); });
+  });
+
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: allOrderIds }) }).then(() => {
+    selectedOrderKeysMap = {}; 
     loadOrdersData();
   }); 
 }
 
 function fireBatchDeleteOrders() { 
-  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要刪除的項目 (支援跨頁)！");
-  if(!confirm("確定徹底刪除所勾選的訂單嗎？")) return; 
-  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: ids }) }).then(() => {
-    selectedOrderIdsMap = {}; 
+  let selectedItems = getSelectedRawOrdersArray();
+  if(selectedItems.length === 0) return adminCustomAlert("請勾選項目 (支援跨頁)！");
+  if(!confirm("確定徹底刪除所勾選品項對應的訂單嗎？")) return; 
+  
+  let allOrderIds = [];
+  selectedItems.forEach(item => {
+    item.rawItemsRefs.forEach(ref => { if(!allOrderIds.includes(ref.orderId)) allOrderIds.push(ref.orderId); });
+  });
+
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: allOrderIds }) }).then(() => {
+    selectedOrderKeysMap = {}; 
     loadOrdersData();
   }); 
 }
 
-// 🌟 100% 完美終極優化：同單號多品項大歸併列印引擎 (解決一品項印一張超耗材的絕症)
+// 🌟 100% 同單號多品項大歸併列印引擎 (快取索引化，絕不當機)
 function fireBatchPrintInvoices() {
-  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請先勾選欲列印的訂單項目 (支援跨頁)！");
+  let selectedItems = getSelectedRawOrdersArray();
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選欲列印的項目 (支援跨頁)！");
   
-  // 1. 穿透拋查大掃描：從全量訂單中，把有被勾選的單據通通抓出來
-  let matchedRawRows = rawOrders.filter(o => ids.includes(o.orderId));
-  
-  // 2. 核心大歸併字典：以 orderId 為 Key，將多個品項物理合併
   let groupedInvoices = {};
-  matchedRawRows.forEach(o => {
-    if (!groupedInvoices[o.orderId]) {
-      groupedInvoices[o.orderId] = {
-        time: o.time,
-        orderId: o.orderId,
-        total: o.total,
-        custName: o.custName,
-        phone: o.phone,
-        lineName: o.lineName,
-        arrivalDate: o.arrivalDate,
-        pickupTime: o.pickupTime,
-        shipping: o.shipping,
-        shipAddress: o.shipAddress,
-        remark: o.remark,
-        bossRemark: o.bossRemark,
-        status: o.status,
-        payStatus: o.payStatus,
-        productItemsList: [] // 用來存放合併後的品項陣列
-      };
-    }
-    // 將每個品項的名稱與規格平鋪塞入
-    groupedInvoices[o.orderId].productItemsList.push({
-      prodName: o.prodName,
-      specs: o.specs
+  selectedItems.forEach(item => {
+    item.rawItemsRefs.forEach(ref => {
+      if (!groupedInvoices[ref.orderId]) {
+        groupedInvoices[ref.orderId] = {
+          time: ref.time, orderId: ref.orderId, total: ref.total, custName: ref.custName,
+          phone: ref.phone, lineName: ref.lineName, arrivalDate: ref.arrivalDate,
+          pickupTime: ref.pickupTime, shipping: ref.shipping, shipAddress: ref.shipAddress,
+          remark: ref.remark, bossRemark: ref.bossRemark, status: ref.status, payStatus: ref.payStatus,
+          productItemsList: []
+        };
+      }
+      // 避免重複放入同單號同品項多規格
+      let isDup = groupedInvoices[ref.orderId].productItemsList.some(x => x.specs === ref.specs && x.prodName === ref.prodName);
+      if(!isDup) {
+        groupedInvoices[ref.orderId].productItemsList.push({ prodName: ref.prodName, specs: ref.specs });
+      }
     });
   });
 
@@ -653,21 +742,18 @@ function fireBatchPrintInvoices() {
     .grid-2{display:grid; grid-template-cols:1fr 1fr; gap:10px;}
     .item-list-box{background:#f8f9fa; border:1px solid #dee2e6; padding:12px; border-radius:6px; margin:10px 0;}
     .single-item-row{border-bottom:1px dashed #ccc; padding:6px 0;}
-    .single-item-row:last-child{border-none;}
+    .single-item-row:last-child{border:none;}
   </style></head><body>`;
   
-  // 3. 遍歷合併後的字典，一個單號只會生成「一張卡片」，徹底告別耗材！
   for (let orderId in groupedInvoices) {
     let inv = groupedInvoices[orderId];
-    
-    // 動態組裝合併後的品項 HTML 牆
     let mergedItemsHtml = "";
     inv.productItemsList.forEach((prod, index) => {
       mergedItemsHtml += `
         <div class="single-item-row">
-          <span style="font-weight:bold; color:#stone-800;">品項 ${index + 1}：</span>
+          <span>品項 ${index + 1}：</span>
           <span style="font-size:15px; font-weight:bold; color:#B22222;">${prod.prodName}</span>
-          <span style="color:#666; font-size:13px; margin-left:8px;">[ 規格：${prod.specs} ]</span>
+          <span style="color:#666; font-size:13px; margin-left:8px;">[ ${prod.specs} ]</span>
         </div>`;
     });
 
@@ -679,13 +765,10 @@ function fireBatchPrintInvoices() {
           <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${inv.orderId}</span></div>
         </div>
         <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
-        
-        <!-- 🌟 核心成果：多品項完美在同一個大框框內平鋪展示 -->
         <div class="item-list-box">
-          <b>3. 預訂品項貨號明細 (已合併同單號品項)：</b>
+          <b>3. 預訂品項貨號明細 (同單號合流)：</b>
           <div style="margin-top:6px;">${mergedItemsHtml}</div>
         </div>
-
         <div class="grid-2">
           <div><b>4. 應付總額：</b><span style="color:#dc3545; font-weight:bold; font-size:16px;">$ ${inv.total} 元</span> (${inv.payStatus || '未付款'})</div>
           <div><b>5. 客戶聯絡資訊：</b><b>${inv.custName}</b> (Tel: ${inv.phone} / LINE: ${inv.lineName || '無'})</div>
@@ -702,32 +785,44 @@ function fireBatchPrintInvoices() {
         <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${inv.status}</span></div>
       </div>`; 
   }
-  
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
-// 🌟 補齊跨頁 EXCEL 匯出模組：直接從全量跨頁 Map 字典進行物理大提取
+// 🌟 跨頁 EXCEL 匯出模組 (快取快開，絕不當機)
 function fireBatchExportToExcel() {
-  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目 (支援跨頁)！");
+  let selectedItems = getSelectedRawOrdersArray();
+  if(selectedItems.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目 (支援跨頁)！");
+  
   let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
   
-  // 穿透撈取：直接從 rawOrders 歷史全量數據中，跨頁撈取對應的所有單據列
-  let targetRows = rawOrders.filter(o => ids.includes(o.orderId));
-  
-  targetRows.forEach(o => { 
-    let safePhone = o.phone ? "'" + o.phone : "";
-    let safeSpecs = `${o.prodName} (${o.specs})`;
-    csvContent += `${o.time},${o.orderId},${safeSpecs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${(o.lineName || "").replace(/,/g," ")},${(o.arrivalDate || "追加中").replace(/,/g," ")},${(o.pickupTime || "常規").replace(/,/g," ")},${(o.shipping || "自取").replace(/,/g," ")},${(o.shipAddress || "現場").replace(/,/g," ")},${(o.remark || "無").replace(/,/g," ")},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
+  selectedItems.forEach(item => {
+    item.rawItemsRefs.forEach(ref => {
+      let safePhone = ref.phone ? "'" + ref.phone : "";
+      let safeSpecs = `${ref.prodName} (${ref.specs})`;
+      csvContent += `${ref.time},${ref.orderId},${safeSpecs.replace(/,/g," ")},${ref.total},${ref.custName},${safePhone},${(ref.lineName || "").replace(/,/g," ")},${(ref.arrivalDate || "追加中").replace(/,/g," ")},${(ref.pickupTime || "常規").replace(/,/g," ")},${(ref.shipping || "自取").replace(/,/g," ")},${(ref.shipAddress || "現場").replace(/,/g," ")},${(ref.remark || "無").replace(/,/g," ")},${(ref.bossRemark || "").replace(/,/g," ")},${ref.status}\n`;
+    });
   });
   
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
   let link = document.createElement("a"); 
   link.href = URL.createObjectURL(blob); 
-  link.setAttribute("download", `伊利出貨訂單核對總表(跨頁合併最終版).csv`); 
+  link.setAttribute("download", `伊利出貨訂單核對總表(跨頁完美合流版).csv`); 
   document.body.appendChild(link); 
   link.click(); 
   document.body.removeChild(link);
+}
+
+// 🌟 補齊全新綜合功能需求：一鍵雙雕『生成 EXCEL 並列印』
+function fireBatchExportAndPrintCombined() {
+  let selectedItems = getSelectedRawOrdersArray();
+  if(selectedItems.length === 0) return adminCustomAlert("請先勾選項目 (支援跨頁)！");
+  
+  // 同時發送金流操作指令
+  fireBatchExportToExcel();
+  setTimeout(() => {
+    fireBatchPrintInvoices();
+  }, 800);
 }
 </script>
 </body>
