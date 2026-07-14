@@ -28,13 +28,14 @@
       body { background: white; color: black; padding: 0; }
       .admin-panel-ui, .tab-nav-ui, button, select, input { display: none !important; }
       .print-invoice-area { display: block !important; width: 100%; }
-      .invoice-box { border: 2px solid black; padding: 20px; border-radius: 12px; margin-bottom: 25px; page-break-after: always; font-size: 14px; line-height: 1.6; }
+      .invoice-card { border: 2px solid #000 !important; padding: 20px !important; border-radius: 12px !important; margin-bottom: 25px !important; page-break-after: always !important; font-size: 14px !important; line-height: 1.6 !important; }
     }
     .print-invoice-area { display: none; }
   </style>
 </head>
 <body class="bg-white text-text-dark font-sans p-4 sm:p-6">
 
+<!-- 🔐 智慧管理後台安全驗證防護牆 -->
 <div id="adminAuthOverlay" class="fixed inset-0 bg-stone-100 z-[99999] flex flex-col justify-center items-center p-4">
   <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl text-center space-y-4 border border-border-soft">
     <div class="w-16 h-16 rounded-full overflow-hidden mx-auto border border-border-soft shadow-inner">
@@ -60,13 +61,13 @@
         <img src="https://i.postimg.cc/x887dL6Q/line-oa-chat-260617-163106.jpg" class="w-full h-full object-cover" alt="Logo">
       </div>
       <div class="text-left">
-        <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">伊利小編購 智慧管理後台</h1>
+        <h1 class="text-xl font-bold tracking-wider text-text-dark group-hover:text-primary-taupe transition-colors">智慧管理後台</h1>
         <p class="text-xs text-primary-taupe mt-0.5">V20260629</p>
       </div>
     </div>
     
     <div class="flex items-center gap-3 mt-3 sm:mt-0">
-      <a id="viewStoreLink" href="#" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前往前台行動商城</a>
+      <a id="viewStoreLink" href="#" target="_blank" class="bg-primary-taupe text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-taupe-dark transition-all">🌐 前前往台行動商城</a>
       <button onclick="handleAdminLogout()" class="bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm hover:bg-red-700 transition-all">🚪 安全登出</button>
     </div>
   </div>
@@ -84,9 +85,9 @@
     </div>
   </div>
 
+  <!-- 商品快速上架頁籤 -->
   <div id="uploadTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4">
     <h2 id="formActionTitle" class="text-sm font-bold border-b border-border-soft pb-2 text-stone-700">✍ 商品快速配置</h2>
-    
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <div>
         <label class="text-xs font-semibold text-stone-600 block mb-1">商品貨號 (A欄)</label>
@@ -101,7 +102,6 @@
         <input type="text" id="pArrivalDate" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" placeholder="">
       </div>
     </div>
-
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div>
         <label class="text-xs font-semibold text-stone-600 block mb-1">商品狀態 (C欄)</label>
@@ -114,12 +114,10 @@
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">副分類 (E欄)</label><select id="pSubSelect" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50"></select></div>
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">特色標籤 (F欄)</label><input type="text" id="pTag" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格一清單 (M欄，中英逗號隔開)</label><input type="text" id="pColors" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
       <div><label class="text-xs font-semibold text-stone-600 block mb-1">規格二清單 (N欄，中英逗號隔開)</label><input type="text" id="pSizes" oninput="regenerateMatrixFromInputs()" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
     </div>
-
     <div class="bg-stone-50 p-4 border border-border-soft rounded-xl">
       <div class="flex justify-between items-center mb-2">
         <span class="text-xs font-bold text-stone-700">💰 規格細部定價配置區 (K欄原價 / L欄特價)</span>
@@ -137,43 +135,25 @@
         <tbody id="matrixTableBody"></tbody>
       </table>
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">YouTube/IG 導流網址 (H欄)</label>
-        <input type="text" id="pVideo" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">加購品名稱 (O欄)</label>
-        <input type="text" id="pAddonName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white">
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">加購品加價金額 (P欄)</label>
-        <input type="number" id="pAddonPrice" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" value="0">
-      </div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">YouTube/IG 導流網址 (H欄)</label><input type="text" id="pVideo" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品名稱 (O欄)</label><input type="text" id="pAddonName" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">加購品加價金額 (P欄)</label><input type="number" id="pAddonPrice" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white" value="0"></div>
     </div>
-
     <div class="border-2 border-dashed border-stone-300 rounded-xl p-5 text-center bg-stone-50 cursor-pointer hover:bg-stone-100 transition-all" onclick="document.getElementById('bbFileInput').click()">
       <span class="text-xs font-bold text-stone-600 block">┼ 點擊選取相片同步上傳到 ImgBB 圖床</span>
       <input type="file" id="bbFileInput" accept="image/*" multiple class="hidden" onchange="uploadToImgBB(this.files)">
       <div id="uploadStatusText" class="text-[11px] text-stone-400 mt-1"></div>
     </div>
-
     <div class="grid grid-cols-1 gap-4">
-      <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">圖片網址紀錄欄 (I欄)</label>
-        <textarea id="pImgs" rows="3" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea>
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600 block mb-1">商品敘述與短文細節 (G欄)</label>
-        <textarea id="pDesc" rows="2" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea>
-      </div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">圖片網址紀錄欄 (I欄)</label><textarea id="pImgs" rows="3" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea></div>
+      <div><label class="text-xs font-semibold text-stone-600 block mb-1">商品敘述與短文細節 (G欄)</label><textarea id="pDesc" rows="2" class="w-full text-sm p-2.5 border border-border-soft rounded-lg bg-stone-50 outline-none focus:bg-white"></textarea></div>
     </div>
-
     <button onclick="publishProduct()" id="submitProductBtn" class="w-full bg-primary-taupe text-white font-medium text-sm py-3 rounded-lg hover:bg-taupe-dark transition-all shadow-md">一鍵即時確認商品網頁上架</button>
     <button onclick="resetProductForm()" id="cancelEditBtn" class="w-full bg-stone-400 text-white font-medium text-sm py-2 rounded-lg hidden">取消編輯返回全新上架</button>
   </div>
 
+  <!-- 商品清單頁籤 -->
   <div id="listTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-3">
@@ -213,12 +193,19 @@
     </div>
   </div>
 
+  <!-- 訂單看板頁籤 (🌟 整合商品明細大搜尋防護牆) -->
   <div id="orderTab" class="tab-content bg-white border border-border-soft rounded-xl p-5 shadow-sm space-y-4 hidden">
     <div class="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
       <div class="flex items-center gap-3">
         <h2 class="text-sm font-bold text-stone-700">📋 訂單看板 (20筆一頁)</h2>
         <button onclick="loadOrdersData()" class="bg-stone-100 hover:bg-stone-200 border text-stone-700 px-2.5 py-1 rounded text-xs flex items-center gap-1 transition-all">🔄 重新整理</button>
       </div>
+      
+      <!-- 🌟 補齊全新核心功能：商品明細與全關鍵字大搜尋框 -->
+      <div class="w-full sm:max-w-xs shrink-0">
+        <input type="text" id="orderDetailSearchInput" oninput="searchOrdersByDetails()" class="w-full text-xs p-2.5 border border-stone-300 rounded-lg bg-stone-50 outline-none focus:bg-white focus:border-primary-taupe font-medium" placeholder="🔍 搜尋商品品名、規格或單號、姓名...">
+      </div>
+
       <div class="flex bg-stone-100 p-1 rounded-lg gap-1 text-xs overflow-x-auto max-w-full">
         <button onclick="filterOrderStatus('全部')" class="order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap">全部</button>
         <button onclick="filterOrderStatus('新訂單')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">新訂單</button>
@@ -230,17 +217,20 @@
         <button onclick="filterOrderStatus('取消不成立')" class="order-filter-btn px-3 py-1 rounded text-stone-500 whitespace-nowrap">取消不成立</button>
       </div>
     </div>
+
     <div class="bg-stone-100 p-2.5 rounded-lg flex items-center gap-2 flex-wrap text-xs">
       <button onclick="fireBatchCompleteOrders()" class="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700">✅ 批量結案 (移至歷史訂單)</button>
       <button onclick="fireBatchPrintInvoices()" class="bg-primary-taupe text-white px-3 py-1.5 rounded hover:bg-taupe-dark">🖨️ 批量生成揀貨單並列印</button>
       <button onclick="fireBatchExportToExcel()" class="bg-green-600 text-white px-3 py-1.5 rounded font-bold hover:bg-green-700">💹 批量生成 EXCEL</button>
       <button onclick="fireBatchDeleteOrders()" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">❌ 批量徹底刪除訂單</button>
+      <div class="text-[11px] text-stone-500 ml-auto font-bold" id="checkedCountIndicator">當前已勾選：0 項單據 (支援跨頁記憶)</div>
     </div>
+
     <div class="overflow-x-auto border rounded-lg">
       <table class="w-full text-left text-xs bg-white border-collapse">
         <thead>
           <tr class="bg-stone-50 border-b">
-            <th class="p-3 w-8"><input type="checkbox" onchange="toggleAllOrders(this)"></th>
+            <th class="p-3 w-8"><input type="checkbox" id="globalSelectAllOrdersHeader" onchange="toggleAllOrdersOnCurrentPage(this)"></th>
             <th class="p-3">下單時間</th>
             <th class="p-3">單號</th>
             <th class="p-3">明細</th>
@@ -266,9 +256,7 @@
 <div id="printArea" class="print-invoice-area"></div>
 
 <script>
-// 🌟【自訂安全密碼修改位置】日後若要更換通行密碼，直接修改下方引號內的四位數即可！
 const ADMIN_SECURITY_PASSWORD = "8888";
-
 let MASTER_GAS_URL = "https://script.google.com/macros/s/AKfycbx1M57x0n50mvw2VGlWHvDTcb-RS0BwDQAU8y9ReTSk5Wk6wFH_5GsCS0ToRM7So4OSiQ/exec";
 const IMGBB_KEY = "0f2f883b9a46cfe7b26639f93bc293d3";
 
@@ -276,17 +264,17 @@ let globalProducts = [], filteredProducts = [], rawOrders = [], currentFilteredO
 let isEditMode = false; let currentInvPage = 1, currentOrderPage = 1, pageSize = 20;
 let currentEditingRowIdx = null; 
 
-// 🔐 安全密碼驗證引擎
+// 🌟 全域跨頁持久記憶體物件：解決換頁打回原型無法累加勾選的致命難題
+let selectedOrderIdsMap = {}; 
+
 function verifyAdminPassword() {
   const pwdInput = document.getElementById("adminPwdInput");
   const errorMsg = document.getElementById("authErrorMsg");
   const overlay = document.getElementById("adminAuthOverlay");
-  
   if (pwdInput.value.trim() === ADMIN_SECURITY_PASSWORD) {
-    sessionStorage.setItem("yili_admin_authed", "true");
+    sessionStorage.setItem("yili_admin_authed_session", "true");
     errorMsg.classList.add("hidden");
     overlay.style.display = "none";
-    // 登入成功後自發啟動基礎店鋪配置同步
     initStoreConfigurations();
   } else {
     errorMsg.classList.remove("hidden");
@@ -295,13 +283,13 @@ function verifyAdminPassword() {
   }
 }
 
-// 🚪 安全登出模組
 function handleAdminLogout() {
-  if (confirm("確定要登出伊利雲端智慧管理後台系統嗎？")) {
-    sessionStorage.removeItem("yili_admin_authed");
+  if (confirm("確定要安全登出伊利小編購後台管理系統嗎？")) {
+    sessionStorage.removeItem("yili_admin_authed_session");
     document.getElementById("adminPwdInput").value = "";
     document.getElementById("authErrorMsg").classList.add("hidden");
     document.getElementById("adminAuthOverlay").style.display = "flex";
+    document.getElementById("adminPwdInput").focus();
   }
 }
 
@@ -315,14 +303,12 @@ function switchTab(id) {
     btn.className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-stone-400 hover:text-text-dark";
   });
   document.getElementById('btn-' + id).className = "tab-btn px-5 py-3 text-sm font-medium border-b-2 border-stone-700 text-text-dark bg-white rounded-t-lg";
-
   if(id === 'listTab') { currentInvPage = 1; loadInventoryData(); }
   if(id === 'orderTab') { currentOrderPage = 1; loadOrdersData(); }
 }
 
 function backToDashboardHome() { window.location.reload(); }
 
-// 獨立拉出初始化，受 Session 晶片安全保護
 function initStoreConfigurations() {
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
     .then(r => r.json()).then(res => {
@@ -331,29 +317,23 @@ function initStoreConfigurations() {
       maj.innerHTML = ""; sub.innerHTML = "";
       res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
       if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
-      
       globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
     });
 }
 
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('viewStoreLink').href = window.location.href.replace('Admin.html','Index.html').split('?')[0];
-  
-  // 密碼 Enter 按鈕鍵盤監聽咬合
   document.getElementById("adminPwdInput").addEventListener("keypress", function(e) {
     if (e.key === "Enter") { verifyAdminPassword(); }
   });
-
-  // 實時持久檢測 Session 狀態
-  if (sessionStorage.getItem("yili_admin_authed") === "true") {
+  if (sessionStorage.getItem("yili_admin_authed_session") === "true") {
     document.getElementById("adminAuthOverlay").style.display = "none";
-    document.getElementById("authErrorMsg").classList.add("hidden");
     initStoreConfigurations();
   } else {
     document.getElementById("adminAuthOverlay").style.display = "flex";
     document.getElementById("adminPwdInput").focus();
   }
-};
+});
 
 function fireBatchSetMatrix() {
   let p = prompt("請輸入欲批次套用的規格特價單價："); if(!p) return;
@@ -390,31 +370,18 @@ function regenerateMatrixFromInputs() {
 
 function startEdit(sku, rowIdx) {
   let p = globalProducts.find(x => x.sku === sku); if(!p) return;
-  isEditMode = true; 
-  currentEditingRowIdx = rowIdx; 
+  isEditMode = true; currentEditingRowIdx = rowIdx; 
   document.getElementById('formActionTitle').innerText = `📝 編輯商品內容 - [ 試算表物理第 ${rowIdx} 行 ]`;
-  
-  var skuInput = document.getElementById('pSku');
-  skuInput.value = p.sku; 
-  skuInput.removeAttribute('readonly');
-  skuInput.style.backgroundColor = "#FFFFFF"; 
-  
-  document.getElementById('pName').value = p.name; 
-  document.getElementById('pStatus').value = p.status;
-  document.getElementById('pMajorSelect').value = p.major;
-  document.getElementById('pSubSelect').value = p.sub;
-  document.getElementById('pTag').value = p.tag || "";
-  document.getElementById('pDesc').value = p.desc || "";
+  var skuInput = document.getElementById('pSku'); skuInput.value = p.sku; skuInput.removeAttribute('readonly'); skuInput.style.backgroundColor = "#FFFFFF"; 
+  document.getElementById('pName').value = p.name; document.getElementById('pStatus').value = p.status;
+  document.getElementById('pMajorSelect').value = p.major; document.getElementById('pSubSelect').value = p.sub;
+  document.getElementById('pTag').value = p.tag || ""; document.getElementById('pDesc').value = p.desc || "";
   document.getElementById('pImgs').value = p.allImgs ? p.allImgs.join('\n') : "";
-  document.getElementById('pColors').value = p.color || "";
-  document.getElementById('pSizes').value = p.size || "";
-  
+  document.getElementById('pColors').value = p.color || ""; document.getElementById('pSizes').value = p.size || "";
   if(document.getElementById('pVideo')) document.getElementById('pVideo').value = p.video || "";
   if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = p.addonName || "";
   if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = p.addonPrice || "0";
-
   document.getElementById('pArrivalDate').value = p.arrivalDate || "";
-  
   regenerateMatrixFromInputs();
   if(p.specsData) {
     try {
@@ -431,93 +398,46 @@ function startEdit(sku, rowIdx) {
       }, 150);
     } catch(e){}
   }
-  document.getElementById('cancelEditBtn').classList.remove('hidden'); 
-  switchTab('uploadTab');
+  document.getElementById('cancelEditBtn').classList.remove('hidden'); switchTab('uploadTab');
 }
 
 function publishProduct() {
-  const sku = document.getElementById('pSku').value.trim(); 
-  const name = document.getElementById('pName').value.trim();
+  const sku = document.getElementById('pSku').value.trim(); const name = document.getElementById('pName').value.trim();
   if(!sku || !name) return adminCustomAlert("貨號與商品品名不可留空！");
-  
   let specs = [], prices = [], oldPrices = [];
   document.querySelectorAll('#matrixTableBody tr').forEach(row => {
     let pr = row.querySelector('.m-price').value;
-    if(pr) { 
-      specs.push({ spec: row.dataset.key, oldPrice: row.querySelector('.m-old').value, price: pr, stock: row.querySelector('.m-stock').value }); 
-      prices.push(pr); 
-      oldPrices.push(row.querySelector('.m-old').value || "0"); 
-    }
+    if(pr) { specs.push({ spec: row.dataset.key, oldPrice: row.querySelector('.m-old').value, price: pr, stock: row.querySelector('.m-stock').value }); prices.push(pr); oldPrices.push(row.querySelector('.m-old').value || "0"); }
   });
-  
   let method = isEditMode ? "editProduct" : "addNewProduct";
-  let pData = { 
-    sku: sku,                     
-    rowIdx: isEditMode ? currentEditingRowIdx : null, 
-    name: name, 
-    status: document.getElementById('pStatus').value, 
-    major: document.getElementById('pMajorSelect').value, 
-    sub: document.getElementById('pSubSelect').value, 
-    tag: document.getElementById('pTag').value.trim(), 
-    desc: document.getElementById('pDesc').value.trim(), 
-    video: document.getElementById('pVideo') ? document.getElementById('pVideo').value.trim() : "", 
-    imgs: document.getElementById('pImgs').value.trim(), 
-    specsData: JSON.stringify(specs), 
-    oldPrice: oldPrices.join(','), 
-    price: prices.join(','), 
-    color: document.getElementById('pColors').value.trim() || "規格1", 
-    size: document.getElementById('pSizes').value.trim() || "規格2",
-    addonName: document.getElementById('pAddonName') ? document.getElementById('pAddonName').value.trim() : "",
-    addonPrice: document.getElementById('pAddonPrice') ? document.getElementById('pAddonPrice').value.trim() : "0",
-    arrivalDate: document.getElementById('pArrivalDate').value.trim() 
-  };
-  
+  let pData = { sku: sku, rowIdx: isEditMode ? currentEditingRowIdx : null, name: name, status: document.getElementById('pStatus').value, major: document.getElementById('pMajorSelect').value, sub: document.getElementById('pSubSelect').value, tag: document.getElementById('pTag').value.trim(), desc: document.getElementById('pDesc').value.trim(), video: document.getElementById('pVideo') ? document.getElementById('pVideo').value.trim() : "", imgs: document.getElementById('pImgs').value.trim(), specsData: JSON.stringify(specs), oldPrice: oldPrices.join(','), price: prices.join(','), color: document.getElementById('pColors').value.trim() || "規格1", size: document.getElementById('pSizes').value.trim() || "規格2", addonName: document.getElementById('pAddonName') ? document.getElementById('pAddonName').value.trim() : "", addonPrice: document.getElementById('pAddonPrice') ? document.getElementById('pAddonPrice').value.trim() : "0", arrivalDate: document.getElementById('pArrivalDate').value.trim() };
   adminCustomAlert("數據同步傳輸中...");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: method, product: pData }) })
     .then(r => r.json()).then(res => { 
-      if(res.success) {
-        adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); 
-        resetProductForm(); 
-        loadInventoryData(); 
-        switchTab('listTab'); 
-      } else {
-        adminCustomAlert("❌ 後端錯誤提示：" + res.error);
-      }
+      if(res.success) { adminCustomAlert(res.message || "🎉 雲端儲存更新成功！"); resetProductForm(); loadInventoryData(); switchTab('listTab'); } 
+      else { adminCustomAlert("❌ 後端錯誤提示：" + res.error); }
     }).catch(() => { adminCustomAlert("儲存失敗，請確認網路連線。"); });
 }
 
 function resetProductForm() { 
-  var skuInput = document.getElementById('pSku');
-  skuInput.value = ""; skuInput.removeAttribute('readonly'); skuInput.style.backgroundColor = "";
+  var skuInput = document.getElementById('pSku'); skuInput.value = ""; skuInput.removeAttribute('readonly'); skuInput.style.backgroundColor = "";
   document.getElementById('pName').value = ""; document.getElementById('pColors').value = ""; document.getElementById('pSizes').value = ""; document.getElementById('pDesc').value = ""; 
-  if(document.getElementById('pVideo')) document.getElementById('pVideo').value = "";
-  if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = "";
-  if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = "0";
-  document.getElementById('pArrivalDate').value = "";
-  document.getElementById('formActionTitle').innerText = "✍ 商品快速配置";
-  document.getElementById('cancelEditBtn').classList.add('hidden'); 
-  isEditMode = false; currentEditingRowIdx = null; regenerateMatrixFromInputs(); 
+  if(document.getElementById('pVideo')) document.getElementById('pVideo').value = ""; if(document.getElementById('pAddonName')) document.getElementById('pAddonName').value = ""; if(document.getElementById('pAddonPrice')) document.getElementById('pAddonPrice').value = "0"; document.getElementById('pArrivalDate').value = ""; document.getElementById('formActionTitle').innerText = "✍ 商品快速配置"; document.getElementById('cancelEditBtn').classList.add('hidden'); isEditMode = false; currentEditingRowIdx = null; regenerateMatrixFromInputs(); 
 }
 
 function loadInventoryData() { fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) }).then(r => r.json()).then(res => { globalProducts = res.products; filteredProducts = [...globalProducts]; renderInventoryTable(); }); }
 function searchInventory() { let kw = document.getElementById('inventorySearchInput').value.toLowerCase().trim(); filteredProducts = globalProducts.filter(p => p.sku.toLowerCase().includes(kw) || p.name.toLowerCase().includes(kw)); currentInvPage = 1; renderInventoryTable(); }
-
 function renderInventoryTable() {
   const tbody = document.getElementById('inventoryTableBody'); tbody.innerHTML = ""; let total = Math.ceil(filteredProducts.length / pageSize) || 1;
   document.getElementById('invPageText').innerText = `第 ${currentInvPage} / ${total} 頁`;
   let start = (currentInvPage - 1) * pageSize; let end = Math.min(start + pageSize, filteredProducts.length);
   for(let i=start; i<end; i++) {
-    let p = filteredProducts[i];
-    let minPrice = p.price;
-    let dateShow = p.arrivalDate || "追加中";
-    let trueRowIdx = i + 2; 
+    let p = filteredProducts[i]; let minPrice = p.price; let dateShow = p.arrivalDate || "追加中"; let trueRowIdx = i + 2; 
     tbody.innerHTML += `<tr class="hover:bg-stone-50 text-xs bg-white"><td class="p-3"><input type="checkbox" class="inv-chk" value="${p.sku}"></td><td class="p-3"><img src="${p.allImgs[0]}" class="w-10 h-10 object-cover rounded shadow-sm"></td><td class="p-3 font-bold">${p.sku}</td><td class="p-3">${p.name}</td><td class="p-3">${p.major}/${p.sub}</td><td class="p-3 font-semibold text-stone-700">$${minPrice}</td><td class="p-3 font-medium text-amber-800">${dateShow}</td><td class="p-3"><span>${p.status}</span></td><td class="p-3"><button onclick="startEdit('${p.sku}', ${trueRowIdx})" class="bg-primary-taupe text-white px-2 py-1 rounded hover:bg-taupe-dark">編輯</button></td></tr>`;
   }
 }
-
 function changeInvPage(amt) { currentInvPage += amt; renderInventoryTable(); }
 function toggleAllProducts(m) { document.querySelectorAll('.inv-chk').forEach(c => c.checked = m.checked); }
-
 function fireBatchCopy() {
   let chks = document.querySelectorAll('.inv-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目");
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCopyProducts", skus: Array.from(chks).map(c=>c.value) }) }).then(() => loadInventoryData());
@@ -531,7 +451,56 @@ function filterOrderStatus(status) {
   document.querySelectorAll('.order-filter-btn').forEach(b => b.className = "order-filter-btn px-3 py-1 rounded text-stone-400 whitespace-nowrap");
   event.target.className = "order-filter-btn bg-white px-3 py-1 rounded font-bold shadow-sm text-stone-800 whitespace-nowrap";
   if(status === '全部') currentFilteredOrders = [...rawOrders]; else currentFilteredOrders = rawOrders.filter(o => o.status === status);
+  document.getElementById('orderDetailSearchInput').value = ""; // 切換標籤時清空搜尋
   currentOrderPage = 1; renderOrderTable();
+}
+
+// 🌟 補齊全新功能：大看板商品明細與全域即時搜尋機制
+function searchOrdersByDetails() {
+  let kw = document.getElementById('orderDetailSearchInput').value.toLowerCase().trim();
+  if (!kw) {
+    currentFilteredOrders = [...rawOrders];
+  } else {
+    currentFilteredOrders = rawOrders.filter(o => {
+      return (o.prodName && o.prodName.toLowerCase().includes(kw)) ||
+             (o.specs && o.specs.toLowerCase().includes(kw)) ||
+             (o.sku && o.sku.toLowerCase().includes(kw)) ||
+             (o.orderId && o.orderId.toLowerCase().includes(kw)) ||
+             (o.custName && o.custName.toLowerCase().includes(kw)) ||
+             (o.phone && o.phone.toLowerCase().includes(kw));
+    });
+  }
+  currentOrderPage = 1; 
+  renderOrderTable();
+}
+
+// 🌟 全域持久記憶體同步核對模組：當點擊單個 Checkbox 時，寫入/移除全域記憶體 Map
+function handleSingleOrderCheckbox(box, orderId) {
+  if (box.checked) {
+    selectedOrderIdsMap[orderId] = true;
+  } else {
+    delete selectedOrderIdsMap[orderId];
+  }
+  updateCheckedIndicatorUI();
+}
+
+// 🌟 當前頁全選控制：僅改變當前渲染頁面的勾選，但同步累加進持久 Map
+function toggleAllOrdersOnCurrentPage(headerBox) {
+  document.querySelectorAll('.order-chk').forEach(c => {
+    c.checked = headerBox.checked;
+    if (headerBox.checked) {
+      selectedOrderIdsMap[c.value] = true;
+    } else {
+      delete selectedOrderIdsMap[c.value];
+    }
+  });
+  updateCheckedIndicatorUI();
+}
+
+// 更新界面計數器
+function updateCheckedIndicatorUI() {
+  let count = Object.keys(selectedOrderIdsMap).length;
+  document.getElementById('checkedCountIndicator').innerText = `當前已勾選：${count} 項單據 (支援跨頁記憶)`;
 }
 
 function renderOrderTable() {
@@ -541,9 +510,15 @@ function renderOrderTable() {
   let start = (currentOrderPage - 1) * pageSize; 
   let end = Math.min(start + pageSize, currentFilteredOrders.length);
 
+  // 重置表頭勾選框
+  document.getElementById('globalSelectAllOrdersHeader').checked = false;
+
   for(let i=start; i<end; i++) {
     let o = currentFilteredOrders[i];
     let cleanArrivalDate = o.arrivalDate || "追加中";
+
+    // 🌟 持久型跨頁檢查：如果這筆單號存在於全域 Map 中，維持勾選狀態
+    let isCheckedStr = selectedOrderIdsMap[o.orderId] ? "checked" : "";
 
     let displayTimeAndAddress = `
       <div class="space-y-0.5 text-[11px] leading-tight text-stone-600">
@@ -556,7 +531,7 @@ function renderOrderTable() {
 
     tbody.innerHTML += `
       <tr class="hover:bg-stone-50 text-xs bg-white" data-order-raw='${JSON.stringify(o)}'>
-        <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}"></td>
+        <td class="p-3"><input type="checkbox" class="order-chk" value="${o.orderId}" ${isCheckedStr} onchange="handleSingleOrderCheckbox(this, '${o.orderId}')"></td>
         <td class="p-3 font-mono text-stone-400">${o.time}</td>
         <td class="p-3 font-bold text-blue-900">${o.orderId}</td>
         <td class="p-3"><b>${o.prodName}</b><br><span class="text-stone-400">${o.specs}</span></td>
@@ -585,6 +560,7 @@ function renderOrderTable() {
         </td>
       </tr>`;
   }
+  updateCheckedIndicatorUI();
 }
 
 function silentUpdateStatus(rowIdx, select) {
@@ -600,153 +576,159 @@ function silentUpdateStatus(rowIdx, select) {
 
 function silentUpdateRemark(rowIdx, input) {
   let tip = input.nextElementSibling;
-  tip.className = "status-tip text-[10px] text-amber-600 block mt-0.5 font-bold";
-  tip.innerText = "⏳ 儲存中...";
-  
+  tip.className = "status-tip text-[10px] text-amber-600 block mt-0.5 font-bold"; tip.innerText = "⏳ 儲存中...";
   fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "updateBossRemark", rowIdx: rowIdx, remark: input.value.trim() }) })
     .then(r => r.json()).then(res => { 
-      if(res && res.success) { 
-        tip.className = "status-tip text-[10px] text-green-600 block mt-0.5 font-bold";
-        tip.innerText = "✅ 已同步試算表"; 
-      } else { 
-        tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold";
-        tip.innerText = "❌ 儲存未成功"; 
-      }
-    }).catch(() => { 
-      tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold";
-      tip.innerText = "❌ 連線超時"; 
-    });
+      if(res && res.success) { tip.className = "status-tip text-[10px] text-green-600 block mt-0.5 font-bold"; tip.innerText = "✅ 已同步試算表"; } 
+      else { tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold"; tip.innerText = "❌ 儲存未成功"; }
+    }).catch(() => { tip.className = "status-tip text-[10px] text-red-600 block mt-0.5 font-bold"; tip.innerText = "❌ 連線超時"; });
 }
 
 function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
 function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
-function fireBatchCompleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選項目"); fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
-function fireBatchDeleteOrders() { let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請勾選項目"); if(!confirm("確定徹底刪除所勾選訂單？")) return; fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: Array.from(chks).map(c=>c.value) }) }).then(() => loadOrdersData()); }
 
+// 🌟 全量跨頁持久操作：將全域記憶體中被勾選的單號轉換成陣列傳遞給後端
+function getSelectedOrderIdsArray() {
+  return Object.keys(selectedOrderIdsMap);
+}
+
+function fireBatchCompleteOrders() { 
+  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要批量結案的項目 (支援跨頁)！");
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchCompleteOrders", orderIds: ids }) }).then(() => {
+    selectedOrderIdsMap = {}; // 結案成功後清空記憶體
+    loadOrdersData();
+  }); 
+}
+
+function fireBatchDeleteOrders() { 
+  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要刪除的項目 (支援跨頁)！");
+  if(!confirm("確定徹底刪除所勾選的訂單嗎？")) return; 
+  fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "batchDeleteOrders", orderIds: ids }) }).then(() => {
+    selectedOrderIdsMap = {}; 
+    loadOrdersData();
+  }); 
+}
+
+// 🌟 100% 完美終極優化：同單號多品項大歸併列印引擎 (解決一品項印一張超耗材的絕症)
 function fireBatchPrintInvoices() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length===0) return adminCustomAlert("請先勾選欲列印的訂單項目！");
+  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請先勾選欲列印的訂單項目 (支援跨頁)！");
+  
+  // 1. 穿透拋查大掃描：從全量訂單中，把有被勾選的單據通通抓出來
+  let matchedRawRows = rawOrders.filter(o => ids.includes(o.orderId));
+  
+  // 2. 核心大歸併字典：以 orderId 為 Key，將多個品項物理合併
+  let groupedInvoices = {};
+  matchedRawRows.forEach(o => {
+    if (!groupedInvoices[o.orderId]) {
+      groupedInvoices[o.orderId] = {
+        time: o.time,
+        orderId: o.orderId,
+        total: o.total,
+        custName: o.custName,
+        phone: o.phone,
+        lineName: o.lineName,
+        arrivalDate: o.arrivalDate,
+        pickupTime: o.pickupTime,
+        shipping: o.shipping,
+        shipAddress: o.shipAddress,
+        remark: o.remark,
+        bossRemark: o.bossRemark,
+        status: o.status,
+        payStatus: o.payStatus,
+        productItemsList: [] // 用來存放合併後的品項陣列
+      };
+    }
+    // 將每個品項的名稱與規格平鋪塞入
+    groupedInvoices[o.orderId].productItemsList.push({
+      prodName: o.prodName,
+      specs: o.specs
+    });
+  });
+
   let w = window.open('', '_blank');
   let html = `<html><head><title>伊利小編購 - 揀貨單列印中心</title><style>
     body{font-family:sans-serif;padding:20px;background:#fff;color:#000;} 
     .invoice-card{border:2px solid #000; padding:20px; border-radius:12px; margin-bottom:25px; page-break-after:always; line-height:1.6; font-size:14px;}
     .title{font-size:18px; font-weight:bold; border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:12px;}
     .grid-2{display:grid; grid-template-cols:1fr 1fr; gap:10px;}
-    .item-list{background:#f8f9fa; border:1px solid #dee2e6; padding:12px; border-radius:6px; margin:10px 0;}
+    .item-list-box{background:#f8f9fa; border:1px solid #dee2e6; padding:12px; border-radius:6px; margin:10px 0;}
+    .single-item-row{border-bottom:1px dashed #ccc; padding:6px 0;}
+    .single-item-row:last-child{border-none;}
   </style></head><body>`;
   
-  chks.forEach(box => { 
-    let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
+  // 3. 遍歷合併後的字典，一個單號只會生成「一張卡片」，徹底告別耗材！
+  for (let orderId in groupedInvoices) {
+    let inv = groupedInvoices[orderId];
+    
+    // 動態組裝合併後的品項 HTML 牆
+    let mergedItemsHtml = "";
+    inv.productItemsList.forEach((prod, index) => {
+      mergedItemsHtml += `
+        <div class="single-item-row">
+          <span style="font-weight:bold; color:#stone-800;">品項 ${index + 1}：</span>
+          <span style="font-size:15px; font-weight:bold; color:#B22222;">${prod.prodName}</span>
+          <span style="color:#666; font-size:13px; margin-left:8px;">[ 規格：${prod.specs} ]</span>
+        </div>`;
+    });
+
     html += `
       <div class="invoice-card">
         <div class="title">🛒 伊利小編購 - 揀貨出貨自取明細單</div>
         <div class="grid-2">
-          <div><b>1. 下單時間：</b>${o.time}</div>
-          <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${o.orderId}</span></div>
+          <div><b>1. 下單時間：</b>${inv.time}</div>
+          <div><b>2. 預訂單號：</b><span style="color:#0056b3; font-weight:bold;">${inv.orderId}</span></div>
         </div>
         <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
-        <div class="item-list">
-          <b>3. 預訂品項貨號明細：</b><br>
-          <span style="font-size:15px; font-weight:bold; color:#B22222;">${o.prodName}</span><br>
-          <span style="color:#555;">[ 規格矩陣配給：${o.specs} ]</span>
+        
+        <!-- 🌟 核心成果：多品項完美在同一個大框框內平鋪展示 -->
+        <div class="item-list-box">
+          <b>3. 預訂品項貨號明細 (已合併同單號品項)：</b>
+          <div style="margin-top:6px;">${mergedItemsHtml}</div>
         </div>
+
         <div class="grid-2">
-          <div><b>4. 應付總額：</b><span style="color:#dc3545; font-weight:bold; font-size:16px;">$ ${o.total} 元</span> (${o.payStatus || '未付款'})</div>
-          <div><b>5. 客戶聯絡資訊：</b><b>${o.custName}</b> (Tel: ${o.phone} / LINE: ${o.lineName || '無'})</div>
+          <div><b>4. 應付總額：</b><span style="color:#dc3545; font-weight:bold; font-size:16px;">$ ${inv.total} 元</span> (${inv.payStatus || '未付款'})</div>
+          <div><b>5. 客戶聯絡資訊：</b><b>${inv.custName}</b> (Tel: ${inv.phone} / LINE: ${inv.lineName || '無'})</div>
         </div>
         <hr style="border:none; border-top:1px dashed #000; margin:10px 0;">
-        <div><b>6. 商品到貨日期：</b><span style="color:#d97706; font-weight:bold;">${o.arrivalDate || '追加中'}</span></div>
+        <div><b>6. 商品到貨日期：</b><span style="color:#d97706; font-weight:bold;">${inv.arrivalDate || '追加中'}</span></div>
         <div style="background:#fff3cd; border:1px solid #ffeeba; padding:10px; border-radius:6px; margin:8px 0;">
           <b>7. 預計取貨時間/配送地址：</b><br>
-          ⏱️ 預計取貨時間：<span style="font-weight:bold; color:#795548;">${o.pickupTime || '常規時間'}</span><br>
-          🚚 配送或自取方式：<b>${o.shipping || '自取'}</b><br>
-          📍 收貨地址/店面：<b>${o.shipAddress || '現場面交'}</b>
+          ⏱️ 預計取貨時間：<span style="font-weight:bold; color:#795548;">${inv.pickupTime || '常規時間'}</span><br>
+          🚚 配送或自取方式：<b>${inv.shipping || '自取'}</b><br>
+          📍 收貨地址/店面：<b>${inv.shipAddress || '現場面交'}</b>
         </div>
-        <div style="color:#4a148c; font-weight:bold;"><b>8. 老闆點擊對帳備註：</b>${o.bossRemark || "暫無任何備註"}</div>
-        <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${o.status}</span></div>
+        <div style="color:#4a148c; font-weight:bold;"><b>8. 老闆點擊對帳備註：</b>${inv.bossRemark || "暫無任何備註"}</div>
+        <div style="margin-top:6px;"><b>9. 當前訂單狀態流轉：</b><span style="background:#000; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">${inv.status}</span></div>
       </div>`; 
-  });
+  }
   
   html += `<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
   w.document.write(html); w.document.close();
 }
 
+// 🌟 補齊跨頁 EXCEL 匯出模組：直接從全量跨頁 Map 字典進行物理大提取
 function fireBatchExportToExcel() {
-  let chks = document.querySelectorAll('.order-chk:checked'); if(chks.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目！");
+  let ids = getSelectedOrderIdsArray(); if(ids.length === 0) return adminCustomAlert("請勾選要匯出 EXCEL 的項目 (支援跨頁)！");
   let csvContent = "\uFEFF1.下單時間,2.訂單單號,3.商品品名與規格明細,4.應付總額,5.客戶姓名,6.客戶聯絡電話,7.客戶LINE暱稱,8.到貨日期,9.預計取貨時間,10.配送方式,11.詳細收貨地址,12.買家重要備註,13.老闆點擊備註,14.當前訂單狀態\n";
   
-  chks.forEach(box => { 
-    let o = JSON.parse(box.closest('tr').getAttribute('data-order-raw')); 
+  // 穿透撈取：直接從 rawOrders 歷史全量數據中，跨頁撈取對應的所有單據列
+  let targetRows = rawOrders.filter(o => ids.includes(o.orderId));
+  
+  targetRows.forEach(o => { 
     let safePhone = o.phone ? "'" + o.phone : "";
     let safeSpecs = `${o.prodName} (${o.specs})`;
-    
     csvContent += `${o.time},${o.orderId},${safeSpecs.replace(/,/g," ")},${o.total},${o.custName},${safePhone},${(o.lineName || "").replace(/,/g," ")},${(o.arrivalDate || "追加中").replace(/,/g," ")},${(o.pickupTime || "常規").replace(/,/g," ")},${(o.shipping || "自取").replace(/,/g," ")},${(o.shipAddress || "現場").replace(/,/g," ")},${(o.remark || "無").replace(/,/g," ")},${(o.bossRemark || "").replace(/,/g," ")},${o.status}\n`; 
   });
   
   let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
   let link = document.createElement("a"); 
   link.href = URL.createObjectURL(blob); 
-  link.setAttribute("download", `伊利出貨訂單核對總表(9大狀態對齊版).csv`); 
+  link.setAttribute("download", `伊利出貨訂單核對總表(跨頁合併最終版).csv`); 
   document.body.appendChild(link); 
   link.click(); 
   document.body.removeChild(link);
 }
-
-function changeOrderPage(amt) { currentOrderPage += amt; renderOrderTable(); }
-function toggleAllOrders(m) { document.querySelectorAll('.order-chk').forEach(c => c.checked = m.checked); }
-
-/**
- * 🔐 ADMIN 後台安全登入與持久身分狀態控管
- */
-function verifyAdminPassword() {
-  const pwdInput = document.getElementById("adminPwdInput");
-  const errorMsg = document.getElementById("authErrorMsg");
-  const overlay = document.getElementById("adminAuthOverlay");
-  
-  // 比對上方的安全靜態變數密碼值
-  if (pwdInput.value.trim() === ADMIN_SECURITY_PASSWORD) {
-    sessionStorage.setItem("yili_admin_authed_session", "true");
-    errorMsg.classList.add("hidden");
-    overlay.style.display = "none";
-    // 通行解鎖後，即刻自動拉取並初始化店鋪遠端連線配置數據
-    fetch(MASTER_GAS_URL, { method: "POST", body: JSON.stringify({ method: "getStoreData" }) })
-      .then(r => r.json()).then(res => {
-        if(!res || !res.success) return;
-        const maj = document.getElementById('pMajorSelect'); const sub = document.getElementById('pSubSelect');
-        maj.innerHTML = ""; sub.innerHTML = "";
-        res.majorCategories.forEach(c => { maj.innerHTML += `<option value="${c}">${c}</option>`; });
-        if(res.subCategories) res.subCategories.split(',').forEach(c => { sub.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`; });
-        globalProducts = res.products; filteredProducts = [...globalProducts]; regenerateMatrixFromInputs();
-      });
-  } else {
-    errorMsg.classList.remove("hidden");
-    pwdInput.value = "";
-    pwdInput.focus();
-  }
-}
-
-function handleAdminLogout() {
-  if (confirm("確定要安全登出伊利小編購後台管理系統嗎？")) {
-    sessionStorage.removeItem("yili_admin_authed_session");
-    document.getElementById("adminPwdInput").value = "";
-    document.getElementById("authErrorMsg").classList.add("hidden");
-    document.getElementById("adminAuthOverlay").style.display = "flex";
-    document.getElementById("adminPwdInput").focus();
-  }
-}
-
-// 實時掛載身分審查器，杜絕重新整理頁面重複輸入密碼的體驗黑洞
-document.addEventListener("DOMContentLoaded", function() {
-  const sessionStatus = sessionStorage.getItem("yili_admin_authed_session");
-  const overlay = document.getElementById("adminAuthOverlay");
-  
-  if (sessionStatus === "true") {
-    if(overlay) overlay.style.display = "none";
-  } else {
-    if(overlay) overlay.style.display = "flex";
-    const input = document.getElementById("adminPwdInput");
-    if(input) input.focus();
-  }
-});
 </script>
 </body>
 </html>
